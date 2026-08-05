@@ -1016,16 +1016,12 @@ body.hackerba .hb-floor-avatar {
   border: 1px solid #e0e0e0;
   border-radius: 2px;
   color: #fff;
-  background: linear-gradient(160deg, #7aa8d6, #4b7fb3);
+  background: #7a7a7a;
   font-family: Arial, sans-serif;
   font-size: 24px;
   font-weight: 700;
   line-height: 60px;
   text-align: center;
-}
-
-body.hackerba .hb-floor-lz .hb-floor-avatar {
-  background: linear-gradient(160deg, #ffb56f, #ff7f24);
 }
 
 body.hackerba .hb-floor-name {

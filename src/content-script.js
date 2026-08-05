@@ -832,13 +832,25 @@ function avatarLetter(name) {
   return (text.slice(0, 1) || "?").toUpperCase();
 }
 
-function userLevel(name) {
-  const text = String(name || "");
+function hashString(text) {
   let hash = 0;
-  for (let i = 0; i < text.length; i += 1) {
-    hash = (hash * 31 + text.charCodeAt(i)) % 997;
+  const value = String(text || "");
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
   }
-  return (hash % 12) + 1;
+  return hash;
+}
+
+function avatarColor(name) {
+  const hash = hashString(name);
+  const hue = hash % 360;
+  const sat = 42 + (hash % 28);
+  const light = 38 + ((hash >>> 8) % 16);
+  return `hsl(${hue} ${sat}% ${light}%)`;
+}
+
+function userLevel(name) {
+  return (hashString(name) % 12) + 1;
 }
 
 function createAuthorColumn(document, { user, userHref, isLz = false }) {
@@ -861,6 +873,7 @@ function createAuthorColumn(document, { user, userHref, isLz = false }) {
   const avatar = document.createElement("div");
   avatar.className = "hb-floor-avatar";
   avatar.textContent = avatarLetter(user);
+  avatar.style.background = avatarColor(user);
   face.append(avatar);
   author.append(face);
 
