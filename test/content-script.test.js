@@ -400,17 +400,24 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
   const main = document.querySelector(".hb-main-floor");
   const card = document.querySelector(".hb-floor-list .hb-floor");
   const button = card.querySelector(".hb-floor-toggle");
-  assert.equal(document.querySelectorAll("tr.athing.comtr").length, 0);
-  assert.equal(document.querySelector(".fatitem"), null);
+  assert.ok(document.querySelector(".hb-post-wrap"));
+  assert.ok(document.querySelector(".hb-hn-source")?.hidden);
   assert.ok(main);
+  assert.ok(document.querySelector(".hb-core-title"));
+  assert.match(document.querySelector(".hb-core-title-txt").textContent, /Main post/);
+  assert.match(document.querySelector(".hb-core-meta").textContent, /回复贴：1/);
   assert.equal(main.querySelector(".hb-floor-no").textContent, "1楼");
   assert.equal(main.querySelector(".hb-floor-name").textContent, "alice");
+  assert.ok(main.querySelector(".hb-louzhu"));
+  assert.ok(main.querySelector(".hb-floor-level"));
+  assert.ok(main.querySelector(".hb-share-link"));
+  assert.equal(main.querySelector(".hb-main-title"), null);
   assert.equal(main.querySelector(".hb-reply-box form"), null);
   assert.equal(document.querySelector(".hb-reply-panel-title")?.textContent, "发表回复");
   assert.equal(document.querySelector('.hb-reply-box input[type="submit"]')?.value, "发表");
   assert.equal(card.querySelector(".hb-floor-no").textContent, "2楼");
   assert.equal(card.querySelector(".hb-floor-name").textContent, "bob");
-  assert.equal(card.querySelector(".hb-floor-content").textContent, "Useful answer.");
+  assert.match(card.querySelector(".hb-floor-content").textContent, /Useful answer/);
   assert.equal(card.querySelector(".hb-floor-reply").textContent, "回复");
   assert.equal(button.getAttribute("aria-expanded"), "true");
   assert.ok(card.querySelector(".hb-floor-avatar"));
@@ -418,6 +425,68 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
   button.click();
   assert.equal(card.classList.contains("hb-floor-collapsed"), true);
   assert.equal(button.getAttribute("aria-expanded"), "false");
+});
+
+test("嵌套评论收进楼中楼", () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr><td>
+        <table class="fatitem">
+          <tr class="athing">
+            <td class="title"><span class="titleline"><a href="https://example.com">T</a></span></td>
+          </tr>
+          <tr>
+            <td class="subtext">
+              by <a class="hnuser" href="user?id=alice">alice</a>
+              <span class="age">1 hour ago</span>
+              | <a href="item?id=1">3&nbsp;comments</a>
+            </td>
+          </tr>
+        </table>
+        <table class="comment-tree">
+          <tr class="athing comtr">
+            <td class="ind" indent="0"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=bob">bob</a></span>
+              <div class="comment"><span class="commtext">Top</span></div>
+            </td>
+          </tr>
+          <tr class="athing comtr">
+            <td class="ind" indent="1"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=carol">carol</a></span>
+              <div class="comment"><span class="commtext">Nested</span></div>
+            </td>
+          </tr>
+          <tr class="athing comtr">
+            <td class="ind" indent="2"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=dave">dave</a></span>
+              <div class="comment"><span class="commtext">Deeper</span></div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/item?id=1",
+  );
+
+  enhanceHackerNews(document);
+
+  assert.equal(document.querySelectorAll(".hb-floor-list .hb-floor").length, 1);
+  assert.equal(document.querySelector(".hb-floor-list .hb-floor-no").textContent, "2楼");
+  const lzl = document.querySelector(".hb-lzl");
+  assert.ok(lzl);
+  assert.equal(lzl.querySelector(".hb-lzl-num").textContent, "2");
+  const items = [...lzl.querySelectorAll(".hb-lzl-item")];
+  assert.equal(items.length, 2);
+  assert.match(items[0].textContent, /carol/);
+  assert.match(items[0].textContent, /Nested/);
+  assert.equal(items[0].querySelector(".hb-lzl-to"), null);
+  assert.match(items[1].querySelector(".hb-lzl-to").textContent, /回复 carol/);
+  assert.match(items[1].textContent, /Deeper/);
 });
 
 test("重复运行不会重复插入评论折叠控件与帖子列表", () => {
@@ -434,7 +503,7 @@ test("重复运行不会重复插入评论折叠控件与帖子列表", () => {
   enhanceHackerNews(document);
 
   assert.equal(document.querySelectorAll(".hb-thread-list").length, 1);
-  assert.equal(document.querySelectorAll(".hb-floor-list").length, 0);
+  assert.equal(document.querySelectorAll(".hb-post-wrap").length, 0);
 });
 
 test("分页展示上一页/页码/下一页，并保留 morelink", () => {

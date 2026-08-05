@@ -1,14 +1,18 @@
 {
   "name": "hackerba",
   "version": "1.0.0",
-  "description": "",
+  "description": "Chrome extension that restyles Hacker News as a Tieba-like forum",
   "type": "module",
   "scripts": {
     "test": "node --test"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "chrome-extension",
+    "hacker-news",
+    "tieba"
+  ],
+  "author": "Locusable Studio",
+  "license": "MIT",
   "devDependencies": {
     "jsdom": "^30.0.1"
   }

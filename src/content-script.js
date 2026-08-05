@@ -402,7 +402,9 @@ function revealSourceIfNeeded(document) {
     return;
   }
 
-  const hideSource = Boolean(document.querySelector(".hb-thread-list"));
+  const hideSource = Boolean(
+    document.querySelector(".hb-thread-list") || document.querySelector(".hb-post-wrap"),
+  );
   source.hidden = hideSource;
   source.classList.toggle("hb-source-hidden", hideSource);
   source.classList.toggle("hb-source-visible", !hideSource);
@@ -772,14 +774,37 @@ function avatarLetter(name) {
   return (text.slice(0, 1) || "?").toUpperCase();
 }
 
+function userLevel(name) {
+  const text = String(name || "");
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = (hash * 31 + text.charCodeAt(i)) % 997;
+  }
+  return (hash % 12) + 1;
+}
+
 function createAuthorColumn(document, { user, userHref, isLz = false }) {
   const author = document.createElement("div");
   author.className = "hb-floor-author";
 
+  if (isLz) {
+    const badge = document.createElement("div");
+    badge.className = "hb-louzhu";
+    badge.title = "楼主";
+    badge.innerHTML = "<span>楼主</span>";
+    author.append(badge);
+  }
+
+  const face = document.createElement("a");
+  face.className = "hb-floor-face";
+  face.setAttribute("href", userHref);
+  face.setAttribute("title", user);
+
   const avatar = document.createElement("div");
   avatar.className = "hb-floor-avatar";
   avatar.textContent = avatarLetter(user);
-  author.append(avatar);
+  face.append(avatar);
+  author.append(face);
 
   const name = document.createElement("a");
   name.className = "hb-floor-name";
@@ -787,19 +812,38 @@ function createAuthorColumn(document, { user, userHref, isLz = false }) {
   name.textContent = user;
   author.append(name);
 
-  if (isLz) {
-    const badge = document.createElement("span");
-    badge.className = "hb-floor-lz-icon";
-    badge.textContent = "楼主";
-    author.append(badge);
-  }
+  const level = document.createElement("div");
+  level.className = "hb-floor-level";
+  level.innerHTML = `<span>等级</span><em>${userLevel(user)}</em>`;
+  author.append(level);
 
   return author;
+}
+
+function createCoreTitle(document, { title, replyCount }) {
+  const bar = document.createElement("div");
+  bar.className = "hb-core-title";
+  bar.innerHTML = `
+    <div class="hb-core-title-wrap">
+      <h1 class="hb-core-title-txt" title="${escapeAttr(title)}">${escapeHtml(title)}</h1>
+      <div class="hb-core-title-btns">
+        <span class="hb-core-meta">回复贴：${escapeHtml(String(replyCount))}</span>
+        <a class="hb-core-quick-reply" href="#hb-reply">回复</a>
+      </div>
+    </div>
+    <div class="hb-core-title-ctrl">
+      <span class="hb-core-ctrl-item hb-core-ctrl-on">全部</span>
+      <span class="hb-core-ctrl-sep">|</span>
+      <span class="hb-core-ctrl-item">只看楼主</span>
+    </div>
+  `;
+  return bar;
 }
 
 function createReplyPanel(document, form) {
   const panel = document.createElement("div");
   panel.className = "hb-reply-panel";
+  panel.id = "hb-reply";
 
   const title = document.createElement("div");
   title.className = "hb-reply-panel-title";
@@ -823,15 +867,9 @@ function createReplyPanel(document, form) {
   return panel;
 }
 
-function enhanceMainPost(document) {
-  const fatitem = document.querySelector(".fatitem");
-  if (!fatitem || fatitem.dataset.hbEnhanced === "1") {
-    return null;
-  }
-  fatitem.dataset.hbEnhanced = "1";
-
+function buildMainFloor(document, fatitem, replyCount) {
   const titleLink = fatitem.querySelector(".titleline > a");
-  const title = titleLink?.textContent?.trim() || "";
+  const title = titleLink?.textContent?.trim() || "无标题";
   const titleHref = titleLink?.getAttribute("href") || "#";
   const site = fatitem.querySelector(".sitestr")?.textContent?.trim() || "";
   const user = fatitem.querySelector(".hnuser")?.textContent?.trim() || "匿名";
@@ -844,6 +882,8 @@ function enhanceMainPost(document) {
   if (title) {
     setBreadcrumbCurrent(document, title.length > 28 ? `${title.slice(0, 28)}…` : title);
   }
+
+  const coreTitle = createCoreTitle(document, { title, replyCount });
 
   const card = document.createElement("div");
   card.className = "hb-floor hb-floor-lz hb-main-floor";
@@ -858,43 +898,50 @@ function enhanceMainPost(document) {
   top.innerHTML = `<span class="hb-floor-no">1楼</span>`;
   main.append(top);
 
-  const titleEl = document.createElement("h1");
-  titleEl.className = "hb-main-title";
-  if (/^https?:/i.test(titleHref)) {
-    titleEl.innerHTML = `<a href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`;
-  } else {
-    titleEl.textContent = title;
-  }
-  if (site) {
-    const siteEl = document.createElement("a");
-    siteEl.className = "hb-main-site";
-    siteEl.href = titleHref;
-    siteEl.target = "_blank";
-    siteEl.rel = "noopener noreferrer";
-    siteEl.textContent = site;
-    titleEl.append(document.createTextNode(" "));
-    titleEl.append(siteEl);
-  }
-  main.append(titleEl);
-
+  const content = document.createElement("div");
+  content.className = "hb-floor-content";
   if (toptext && toptext.textContent.trim()) {
-    const body = document.createElement("div");
-    body.className = "hb-floor-content";
-    body.append(...[...toptext.childNodes]);
-    main.append(body);
+    content.append(...[...toptext.childNodes]);
+  } else if (/^https?:/i.test(titleHref)) {
+    const share = document.createElement("div");
+    share.className = "hb-share-link";
+    share.innerHTML = `
+      <div class="hb-share-label">分享链接：</div>
+      <a class="hb-main-link" href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>
+      ${site ? `<div class="hb-main-site-line">${escapeHtml(site)}</div>` : ""}
+    `;
+    content.append(share);
+  } else {
+    content.textContent = title;
   }
+  main.append(content);
 
   const meta = document.createElement("div");
   meta.className = "hb-floor-tail";
-  meta.innerHTML = `
-    <span>${escapeHtml(score || "")}</span>
-    <span class="hb-floor-age">${escapeHtml(age)}</span>
-    <a class="hb-floor-user-inline" href="${escapeAttr(userHref)}">${escapeHtml(user)}</a>
-  `;
+  const left = document.createElement("div");
+  left.className = "hb-floor-tail-left";
+  if (score) {
+    const scoreEl = document.createElement("span");
+    scoreEl.className = "hb-floor-score";
+    scoreEl.textContent = score;
+    left.append(scoreEl);
+  }
+  const ageEl = document.createElement("span");
+  ageEl.className = "hb-floor-age";
+  ageEl.textContent = age || "";
+  left.append(ageEl);
+  meta.append(left);
+
+  const replyA = document.createElement("a");
+  replyA.className = "hb-floor-reply";
+  replyA.href = "#hb-reply";
+  replyA.textContent = "回复";
+  meta.append(replyA);
+
   main.append(meta);
   card.append(main);
-  fatitem.replaceWith(card);
-  return form;
+
+  return { form, coreTitle, card, user };
 }
 
 function createFloorCard(document, comment, floor, firstUser) {
@@ -904,16 +951,12 @@ function createFloorCard(document, comment, floor, firstUser) {
     comment.querySelector(".age")?.textContent?.trim() ||
     (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " ").trim();
   const isLz = Boolean(firstUser && user === firstUser);
-  const indent = Number(comment.querySelector(".ind")?.getAttribute("indent") || 0);
   const commentNode = comment.querySelector(".comment");
   const reply = commentNode?.querySelector(".reply");
 
   const card = document.createElement("div");
   card.className = isLz ? "hb-floor hb-floor-lz" : "hb-floor";
   card.dataset.hbFloor = String(floor);
-  if (indent > 0) {
-    card.style.setProperty("--hb-indent", String(Math.min(indent, 6)));
-  }
 
   card.append(createAuthorColumn(document, { user, userHref, isLz }));
 
@@ -955,10 +998,13 @@ function createFloorCard(document, comment, floor, firstUser) {
 
   const tail = document.createElement("div");
   tail.className = "hb-floor-tail";
+  const left = document.createElement("div");
+  left.className = "hb-floor-tail-left";
   const ageEl = document.createElement("span");
   ageEl.className = "hb-floor-age";
   ageEl.textContent = age;
-  tail.append(ageEl);
+  left.append(ageEl);
+  tail.append(left);
   if (reply) {
     const replyLink = reply.querySelector("a");
     if (replyLink) {
@@ -972,41 +1018,179 @@ function createFloorCard(document, comment, floor, firstUser) {
   main.append(tail);
 
   card.append(main);
-  return card;
+  return { card, user };
+}
+
+function ensureLzlContainer(document, floorCard) {
+  let lzl = floorCard.querySelector(".hb-lzl");
+  if (lzl) {
+    return lzl;
+  }
+
+  const main = floorCard.querySelector(".hb-floor-main");
+  lzl = document.createElement("div");
+  lzl.className = "hb-lzl";
+  lzl.innerHTML = `
+    <div class="hb-lzl-hd">共<em class="hb-lzl-num">0</em>条回复</div>
+    <ul class="hb-lzl-list"></ul>
+  `;
+  main?.append(lzl);
+  return lzl;
+}
+
+function syncLzlCount(lzl) {
+  const num = lzl.querySelector(".hb-lzl-num");
+  const count = lzl.querySelectorAll(".hb-lzl-item").length;
+  if (num) {
+    num.textContent = String(count);
+  }
+}
+
+function createLzlItem(document, comment, { firstUser, replyTo = "" }) {
+  const user = comment.querySelector(".hnuser")?.textContent?.trim() || "?";
+  const userHref = comment.querySelector(".hnuser")?.getAttribute("href") || "login";
+  const age =
+    comment.querySelector(".age")?.textContent?.trim() ||
+    (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " ").trim();
+  const isLz = Boolean(firstUser && user === firstUser);
+  const commentNode = comment.querySelector(".comment");
+  const reply = commentNode?.querySelector(".reply");
+
+  const item = document.createElement("li");
+  item.className = isLz ? "hb-lzl-item hb-lzl-lz" : "hb-lzl-item";
+
+  const name = document.createElement("a");
+  name.className = "hb-lzl-name";
+  name.href = userHref;
+  name.textContent = user;
+  item.append(name);
+
+  if (isLz) {
+    const badge = document.createElement("span");
+    badge.className = "hb-lzl-lz-tag";
+    badge.textContent = "楼主";
+    item.append(badge);
+  }
+
+  item.append(document.createTextNode("："));
+
+  if (replyTo) {
+    const to = document.createElement("span");
+    to.className = "hb-lzl-to";
+    to.textContent = `回复 ${replyTo} : `;
+    item.append(to);
+  }
+
+  const text = document.createElement("span");
+  text.className = "hb-lzl-text";
+  if (commentNode) {
+    const nodes = [...commentNode.childNodes].filter((node) => {
+      return !(node.nodeType === 1 && node.classList?.contains("reply"));
+    });
+    text.append(...nodes);
+  }
+  item.append(text);
+
+  const tail = document.createElement("div");
+  tail.className = "hb-lzl-tail";
+  const ageEl = document.createElement("span");
+  ageEl.className = "hb-lzl-age";
+  ageEl.textContent = age;
+  tail.append(ageEl);
+  if (reply) {
+    const replyLink = reply.querySelector("a");
+    if (replyLink) {
+      const a = document.createElement("a");
+      a.className = "hb-lzl-reply";
+      a.href = replyLink.getAttribute("href") || "#";
+      a.textContent = "回复";
+      tail.append(a);
+    }
+  }
+  item.append(tail);
+
+  return { item, user };
 }
 
 function enhanceComments(document) {
-  if (document.querySelector(".hb-main-floor")) {
+  if (document.querySelector(".hb-post-wrap")) {
     return;
   }
 
-  const form = enhanceMainPost(document);
-
+  const fatitem = document.querySelector(".fatitem");
   const comments = [...document.querySelectorAll("tr.athing.comtr")];
-  const firstUser = document.querySelector(".hb-main-floor .hb-floor-name")?.textContent?.trim();
+  if (!fatitem && comments.length === 0) {
+    return;
+  }
 
-  let list = null;
+  const panel = document.querySelector(".hb-thread-panel");
+  if (!panel) {
+    return;
+  }
+
+  document.body.classList.add("hb-item-page");
+
+  const wrap = document.createElement("div");
+  wrap.className = "hb-post-wrap";
+
+  let form = null;
+  let firstUser = "";
+  let replyCount = comments.length;
+
+  if (fatitem) {
+    const replyMatch = [...fatitem.querySelectorAll(".subtext a")]
+      .map((a) => a.textContent.replace(/\u00a0/g, " ").trim())
+      .find((text) => /comment|discuss|讨论/i.test(text));
+    replyCount = Number((replyMatch || "").match(/(\d+)/)?.[1] || comments.length);
+    const built = buildMainFloor(document, fatitem, replyCount);
+    form = built.form;
+    firstUser = built.user;
+    wrap.append(built.coreTitle, built.card);
+  }
+
   if (comments.length > 0) {
-    list = document.createElement("div");
+    const list = document.createElement("div");
     list.className = "hb-floor-list";
-    comments.forEach((comment, index) => {
-      list.append(createFloorCard(document, comment, index + 2, firstUser));
+    /** @type {{ indent: number, user: string, card: Element }[]} */
+    const stack = [];
+    let floorNo = 2;
+
+    comments.forEach((comment) => {
+      const indent = Number(comment.querySelector(".ind")?.getAttribute("indent") || 0);
+      while (stack.length && stack[stack.length - 1].indent >= indent) {
+        stack.pop();
+      }
+
+      if (indent === 0 || stack.length === 0) {
+        const built = createFloorCard(document, comment, floorNo, firstUser);
+        floorNo += 1;
+        list.append(built.card);
+        stack.length = 0;
+        stack.push({ indent: 0, user: built.user, card: built.card });
+        return;
+      }
+
+      const parent = stack[stack.length - 1];
+      const floorCard = stack[0].card;
+      const lzl = ensureLzlContainer(document, floorCard);
+      const built = createLzlItem(document, comment, {
+        firstUser,
+        replyTo: indent > 1 ? parent.user : "",
+      });
+      lzl.querySelector(".hb-lzl-list")?.append(built.item);
+      syncLzlCount(lzl);
+      stack.push({ indent, user: built.user, card: floorCard });
     });
 
-    const tree = document.querySelector(".comment-tree");
-    if (tree) {
-      tree.replaceWith(list);
-    } else {
-      comments[0].before(list);
-      comments.forEach((comment) => comment.remove());
-    }
+    wrap.append(list);
   }
 
-  if (form && !document.querySelector(".hb-reply-panel")) {
-    const panel = createReplyPanel(document, form);
-    const anchor = list || document.querySelector(".hb-main-floor");
-    anchor?.after(panel);
+  if (form) {
+    wrap.append(createReplyPanel(document, form));
   }
+
+  panel.append(wrap);
+  revealSourceIfNeeded(document);
 }
 
 function escapeHtml(value) {
