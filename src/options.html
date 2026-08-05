@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HackerBa 设置</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main>
+      <h1>HackerBa</h1>
+      <p>贴吧式 Hacker News 阅读体验</p>
+      <form id="preferences">
+        <label>
+          主题
+          <select id="theme" name="theme">
+            <option value="light">浅色</option>
+            <option value="dark">深色</option>
+          </select>
+        </label>
+        <label>
+          信息密度
+          <select id="density" name="density">
+            <option value="comfortable">舒适</option>
+            <option value="compact">紧凑</option>
+          </select>
+        </label>
+        <button type="submit">保存设置</button>
+        <output id="status" aria-live="polite"></output>
+      </form>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

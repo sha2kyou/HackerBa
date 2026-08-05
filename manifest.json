@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "HackerBa",
+  "version": "0.1.0",
+  "description": "将 Hacker News 改造成贴吧式阅读体验。",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://news.ycombinator.com/*"
+      ],
+      "css": [
+        "src/hackerba.css"
+      ],
+      "js": [
+        "src/content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "src/options.html"
+}

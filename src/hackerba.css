@@ -1,0 +1,589 @@
+/* HackerBa — 贴吧吧页风格还原 */
+
+:root {
+  --hb-blue: #2d64b3;
+  --hb-blue-link: #2d64b3;
+  --hb-orange: #f90;
+  --hb-orange-btn: #ff7a45;
+  --hb-rep: #fe7100;
+  --hb-bg: #f5f5f5;
+  --hb-line: #e5e5e5;
+  --hb-text: #333;
+  --hb-muted: #999;
+  --hb-width: 1000px;
+}
+
+html.hackerba-page,
+body.hackerba {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--hb-bg) !important;
+  color: var(--hb-text);
+  font: 12px/1.5 "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif !important;
+}
+
+body.hackerba > *:not(.hb-wrap) {
+  display: none !important;
+}
+
+body.hackerba .hb-wrap {
+  min-height: 100vh;
+  background: var(--hb-bg);
+}
+
+/* ===== 顶栏：贴吧式白底细线 ===== */
+body.hackerba .hb-topbar {
+  height: 48px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fff;
+}
+
+body.hackerba .hb-topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: var(--hb-width);
+  max-width: calc(100% - 24px);
+  height: 100%;
+  margin: 0 auto;
+}
+
+body.hackerba .hb-brand {
+  color: var(--hb-blue);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body.hackerba .hb-top-link {
+  color: #666;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body.hackerba .hb-search {
+  display: flex;
+  flex: 1;
+  max-width: 480px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.hackerba .hb-search input {
+  flex: 1;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  border-right: 0;
+  border-radius: 2px 0 0 2px;
+  outline: none;
+  background: #fff;
+  font-size: 12px;
+}
+
+body.hackerba .hb-search button {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid #3385ff;
+  border-radius: 0 2px 2px 0;
+  color: #fff;
+  background: #3385ff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+body.hackerba .hb-userbar {
+  margin-left: auto;
+  color: #999;
+  white-space: nowrap;
+}
+
+body.hackerba .hb-userbar a {
+  margin: 0 4px;
+  color: #666;
+  text-decoration: none;
+}
+
+body.hackerba .hb-userbar a:hover {
+  color: var(--hb-blue);
+}
+
+/* ===== 吧头：蓝底横幅 + 方形吧头像 ===== */
+body.hackerba .hb-card-banner {
+  background:
+    linear-gradient(180deg, rgb(45 100 179 / 92%), rgb(45 100 179 / 88%)),
+    repeating-linear-gradient(
+      135deg,
+      #3a78c2 0 12px,
+      #356fb5 12px 24px
+    );
+}
+
+body.hackerba .hb-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: var(--hb-width);
+  max-width: calc(100% - 24px);
+  min-height: 110px;
+  margin: 0 auto;
+  padding: 16px 0;
+  color: #fff;
+}
+
+body.hackerba .hb-card-avatar {
+  display: grid;
+  flex: 0 0 80px;
+  width: 80px;
+  height: 80px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background: #1e4f96;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+body.hackerba .hb-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+body.hackerba .hb-card-title {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+body.hackerba .hb-card-num {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 6px;
+  color: #e8f1ff;
+  font-size: 12px;
+}
+
+body.hackerba .hb-card-num em {
+  font-style: normal;
+  opacity: 0.85;
+}
+
+body.hackerba .hb-card-slogan {
+  margin: 0;
+  color: #d7e6ff;
+  font-size: 12px;
+}
+
+body.hackerba .hb-card-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.hackerba .hb-btn-attention,
+body.hackerba .hb-btn-post {
+  display: inline-block;
+  min-width: 72px;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 2px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+body.hackerba .hb-btn-attention {
+  color: #2d64b3;
+  background: #fff;
+}
+
+body.hackerba .hb-btn-post {
+  color: #fff;
+  background: var(--hb-orange-btn);
+}
+
+/* ===== 内容区：左帖列表 + 右侧栏 ===== */
+body.hackerba .hb-content {
+  display: flex;
+  gap: 14px;
+  width: var(--hb-width);
+  max-width: calc(100% - 24px);
+  margin: 12px auto 40px;
+  align-items: flex-start;
+}
+
+body.hackerba .hb-main {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+}
+
+body.hackerba .hb-tab-nav {
+  display: flex;
+  margin: 0;
+  padding: 0 12px;
+  list-style: none;
+  border-bottom: 1px solid var(--hb-line);
+  background: #fafafa;
+}
+
+body.hackerba .hb-tab-nav li {
+  margin: 0 18px 0 0;
+}
+
+body.hackerba .hb-tab-nav a {
+  display: inline-block;
+  padding: 12px 2px 10px;
+  border-bottom: 2px solid transparent;
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+body.hackerba .hb-tab-nav a:hover,
+body.hackerba .hb-tab-nav .hb-tab-focus {
+  border-bottom-color: var(--hb-blue);
+  color: var(--hb-blue);
+  font-weight: 700;
+}
+
+/* ===== 帖子列表：经典左侧橙色回复数 ===== */
+body.hackerba .hb-thread-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+body.hackerba .hb-thread-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+body.hackerba .hb-thread-item:hover {
+  background: #fafafa;
+}
+
+body.hackerba .hb-thread-left {
+  flex: 0 0 45px;
+}
+
+body.hackerba .hb-rep-num {
+  display: block;
+  width: 45px;
+  height: 28px;
+  border-radius: 2px;
+  color: var(--hb-rep);
+  background: #f8f8f8;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 28px;
+  text-align: center;
+}
+
+body.hackerba .hb-thread-center {
+  flex: 1;
+  min-width: 0;
+}
+
+body.hackerba .hb-thread-title {
+  margin-bottom: 6px;
+}
+
+body.hackerba .hb-th-tit {
+  color: #333 !important;
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none !important;
+  word-break: break-word;
+}
+
+body.hackerba .hb-th-tit:visited {
+  color: #666 !important;
+}
+
+body.hackerba .hb-th-tit:hover {
+  color: var(--hb-blue) !important;
+  text-decoration: underline !important;
+}
+
+body.hackerba .hb-th-site {
+  margin-left: 6px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+body.hackerba .hb-thread-detail {
+  color: var(--hb-muted);
+  font-size: 12px;
+}
+
+body.hackerba .hb-author {
+  color: #2d64b3;
+}
+
+body.hackerba .hb-sep {
+  margin: 0 4px;
+}
+
+body.hackerba .hb-goto-item {
+  margin-left: 10px;
+  color: #999;
+  text-decoration: none;
+}
+
+body.hackerba .hb-goto-item:hover {
+  color: var(--hb-blue);
+}
+
+body.hackerba .hb-pager {
+  padding: 14px;
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
+}
+
+body.hackerba .hb-pager a {
+  color: var(--hb-blue);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+/* ===== 右侧栏 ===== */
+body.hackerba .hb-aside {
+  flex: 0 0 240px;
+  width: 240px;
+}
+
+body.hackerba .hb-aside-box {
+  margin-bottom: 12px;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+}
+
+body.hackerba .hb-aside-title {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  color: #333;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+body.hackerba .hb-aside-body {
+  padding: 12px;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+body.hackerba .hb-aside-body p {
+  margin: 0 0 4px;
+}
+
+body.hackerba .hb-aside-link,
+body.hackerba .hb-aside-links a {
+  color: var(--hb-blue);
+  text-decoration: none;
+}
+
+body.hackerba .hb-aside-links a {
+  display: block;
+  padding: 4px 0;
+  border-bottom: 1px dashed #f0f0f0;
+}
+
+body.hackerba .hb-aside-links a:last-child {
+  border-bottom: 0;
+}
+
+/* ===== 帖子详情 / 楼层 ===== */
+body.hackerba .hb-hn-source:not([hidden]) {
+  display: block;
+}
+
+body.hackerba .fatitem,
+body.hackerba .comment-tree,
+body.hackerba form,
+body.hackerba .profileform {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.hackerba .hb-thread-panel:has(.fatitem),
+body.hackerba .hb-thread-panel:has(.comment-tree),
+body.hackerba .hb-thread-panel:has(form) {
+  padding: 0;
+}
+
+body.hackerba .hb-thread-panel:has(.fatitem) .hb-hn-source,
+body.hackerba .hb-thread-panel:has(.comment-tree) .hb-hn-source,
+body.hackerba .hb-thread-panel:has(form) .hb-hn-source,
+body.hackerba .hb-thread-panel:has(.profileform) .hb-hn-source {
+  display: block !important;
+  padding: 16px;
+}
+
+body.hackerba .hb-original-header {
+  display: none !important;
+}
+
+body.hackerba #hnmain {
+  width: 100% !important;
+  background: transparent !important;
+}
+
+body.hackerba .fatitem {
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+}
+
+body.hackerba .hb-floor {
+  display: flex !important;
+  gap: 12px;
+  position: relative;
+  margin: 0 0 10px !important;
+  padding: 14px !important;
+  border: 1px solid #e1e1e1 !important;
+  background: #fff !important;
+}
+
+body.hackerba .hb-floor > td {
+  display: block;
+  border: 0 !important;
+}
+
+body.hackerba .hb-floor-avatar {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 3px;
+  color: #fff;
+  background: #8bb7e8;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 48px;
+  text-align: center;
+}
+
+body.hackerba .hb-floor::after {
+  content: attr(data-hb-floor) "楼";
+  position: absolute;
+  top: 12px;
+  right: 52px;
+  color: #bbb;
+  font-size: 12px;
+}
+
+body.hackerba .hb-floor .togg,
+body.hackerba .hb-floor .votelinks,
+body.hackerba .hb-floor .ind {
+  display: none !important;
+}
+
+body.hackerba .hb-floor .default {
+  flex: 1;
+  min-width: 0;
+}
+
+body.hackerba .comhead,
+body.hackerba .comhead a {
+  color: var(--hb-muted) !important;
+}
+
+body.hackerba .comment {
+  margin-top: 8px;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+body.hackerba .hb-floor-toggle {
+  float: right;
+  padding: 0 6px;
+  border: 1px solid #e5e5e5;
+  border-radius: 2px;
+  color: #666;
+  background: #f7f7f7;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+body.hackerba .hb-floor-collapsed .comment,
+body.hackerba .hb-floor-collapsed .reply {
+  display: none;
+}
+
+body.hackerba input,
+body.hackerba textarea {
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  font: inherit;
+}
+
+body.hackerba input[type="submit"] {
+  border: 0;
+  border-radius: 2px;
+  color: #fff !important;
+  background: var(--hb-orange-btn);
+  cursor: pointer;
+}
+
+html[data-hb-theme="dark"] {
+  --hb-bg: #1a1a1a;
+  --hb-text: #ddd;
+  --hb-muted: #888;
+  --hb-line: #333;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-topbar,
+html[data-hb-theme="dark"] body.hackerba .hb-main,
+html[data-hb-theme="dark"] body.hackerba .hb-aside-box,
+html[data-hb-theme="dark"] body.hackerba .hb-floor,
+html[data-hb-theme="dark"] body.hackerba .fatitem {
+  border-color: #333;
+  background: #242424;
+  color: #ddd;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-th-tit {
+  color: #e8e8e8 !important;
+}
+
+html[data-hb-density="compact"] body.hackerba .hb-thread-item {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 860px) {
+  body.hackerba .hb-aside {
+    display: none;
+  }
+
+  body.hackerba .hb-topbar-inner,
+  body.hackerba .hb-card-head,
+  body.hackerba .hb-content {
+    width: auto;
+  }
+
+  body.hackerba .hb-card-btns {
+    display: none;
+  }
+}
