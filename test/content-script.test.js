@@ -200,7 +200,8 @@ test("帖子行包含右侧最后回复区，并带列表工具条与面包屑",
   assert.match(item.querySelector(".hb-create-time").textContent, /2 hours ago/);
   assert.equal(item.querySelector(".hb-thread-reply-meta"), null);
   assert.ok(item.querySelector(".hb-thread-abs"));
-  assert.ok(item.querySelector(".hb-icon-hot"));
+  assert.ok(item.querySelector(".hb-icon-good"));
+  assert.equal(item.querySelector(".hb-icon-hot"), null);
   assert.ok(document.querySelector(".hb-tab-post"));
   assert.equal(document.querySelector(".hb-btn-mini-post"), null);
 });

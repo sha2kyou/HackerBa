@@ -500,11 +500,11 @@ function titleHrefForThread(document, thread) {
 
 function createThreadItem(document, thread) {
   const badges = [];
-  if (thread.score >= 100) {
+  if (Number(thread.replyNum) >= 50) {
     badges.push('<span class="hb-icon-hot" title="热门">热</span>');
   }
-  if (Number(thread.replyNum) >= 50) {
-    badges.push('<span class="hb-icon-good" title="高讨论">精</span>');
+  if (thread.score >= 100) {
+    badges.push('<span class="hb-icon-good" title="高分">精</span>');
   }
 
   const absParts = [];
