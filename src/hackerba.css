@@ -459,6 +459,12 @@ body.hackerba .hb-rep-num {
   font-weight: 700;
   line-height: 20px;
   text-align: center;
+  text-decoration: none;
+}
+
+body.hackerba .hb-rep-num:hover {
+  border-color: #ff7e23;
+  color: #e56600;
 }
 
 body.hackerba .hb-thread-body {

@@ -563,11 +563,12 @@ function createThreadItem(document, thread) {
     ? ` href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer"`
     : ` href="${escapeAttr(titleHref)}"`;
 
+  const itemHref = thread.itemHref || "#";
   const item = document.createElement("li");
   item.className = "hb-thread-item";
   item.innerHTML = `
     <div class="hb-thread-left">
-      <span class="hb-rep-num" title="${escapeAttr(t("repliesTitle", null, document))}">${escapeHtml(thread.replyNum)}</span>
+      <a class="hb-rep-num" href="${escapeAttr(itemHref)}" title="${escapeAttr(t("repliesTitle", null, document))}">${escapeHtml(thread.replyNum)}</a>
     </div>
     <div class="hb-thread-body">
       <div class="hb-thread-lz">

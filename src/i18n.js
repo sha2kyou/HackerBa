@@ -108,7 +108,7 @@
       optDensityCompact: "Compact",
       optTitleClick: "Open discussion on title click",
       optTitleClickHint:
-        "On: open the discussion page<br>Off: open the original link (classic Hacker News)",
+        "On: title opens discussion<br>Off: title opens the original link; click the reply count to enter discussion",
       optSave: "Save settings",
       optSaved: "Saved. Refresh Hacker News pages to apply.",
       optVersion: "Version",
@@ -221,7 +221,7 @@
       optDensityCompact: "紧凑",
       optTitleClick: "点击标题进入评论",
       optTitleClickHint:
-        "开启：进入评论页<br>关闭：打开原文（原 Hacker News 体验）",
+        "开启：标题进入评论页<br>关闭：标题打开原文，点左侧回复数进入讨论",
       optSave: "保存设置",
       optSaved: "已保存，刷新 Hacker News 页面后生效。",
       optVersion: "版本",
