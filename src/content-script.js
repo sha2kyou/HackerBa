@@ -289,7 +289,7 @@ function buildCommunityShell(document) {
   wrap.innerHTML = `
     <div class="hb-topbar">
       <div class="hb-topbar-inner">
-        <a class="hb-brand" href="news" title="HackerBa">
+        <a class="hb-brand" href="news" title="${escapeAttr(t("brandName", null, document))}">
           <span class="hb-brand-text"><i>Hacker</i>${escapeHtml(t("brandSuffix", null, document))}</span>
         </a>
         <form class="hb-search" data-hb-search="local" action="#" method="get">
@@ -300,7 +300,7 @@ function buildCommunityShell(document) {
       </div>
     </div>
     <div class="hb-breadcrumb">
-      <a href="news">HackerBa</a>
+      <a href="news">${escapeHtml(t("brandName", null, document))}</a>
       <span class="hb-bc-sep">&gt;</span>
       <span class="hb-bc-current">${escapeHtml(t("forumName", null, document))}</span>
     </div>

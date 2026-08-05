@@ -768,7 +768,10 @@ test("语言偏好 zh 时界面为中文", () => {
   document.defaultView.HackerBa.enhanceHackerNews(document);
 
   assert.match(document.querySelector(".hb-brand").textContent, /贴吧/);
+  assert.equal(document.querySelector(".hb-brand").getAttribute("title"), "Hacker贴吧");
+  assert.equal(document.querySelector(".hb-breadcrumb a")?.textContent, "Hacker贴吧");
   assert.equal(document.querySelector(".hb-search-btn").textContent, "搜索");
+  assert.match(document.querySelector(".hb-footer")?.textContent || "", /Hacker贴吧/);
   assert.equal(
     [...document.querySelectorAll(".hb-tab-nav a")].map((a) => a.textContent).join(","),
     "看帖,问答,作品,招聘,精品",
