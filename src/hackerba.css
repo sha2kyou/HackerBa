@@ -258,11 +258,13 @@ body.hackerba .hb-card-num {
 }
 
 body.hackerba .hb-card-num em {
+  color: inherit !important;
   font-style: normal;
   opacity: 0.9;
 }
 
 body.hackerba .hb-card-num b {
+  color: inherit !important;
   font-weight: 700;
 }
 
