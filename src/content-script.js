@@ -1523,7 +1523,7 @@ async function applyPreferences(document) {
     theme: "light",
     density: "comfortable",
     titleOpensDiscussion: true,
-    showBannerCover: true,
+    showBannerCover: false,
     language: "auto",
   };
 
@@ -1549,7 +1549,7 @@ async function applyPreferences(document) {
   document.documentElement.dataset.hbTitleDiscussion =
     preferences.titleOpensDiscussion === false ? "0" : "1";
   document.documentElement.dataset.hbBannerCover =
-    preferences.showBannerCover === false ? "0" : "1";
+    preferences.showBannerCover === true ? "1" : "0";
   document.documentElement.dataset.hbLang = locale;
   document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
   bindSystemThemeSync(document);

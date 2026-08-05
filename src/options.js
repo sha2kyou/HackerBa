@@ -33,13 +33,13 @@ async function restorePreferences() {
     theme: "light",
     density: "comfortable",
     titleOpensDiscussion: true,
-    showBannerCover: true,
+    showBannerCover: false,
   });
   language.value = preferences.language || "auto";
   theme.value = preferences.theme;
   density.value = preferences.density;
   titleOpensDiscussion.checked = preferences.titleOpensDiscussion !== false;
-  showBannerCover.checked = preferences.showBannerCover !== false;
+  showBannerCover.checked = preferences.showBannerCover === true;
   applyOptionsI18n(resolveLocale(language.value, browserLang()));
 }
 

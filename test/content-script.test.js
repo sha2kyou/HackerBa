@@ -29,7 +29,7 @@ function enhanceHackerNews(document) {
   return document.defaultView.HackerBa.enhanceHackerNews(document);
 }
 
-test("吧头封面图通过扩展 URL 注入", async () => {
+test("开启首图时通过扩展 URL 注入封面", async () => {
   const document = createDocument(`
     <center><table id="hnmain"><tr><td></td></tr></table></center>
   `);
@@ -38,6 +38,13 @@ test("吧头封面图通过扩展 URL 注入", async () => {
     runtime: {
       getURL(path) {
         return `chrome-extension://hb-test/${path}`;
+      },
+    },
+    storage: {
+      sync: {
+        async get(defaults) {
+          return { ...defaults, showBannerCover: true };
+        },
       },
     },
   };
@@ -56,7 +63,7 @@ test("吧头封面图通过扩展 URL 注入", async () => {
   assert.equal(document.documentElement.dataset.hbBannerCover, "1");
 });
 
-test("关闭首图时不注入封面并标记 data-hb-banner-cover", async () => {
+test("默认关闭首图时不注入封面", async () => {
   const document = createDocument(`
     <center><table id="hnmain"><tr><td></td></tr></table></center>
   `);
@@ -64,13 +71,6 @@ test("关闭首图时不注入封面并标记 data-hb-banner-cover", async () =>
     runtime: {
       getURL(path) {
         return `chrome-extension://hb-test/${path}`;
-      },
-    },
-    storage: {
-      sync: {
-        async get(defaults) {
-          return { ...defaults, showBannerCover: false };
-        },
       },
     },
   };
