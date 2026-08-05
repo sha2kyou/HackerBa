@@ -8,6 +8,12 @@ const hackerBaCss = await readFile(
   "utf8",
 );
 
+test("吧头封面固定 3:1 比例", () => {
+  assert.match(hackerBaCss, /\.hb-card-cover\s*\{/);
+  assert.match(hackerBaCss, /\.hb-card-banner\s*\{[^}]*aspect-ratio:\s*3\s*\/\s*1/s);
+  assert.match(hackerBaCss, /\.hb-card-cover\s*\{[^}]*object-fit:\s*cover/s);
+});
+
 test("吧头关注数和帖子数不受页面子元素颜色覆盖", () => {
   const dom = new JSDOM(`
     <!doctype html>

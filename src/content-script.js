@@ -261,6 +261,28 @@ function resolveSessionUser(document) {
   };
 }
 
+const BANNER_COVER_PATH = "src/icons/banner-process.jpg";
+
+function resolveExtensionUrl(path) {
+  try {
+    return globalThis.chrome?.runtime?.getURL?.(path) || "";
+  } catch {
+    return "";
+  }
+}
+
+function applyBannerCover(root) {
+  const cover = root?.querySelector?.(".hb-card-cover");
+  if (!cover) {
+    return;
+  }
+  const url = resolveExtensionUrl(BANNER_COVER_PATH);
+  if (!url) {
+    return;
+  }
+  cover.src = url;
+}
+
 function renderUserbar(document, session) {
   const bar = document.querySelector(".hb-userbar");
   if (!bar) {
@@ -319,6 +341,7 @@ function buildCommunityShell(document) {
       <span class="hb-bc-current">${escapeHtml(t("forumName", null, document))}</span>
     </div>
     <div class="hb-card-banner">
+      <img class="hb-card-cover" alt="" decoding="async">
       <div class="hb-card-head">
         <div class="hb-card-avatar" aria-hidden="true">
           <span class="hb-forum-mark">Y</span>
@@ -391,6 +414,7 @@ function buildCommunityShell(document) {
   `;
 
   document.body.insertBefore(wrap, document.body.firstChild);
+  applyBannerCover(wrap);
   renderUserbar(document, session);
   if (session && Number.isFinite(session.karma)) {
     karmaCache.set(session.name, session.karma);
@@ -1561,6 +1585,8 @@ globalThis.HackerBa = {
   resolveTheme,
   applyPreferences,
   userLevelFromKarma,
+  applyBannerCover,
+  BANNER_COVER_PATH,
   KARMA_LEVEL_REF,
   KARMA_LEVEL_AT_REF,
 };

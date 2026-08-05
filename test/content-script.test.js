@@ -29,6 +29,30 @@ function enhanceHackerNews(document) {
   return document.defaultView.HackerBa.enhanceHackerNews(document);
 }
 
+test("吧头封面图通过扩展 URL 注入", () => {
+  const document = createDocument(`
+    <center><table id="hnmain"><tr><td></td></tr></table></center>
+  `);
+  const extensionUrl = "chrome-extension://hb-test/src/icons/banner-process.jpg";
+  document.defaultView.chrome = {
+    runtime: {
+      getURL(path) {
+        return `chrome-extension://hb-test/${path}`;
+      },
+    },
+  };
+
+  enhanceHackerNews(document);
+
+  const cover = document.querySelector(".hb-card-cover");
+  assert.ok(cover);
+  assert.equal(cover.getAttribute("src"), extensionUrl);
+  assert.equal(
+    document.defaultView.HackerBa.BANNER_COVER_PATH,
+    "src/icons/banner-process.jpg",
+  );
+});
+
 test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨论 + 作者时间", () => {
   const document = createDocument(`
     <table id="hnmain">

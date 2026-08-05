@@ -177,18 +177,52 @@ body.hackerba .hb-bc-sep {
 
 /* ===== 吧头 ===== */
 body.hackerba .hb-card-banner {
+  position: relative;
   width: var(--hb-width);
   max-width: calc(100% - 24px);
   margin: 0 auto;
-  border: 1px solid #c9d8eb;
-  background: linear-gradient(180deg, #5b92d4 0%, #3d78c0 100%);
+  overflow: hidden;
+  border: 1px solid #c9b8a8;
+  aspect-ratio: 3 / 1;
+  background: #3d2418;
+}
+
+body.hackerba .hb-card-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+body.hackerba .hb-card-banner::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 12%) 0%,
+    transparent 40%,
+    rgb(0 0 0 / 55%) 100%
+  );
+  content: "";
+  pointer-events: none;
 }
 
 body.hackerba .hb-card-head {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 12px;
-  padding: 12px 14px 14px;
+  padding: 36px 14px 12px;
   color: #fff;
 }
 
@@ -1458,8 +1492,17 @@ html[data-hb-theme="dark"] body.hackerba textarea {
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-card-banner {
-  border-color: #3d5a80;
-  background: linear-gradient(180deg, #3f6fa8 0%, #2f5788 100%);
+  border-color: #4a4036;
+  background: #2a1810;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-card-banner::after {
+  background: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 22%) 0%,
+    rgb(0 0 0 / 12%) 34%,
+    rgb(0 0 0 / 62%) 100%
+  );
 }
 
 html[data-hb-theme="dark"] body.hackerba .commtext,
