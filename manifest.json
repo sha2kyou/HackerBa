@@ -6,6 +6,9 @@
   "permissions": [
     "storage"
   ],
+  "host_permissions": [
+    "https://hn.algolia.com/*"
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -20,5 +23,15 @@
       "run_at": "document_idle"
     }
   ],
-  "options_page": "src/options.html"
+  "options_page": "src/options.html",
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/icons/y18.svg"
+      ],
+      "matches": [
+        "https://news.ycombinator.com/*"
+      ]
+    }
+  ]
 }
