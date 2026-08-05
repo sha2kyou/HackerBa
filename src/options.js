@@ -20,6 +20,10 @@ function applyOptionsI18n(locale) {
   document.querySelectorAll("[data-i18n-html]").forEach((node) => {
     node.innerHTML = t(locale, node.getAttribute("data-i18n-html"));
   });
+  const versionEl = document.querySelector("#opt-version");
+  if (versionEl) {
+    versionEl.textContent = chrome.runtime.getManifest().version;
+  }
 }
 
 async function restorePreferences() {

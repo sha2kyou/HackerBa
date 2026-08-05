@@ -8,7 +8,7 @@
   </head>
   <body>
     <main>
-      <h1>HackerBa</h1>
+      <h1 data-i18n="brandName">HackerBa</h1>
       <p data-i18n="optSubtitle">Tieba-style Hacker News reading</p>
       <form id="preferences">
         <label>
@@ -44,6 +44,28 @@
         <button type="submit" data-i18n="optSave">Save settings</button>
         <output id="status" aria-live="polite"></output>
       </form>
+      <section class="hb-opt-about" aria-label="About">
+        <p>
+          <span data-i18n="optVersion">Version</span>
+          <span id="opt-version"></span>
+        </p>
+        <p>
+          <span data-i18n="optDeveloper">Developer</span>
+          <a
+            href="https://github.com/sha2kyou"
+            target="_blank"
+            rel="noopener noreferrer"
+          >sha2kyou</a>
+        </p>
+        <p>
+          <span data-i18n="optRepository">Repository</span>
+          <a
+            href="https://github.com/sha2kyou/HackerBa"
+            target="_blank"
+            rel="noopener noreferrer"
+          >github.com/sha2kyou/HackerBa</a>
+        </p>
+      </section>
     </main>
     <script src="i18n.js"></script>
     <script type="module" src="options.js"></script>

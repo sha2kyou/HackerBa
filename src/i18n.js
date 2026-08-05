@@ -1,6 +1,7 @@
 (function (root) {
   const MESSAGES = {
     en: {
+      brandName: "HackerBa",
       brandSuffix: "Ba",
       searchPlaceholder: "Search Hacker News",
       searchAria: "Search Hacker News",
@@ -25,7 +26,7 @@
       asideTipsTitle: "Tips",
       asideTips:
         "Switch sections with the tabs above. On Posts, sort by Latest replies or Newest posts.",
-      footer: "© HackerBa · Tieba-style UI, content from Hacker News",
+      footer: "© {brand} · Tieba-style UI, content from Hacker News",
       login: "Log in",
       register: "Sign up",
       logout: "Log out",
@@ -92,7 +93,7 @@
       lzlCountSuffix: " replies",
       replyTo: "Reply to {name}: ",
       // options page
-      optTitle: "HackerBa Settings",
+      optTitle: "{brand} Settings",
       optSubtitle: "Tieba-style Hacker News reading",
       optLanguage: "Language",
       optLangAuto: "Follow browser",
@@ -110,8 +111,12 @@
         "On: open the discussion page<br>Off: open the original link (classic Hacker News)",
       optSave: "Save settings",
       optSaved: "Saved. Refresh Hacker News pages to apply.",
+      optVersion: "Version",
+      optDeveloper: "Developer",
+      optRepository: "Repository",
     },
     zh: {
+      brandName: "Hacker贴吧",
       brandSuffix: "贴吧",
       searchPlaceholder: "搜索 Hacker News",
       searchAria: "搜索 Hacker News",
@@ -135,7 +140,7 @@
       asideRules: "查看吧规 >",
       asideTipsTitle: "温馨提示",
       asideTips: "分区在上方 Tab 切换；看帖下可用「最新回复 / 最新发帖」排序。",
-      footer: "© HackerBa · 界面仿贴吧，内容来自 Hacker News",
+      footer: "© {brand} · 界面仿贴吧，内容来自 Hacker News",
       login: "登录",
       register: "注册",
       logout: "退出",
@@ -201,7 +206,7 @@
       lzlCountPrefix: "共",
       lzlCountSuffix: "条回复",
       replyTo: "回复 {name} : ",
-      optTitle: "HackerBa 设置",
+      optTitle: "{brand} 设置",
       optSubtitle: "贴吧式 Hacker News 阅读体验",
       optLanguage: "语言",
       optLangAuto: "跟随浏览器",
@@ -219,6 +224,9 @@
         "开启：进入评论页<br>关闭：打开原文（原 Hacker News 体验）",
       optSave: "保存设置",
       optSaved: "已保存，刷新 Hacker News 页面后生效。",
+      optVersion: "版本",
+      optDeveloper: "开发者",
+      optRepository: "仓库",
     },
   };
 
@@ -235,11 +243,11 @@
 
   function t(locale, key, vars) {
     const dict = MESSAGES[locale] || MESSAGES.en;
+    const brand = dict.brandName || MESSAGES.en.brandName;
     let text = dict[key] ?? MESSAGES.en[key] ?? key;
-    if (vars) {
-      for (const [name, value] of Object.entries(vars)) {
-        text = text.replaceAll(`{${name}}`, String(value));
-      }
+    const merged = { brand, ...(vars || {}) };
+    for (const [name, value] of Object.entries(merged)) {
+      text = text.replaceAll(`{${name}}`, String(value));
     }
     return text;
   }

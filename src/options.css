@@ -86,3 +86,28 @@ output {
   margin-top: 2px;
   flex: 0 0 auto;
 }
+
+.hb-opt-about {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e4ebf5;
+  display: grid;
+  gap: 8px;
+}
+
+.hb-opt-about p {
+  margin: 0;
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  color: #75839a;
+}
+
+.hb-opt-about a {
+  color: #2670d9;
+  text-decoration: none;
+}
+
+.hb-opt-about a:hover {
+  text-decoration: underline;
+}
