@@ -26,6 +26,7 @@ function enhanceHackerNews(document) {
   revealSourceIfNeeded(document);
   enhanceComments(document);
   bindSearchForm(document);
+  void hydrateUserLevels(document);
 }
 
 function localizeAuthLabel(text, document) {
@@ -230,6 +231,17 @@ function wrapOrphanContent(document, orphanNodes) {
   return enhanceDocumentPanel(document, host);
 }
 
+function readKarmaBesideUserLink(userLink) {
+  const sibling = userLink?.nextSibling;
+  if (sibling?.nodeType === 3) {
+    const match = sibling.textContent.match(/^\s*\(([\d,]+)\)/);
+    if (match) {
+      return Number(match[1].replaceAll(",", ""));
+    }
+  }
+  return null;
+}
+
 function resolveSessionUser(document) {
   const logout = document.querySelector('.pagetop a[href^="logout"]');
   if (!logout) {
@@ -240,10 +252,12 @@ function resolveSessionUser(document) {
   if (!userLink) {
     return null;
   }
+  const karma = readKarmaBesideUserLink(userLink);
   return {
     name: userLink.textContent.trim() || t("userFallback", null, document),
     href: userLink.getAttribute("href") || "login",
     logoutHref: logout.getAttribute("href") || "logout",
+    karma: Number.isFinite(karma) ? karma : null,
   };
 }
 
@@ -312,7 +326,11 @@ function buildCommunityShell(document) {
         <div class="hb-card-info">
           <div class="hb-card-title-row">
             <h1 class="hb-card-title">${escapeHtml(t("forumName", null, document))}</h1>
-            <span class="hb-card-level" title="${escapeAttr(t("forumLevel", null, document))}">Lv.12</span>
+            <span class="hb-card-level"${
+              session && isFetchableUser(session.name)
+                ? ` data-hb-user="${escapeAttr(session.name)}"`
+                : ""
+            } title="${escapeAttr(t("forumLevel", null, document))}">Lv.—</span>
           </div>
           <div class="hb-card-num">
             <span><em>${escapeHtml(t("followers", null, document))}</em><b>1,234,567</b></span>
@@ -370,6 +388,13 @@ function buildCommunityShell(document) {
 
   document.body.insertBefore(wrap, document.body.firstChild);
   renderUserbar(document, session);
+  if (session && Number.isFinite(session.karma)) {
+    karmaCache.set(session.name, session.karma);
+    const cardLevel = wrap.querySelector(".hb-card-level[data-hb-user]");
+    if (cardLevel) {
+      applyLevelToNode(cardLevel, session.karma);
+    }
+  }
 
   const source = document.createElement("div");
   source.className = "hb-hn-source hb-source-hidden";
@@ -906,11 +931,114 @@ function avatarColor(name) {
   return `hsl(${hue} ${sat}% ${light}%)`;
 }
 
-function userLevel(name) {
-  return (hashString(name) % 12) + 1;
+/** Reference karma ≈ level 12; levels grow without an upper cap. */
+const KARMA_LEVEL_REF = 50_000;
+const KARMA_LEVEL_AT_REF = 12;
+
+/**
+ * Map HN karma → level with a log curve (no max).
+ * level = floor(12 * log1p(karma) / log1p(50000))
+ */
+function userLevelFromKarma(karma) {
+  const k = Math.max(0, Number(karma) || 0);
+  if (k <= 0) {
+    return 0;
+  }
+  return Math.floor((KARMA_LEVEL_AT_REF * Math.log1p(k)) / Math.log1p(KARMA_LEVEL_REF));
 }
 
-function createAuthorColumn(document, { user, userHref, isLz = false }) {
+const karmaCache = new Map();
+const karmaInflight = new Map();
+
+function isFetchableUser(name) {
+  const value = String(name || "").trim();
+  return Boolean(value) && value !== "?" && value !== "anonymous" && value !== "匿名";
+}
+
+async function fetchUserKarma(username) {
+  const key = String(username || "").trim();
+  if (!isFetchableUser(key)) {
+    return null;
+  }
+  if (karmaCache.has(key)) {
+    return karmaCache.get(key);
+  }
+  if (karmaInflight.has(key)) {
+    return karmaInflight.get(key);
+  }
+
+  const pending = (async () => {
+    try {
+      const response = await fetch(
+        `https://hn.algolia.com/api/v1/users/${encodeURIComponent(key)}`,
+      );
+      if (!response.ok) {
+        karmaCache.set(key, null);
+        return null;
+      }
+      const data = await response.json();
+      const karma = Number(data?.karma);
+      const value = Number.isFinite(karma) ? Math.max(0, karma) : 0;
+      karmaCache.set(key, value);
+      return value;
+    } catch {
+      karmaCache.set(key, null);
+      return null;
+    } finally {
+      karmaInflight.delete(key);
+    }
+  })();
+
+  karmaInflight.set(key, pending);
+  return pending;
+}
+
+function formatLevelText(levelEl, level) {
+  if (level == null) {
+    return levelEl.classList.contains("hb-card-level") ? "Lv.—" : "—";
+  }
+  return levelEl.classList.contains("hb-card-level") ? `Lv.${level}` : String(level);
+}
+
+function applyLevelToNode(levelEl, karma) {
+  const level = karma == null ? null : userLevelFromKarma(karma);
+  const text = formatLevelText(levelEl, level);
+  const em = levelEl.querySelector("em");
+  if (em) {
+    em.textContent = text;
+  } else {
+    levelEl.textContent = text;
+  }
+  if (karma == null) {
+    levelEl.removeAttribute("title");
+    return;
+  }
+  const baseTitle = levelEl.classList.contains("hb-card-level")
+    ? t("forumLevel", null, levelEl.ownerDocument)
+    : t("level", null, levelEl.ownerDocument);
+  levelEl.title = `${baseTitle} · karma ${karma}`;
+}
+
+async function hydrateUserLevels(document) {
+  const nodes = [
+    ...document.querySelectorAll(".hb-floor-level[data-hb-user], .hb-card-level[data-hb-user]"),
+  ];
+  if (nodes.length === 0) {
+    return;
+  }
+
+  const users = [...new Set(nodes.map((node) => node.dataset.hbUser).filter(isFetchableUser))];
+  await Promise.all(
+    users.map(async (user) => {
+      const karma = await fetchUserKarma(user);
+      nodes
+        .filter((node) => node.dataset.hbUser === user)
+        .forEach((node) => applyLevelToNode(node, karma));
+    }),
+  );
+}
+
+function createAuthorColumn(document, { user, userHref, isLz = false, isMe = false }) {
   const author = document.createElement("div");
   author.className = "hb-floor-author";
 
@@ -919,6 +1047,12 @@ function createAuthorColumn(document, { user, userHref, isLz = false }) {
     badge.className = "hb-louzhu";
     badge.title = t("op", null, document);
     badge.innerHTML = `<span>${escapeHtml(t("op", null, document))}</span>`;
+    author.append(badge);
+  } else if (isMe) {
+    const badge = document.createElement("div");
+    badge.className = "hb-me";
+    badge.title = t("me", null, document);
+    badge.innerHTML = `<span>${escapeHtml(t("me", null, document))}</span>`;
     author.append(badge);
   }
 
@@ -942,7 +1076,10 @@ function createAuthorColumn(document, { user, userHref, isLz = false }) {
 
   const level = document.createElement("div");
   level.className = "hb-floor-level";
-  level.innerHTML = `<span>${escapeHtml(t("level", null, document))}</span><em>${userLevel(user)}</em>`;
+  if (isFetchableUser(user)) {
+    level.dataset.hbUser = user;
+  }
+  level.innerHTML = `<span>${escapeHtml(t("level", null, document))}</span><em>—</em>`;
   author.append(level);
 
   return author;
@@ -990,7 +1127,7 @@ function createReplyPanel(document, form) {
   return panel;
 }
 
-function buildMainFloor(document, fatitem, replyCount) {
+function buildMainFloor(document, fatitem, replyCount, meUser = "") {
   const titleLink = fatitem.querySelector(".titleline > a");
   const title = titleLink?.textContent?.trim() || t("noTitle", null, document);
   const titleHref = titleLink?.getAttribute("href") || "#";
@@ -1001,6 +1138,7 @@ function buildMainFloor(document, fatitem, replyCount) {
   const score = fatitem.querySelector(".score")?.textContent?.trim() || "";
   const form = fatitem.querySelector("form");
   const toptext = fatitem.querySelector(".toptext");
+  const isMe = Boolean(meUser && user === meUser);
 
   if (title) {
     setBreadcrumbCurrent(document, title.length > 28 ? `${title.slice(0, 28)}…` : title);
@@ -1011,7 +1149,7 @@ function buildMainFloor(document, fatitem, replyCount) {
   const card = document.createElement("div");
   card.className = "hb-floor hb-floor-lz hb-main-floor";
   card.dataset.hbFloor = "1";
-  card.append(createAuthorColumn(document, { user, userHref, isLz: true }));
+  card.append(createAuthorColumn(document, { user, userHref, isLz: true, isMe }));
 
   const main = document.createElement("div");
   main.className = "hb-floor-main";
@@ -1067,21 +1205,25 @@ function buildMainFloor(document, fatitem, replyCount) {
   return { form, coreTitle, card, user };
 }
 
-function createFloorCard(document, comment, floor, firstUser) {
+function createFloorCard(document, comment, floor, firstUser, meUser = "") {
   const user = comment.querySelector(".hnuser")?.textContent?.trim() || "?";
   const userHref = comment.querySelector(".hnuser")?.getAttribute("href") || "login";
   const age =
     comment.querySelector(".age")?.textContent?.trim() ||
     (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " ").trim();
   const isLz = Boolean(firstUser && user === firstUser);
+  const isMe = Boolean(meUser && user === meUser);
   const commentNode = comment.querySelector(".comment");
   const reply = commentNode?.querySelector(".reply");
 
   const card = document.createElement("div");
   card.className = isLz ? "hb-floor hb-floor-lz" : "hb-floor";
+  if (isMe) {
+    card.classList.add("hb-floor-me");
+  }
   card.dataset.hbFloor = String(floor);
 
-  card.append(createAuthorColumn(document, { user, userHref, isLz }));
+  card.append(createAuthorColumn(document, { user, userHref, isLz, isMe }));
 
   const main = document.createElement("div");
   main.className = "hb-floor-main";
@@ -1172,18 +1314,22 @@ function syncLzlCount(lzl) {
   }
 }
 
-function createLzlItem(document, comment, { firstUser, replyTo = "" }) {
+function createLzlItem(document, comment, { firstUser, meUser = "", replyTo = "" }) {
   const user = comment.querySelector(".hnuser")?.textContent?.trim() || "?";
   const userHref = comment.querySelector(".hnuser")?.getAttribute("href") || "login";
   const age =
     comment.querySelector(".age")?.textContent?.trim() ||
     (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " ").trim();
   const isLz = Boolean(firstUser && user === firstUser);
+  const isMe = Boolean(meUser && user === meUser);
   const commentNode = comment.querySelector(".comment");
   const reply = commentNode?.querySelector(".reply");
 
   const item = document.createElement("li");
   item.className = isLz ? "hb-lzl-item hb-lzl-lz" : "hb-lzl-item";
+  if (isMe) {
+    item.classList.add("hb-lzl-me");
+  }
 
   const name = document.createElement("a");
   name.className = "hb-lzl-name";
@@ -1195,6 +1341,11 @@ function createLzlItem(document, comment, { firstUser, replyTo = "" }) {
     const badge = document.createElement("span");
     badge.className = "hb-lzl-lz-tag";
     badge.textContent = t("op", null, document);
+    item.append(badge);
+  } else if (isMe) {
+    const badge = document.createElement("span");
+    badge.className = "hb-lzl-me-tag";
+    badge.textContent = t("me", null, document);
     item.append(badge);
   }
 
@@ -1256,6 +1407,7 @@ function enhanceComments(document) {
 
   document.body.classList.add("hb-item-page");
 
+  const meUser = resolveSessionUser(document)?.name || "";
   const wrap = document.createElement("div");
   wrap.className = "hb-post-wrap";
 
@@ -1268,7 +1420,7 @@ function enhanceComments(document) {
       .map((a) => a.textContent.replace(/\u00a0/g, " ").trim())
       .find((text) => /comment|discuss|讨论/i.test(text));
     replyCount = Number((replyMatch || "").match(/(\d+)/)?.[1] || comments.length);
-    const built = buildMainFloor(document, fatitem, replyCount);
+    const built = buildMainFloor(document, fatitem, replyCount, meUser);
     form = built.form;
     firstUser = built.user;
     wrap.append(built.coreTitle, built.card);
@@ -1288,7 +1440,7 @@ function enhanceComments(document) {
       }
 
       if (indent === 0 || stack.length === 0) {
-        const built = createFloorCard(document, comment, floorNo, firstUser);
+        const built = createFloorCard(document, comment, floorNo, firstUser, meUser);
         floorNo += 1;
         list.append(built.card);
         stack.length = 0;
@@ -1301,6 +1453,7 @@ function enhanceComments(document) {
       const lzl = ensureLzlContainer(document, floorCard);
       const built = createLzlItem(document, comment, {
         firstUser,
+        meUser,
         replyTo: indent > 1 ? parent.user : "",
       });
       lzl.querySelector(".hb-lzl-list")?.append(built.item);
@@ -1403,6 +1556,9 @@ globalThis.HackerBa = {
   createPager,
   resolveTheme,
   applyPreferences,
+  userLevelFromKarma,
+  KARMA_LEVEL_REF,
+  KARMA_LEVEL_AT_REF,
 };
 
 function startHackerBa(document = globalThis.document) {

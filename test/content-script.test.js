@@ -609,6 +609,95 @@ test("已登录时顶栏显示用户名与退出", () => {
   assert.equal(document.querySelector(".hb-user-name")?.getAttribute("href"), "user?id=alice");
   assert.equal(document.querySelector('.hb-userbar a[href^="logout"]')?.textContent, "Log out");
   assert.equal(document.querySelector('.hb-userbar a[href="login"]'), null);
+  assert.equal(document.querySelector(".hb-card-level")?.dataset.hbUser, "alice");
+  assert.equal(document.querySelector(".hb-card-level")?.textContent, "Lv.1");
+});
+
+test("未登录时吧等级为占位", () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A</a></span></td>
+      </tr>
+      <tr><td class="subtext"><a href="item?id=1">1&nbsp;comment</a></td></tr>
+    </table>
+  `);
+
+  enhanceHackerNews(document);
+
+  assert.equal(document.querySelector(".hb-card-level")?.textContent, "Lv.—");
+  assert.equal(document.querySelector(".hb-card-level")?.dataset.hbUser, undefined);
+});
+
+test("当前用户回复显示我标识，楼主优先", () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr>
+        <td><span class="pagetop"><b><a href="news">Hacker News</a></b></span></td>
+        <td><span class="pagetop"><a href="user?id=bob">bob</a> (1) | <a href="logout?auth=x">logout</a></span></td>
+      </tr>
+      <tr><td>
+        <table class="fatitem">
+          <tr class="athing">
+            <td class="title"><span class="titleline"><a href="https://example.com">T</a></span></td>
+          </tr>
+          <tr>
+            <td class="subtext">
+              by <a class="hnuser" href="user?id=alice">alice</a>
+              <span class="age">1 hour ago</span>
+              | <a href="item?id=1">3&nbsp;comments</a>
+            </td>
+          </tr>
+        </table>
+        <table class="comment-tree">
+          <tr class="athing comtr">
+            <td class="ind" indent="0"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=bob">bob</a></span>
+              <div class="comment"><span class="commtext">Mine</span></div>
+            </td>
+          </tr>
+          <tr class="athing comtr">
+            <td class="ind" indent="1"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=bob">bob</a></span>
+              <div class="comment"><span class="commtext">Also mine</span></div>
+            </td>
+          </tr>
+          <tr class="athing comtr">
+            <td class="ind" indent="1"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=alice">alice</a></span>
+              <div class="comment"><span class="commtext">OP reply</span></div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/item?id=1",
+  );
+
+  enhanceHackerNews(document);
+
+  const main = document.querySelector(".hb-main-floor");
+  assert.ok(main.querySelector(".hb-louzhu"));
+  assert.equal(main.querySelector(".hb-me"), null);
+
+  const myFloor = document.querySelector(".hb-floor-list .hb-floor");
+  assert.ok(myFloor.classList.contains("hb-floor-me"));
+  assert.ok(myFloor.querySelector(".hb-me"));
+  assert.equal(myFloor.querySelector(".hb-louzhu"), null);
+  assert.equal(myFloor.querySelector(".hb-me").textContent, "Me");
+
+  const lzlItems = [...document.querySelectorAll(".hb-lzl-item")];
+  assert.equal(lzlItems.length, 2);
+  assert.ok(lzlItems[0].classList.contains("hb-lzl-me"));
+  assert.equal(lzlItems[0].querySelector(".hb-lzl-me-tag")?.textContent, "Me");
+  assert.equal(lzlItems[0].querySelector(".hb-lzl-lz-tag"), null);
+  assert.equal(lzlItems[1].querySelector(".hb-lzl-lz-tag")?.textContent, "OP");
+  assert.equal(lzlItems[1].querySelector(".hb-lzl-me-tag"), null);
 });
 
 test("cursor 分页只显示下一页", () => {
@@ -782,4 +871,18 @@ test("语言偏好 zh 时界面为中文", () => {
     [...document.querySelectorAll(".hb-tab-nav a")].map((a) => a.textContent).join(","),
     "看帖,问答,作品,招聘,精品",
   );
+});
+
+test("karma 对数曲线无上限，参考点约 Lv.12", () => {
+  const document = createDocument("<div></div>");
+  loadScripts(document);
+  const { userLevelFromKarma, KARMA_LEVEL_REF, KARMA_LEVEL_AT_REF } = document.defaultView.HackerBa;
+
+  assert.equal(userLevelFromKarma(0), 0);
+  assert.equal(userLevelFromKarma(-10), 0);
+  assert.equal(userLevelFromKarma(KARMA_LEVEL_REF), KARMA_LEVEL_AT_REF);
+  assert.ok(userLevelFromKarma(KARMA_LEVEL_REF * 10) > KARMA_LEVEL_AT_REF);
+  assert.ok(userLevelFromKarma(100) < userLevelFromKarma(1000));
+  assert.ok(userLevelFromKarma(1000) < userLevelFromKarma(10000));
+  assert.ok(userLevelFromKarma(0) >= 0);
 });

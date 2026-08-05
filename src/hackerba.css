@@ -1009,7 +1009,8 @@ body.hackerba .hb-floor-author {
   text-align: center;
 }
 
-body.hackerba .hb-louzhu {
+body.hackerba .hb-louzhu,
+body.hackerba .hb-me {
   position: absolute;
   top: 0;
   left: 0;
@@ -1020,19 +1021,27 @@ body.hackerba .hb-louzhu {
   pointer-events: none;
 }
 
-body.hackerba .hb-louzhu span {
+body.hackerba .hb-louzhu span,
+body.hackerba .hb-me span {
   position: absolute;
   top: 6px;
   left: -14px;
   width: 52px;
   color: #fff;
-  background: #ff7f24;
   font-size: 11px;
   font-weight: 700;
   line-height: 16px;
   text-align: center;
   transform: rotate(-45deg);
   box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+}
+
+body.hackerba .hb-louzhu span {
+  background: #ff7f24;
+}
+
+body.hackerba .hb-me span {
+  background: #2db55d;
 }
 
 body.hackerba .hb-floor-face {
@@ -1201,16 +1210,24 @@ body.hackerba .hb-lzl-name:hover {
   text-decoration: underline !important;
 }
 
-body.hackerba .hb-lzl-lz-tag {
+body.hackerba .hb-lzl-lz-tag,
+body.hackerba .hb-lzl-me-tag {
   display: inline-block;
   margin: 0 4px 0 2px;
   padding: 0 3px;
   border-radius: 1px;
   color: #fff;
-  background: #ff7f24;
   font-size: 10px;
   line-height: 14px;
   vertical-align: 1px;
+}
+
+body.hackerba .hb-lzl-lz-tag {
+  background: #ff7f24;
+}
+
+body.hackerba .hb-lzl-me-tag {
+  background: #2db55d;
 }
 
 body.hackerba .hb-lzl-to {
