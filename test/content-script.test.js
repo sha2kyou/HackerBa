@@ -56,7 +56,6 @@ test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨�
   const item = document.querySelector(".hb-thread-item");
   assert.ok(item);
   assert.equal(item.querySelector(".hb-rep-num").textContent, "48");
-  assert.equal(item.querySelector(".hb-rep-num").getAttribute("href"), "item?id=1");
   assert.equal(item.querySelector(".hb-th-tit").textContent, "A story");
   assert.equal(item.querySelector(".hb-th-tit").getAttribute("href"), "item?id=1");
   assert.match(item.querySelector(".hb-thread-abs").textContent, /example\.com/);
@@ -70,7 +69,7 @@ test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨�
   assert.equal(document.documentElement.dataset.hbTitleDiscussion, "1");
 });
 
-test("关闭标题打开讨论时标题指向原文", () => {
+test("关闭标题打开讨论时标题指向原文，分数旁显示进入讨论", () => {
   const document = createDocument(`
     <table id="hnmain">
       <tr class="athing submission" id="1">
@@ -83,6 +82,7 @@ test("关闭标题打开讨论时标题指向原文", () => {
       </tr>
       <tr>
         <td class="subtext">
+          <span class="score" id="score_1">12 points</span>
           <a href="item?id=1">3&nbsp;comments</a>
         </td>
       </tr>
@@ -98,7 +98,11 @@ test("关闭标题打开讨论时标题指向原文", () => {
   const title = document.querySelector(".hb-th-tit");
   assert.equal(title.getAttribute("href"), "https://example.com/x");
   assert.equal(title.getAttribute("target"), "_blank");
-  assert.equal(document.querySelector(".hb-rep-num").getAttribute("href"), "item?id=1");
+  const goto = document.querySelector(".hb-goto-item");
+  assert.ok(goto);
+  assert.equal(goto.getAttribute("href"), "item?id=1");
+  assert.match(goto.textContent, /Discuss|进入讨论/);
+  assert.match(document.querySelector(".hb-thread-abs").textContent, /12/);
 });
 
 test("顶栏使用 HackerBa 品牌，搜索在页内提交", () => {

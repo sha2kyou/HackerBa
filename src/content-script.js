@@ -539,6 +539,7 @@ function createThreadItem(document, thread) {
     );
   }
 
+  const openDiscussion = document.documentElement.dataset.hbTitleDiscussion !== "0";
   const absParts = [];
   if (thread.site) {
     absParts.push(thread.site);
@@ -547,7 +548,7 @@ function createThreadItem(document, thread) {
     absParts.push(t("points", { n: thread.score }, document));
   }
 
-  const absHtml = absParts.length
+  let absHtml = absParts.length
     ? absParts
         .map((part, index) => {
           if (index === 0 && thread.site && /^https?:/i.test(thread.externalHref || "")) {
@@ -558,17 +559,21 @@ function createThreadItem(document, thread) {
         .join(" · ")
     : "";
 
+  if (!openDiscussion && thread.itemHref) {
+    const gotoLink = `<a class="hb-goto-item" href="${escapeAttr(thread.itemHref)}">${escapeHtml(t("gotoDiscussion", null, document))}</a>`;
+    absHtml = absHtml ? `${absHtml} ${gotoLink}` : gotoLink;
+  }
+
   const titleHref = titleHrefForThread(document, thread);
   const titleAttrs = /^https?:/i.test(titleHref) && titleHref !== thread.itemHref
     ? ` href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer"`
     : ` href="${escapeAttr(titleHref)}"`;
 
-  const itemHref = thread.itemHref || "#";
   const item = document.createElement("li");
   item.className = "hb-thread-item";
   item.innerHTML = `
     <div class="hb-thread-left">
-      <a class="hb-rep-num" href="${escapeAttr(itemHref)}" title="${escapeAttr(t("repliesTitle", null, document))}">${escapeHtml(thread.replyNum)}</a>
+      <span class="hb-rep-num" title="${escapeAttr(t("repliesTitle", null, document))}">${escapeHtml(thread.replyNum)}</span>
     </div>
     <div class="hb-thread-body">
       <div class="hb-thread-lz">

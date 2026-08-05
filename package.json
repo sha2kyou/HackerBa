@@ -1,6 +1,6 @@
 {
   "name": "hackerba",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Chrome extension that restyles Hacker News as a Tieba-like forum",
   "type": "module",
   "scripts": {
