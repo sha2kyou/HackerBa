@@ -18,8 +18,8 @@ test("吧头关注数和帖子数不受页面子元素颜色覆盖", () => {
       </head>
       <body class="hackerba">
         <div class="hb-card-num">
-          <span><em>关注：</em><b>1,234,567</b></span>
-          <span><em>帖子：</em><b>98,765</b></span>
+          <span><em>关注：</em><b>1,165,754</b></span>
+          <span><em>帖子：</em><b>6,099,649</b></span>
         </div>
       </body>
     </html>

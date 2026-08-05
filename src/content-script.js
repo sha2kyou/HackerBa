@@ -333,13 +333,17 @@ function buildCommunityShell(document) {
             } title="${escapeAttr(t("forumLevel", null, document))}">Lv.—</span>
           </div>
           <div class="hb-card-num">
-            <span><em>${escapeHtml(t("followers", null, document))}</em><b>1,234,567</b></span>
-            <span><em>${escapeHtml(t("posts", null, document))}</em><b>98,765</b></span>
+            <span><em>${escapeHtml(t("followers", null, document))}</em><b>1,165,754</b></span>
+            <span><em>${escapeHtml(t("posts", null, document))}</em><b>6,099,649</b></span>
           </div>
           <p class="hb-card-slogan">${escapeHtml(t("slogan", null, document))}</p>
         </div>
         <div class="hb-card-btns">
-          <button type="button" class="hb-btn-attention hb-btn-followed" aria-pressed="true">${escapeHtml(t("followed", null, document))}</button>
+          ${
+            session
+              ? `<button type="button" class="hb-btn-attention hb-btn-followed" aria-pressed="true">${escapeHtml(t("followed", null, document))}</button>`
+              : `<a class="hb-btn-attention" href="login">${escapeHtml(t("follow", null, document))}</a>`
+          }
         </div>
       </div>
     </div>

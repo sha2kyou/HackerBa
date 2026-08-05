@@ -611,6 +611,8 @@ test("已登录时顶栏显示用户名与退出", () => {
   assert.equal(document.querySelector('.hb-userbar a[href="login"]'), null);
   assert.equal(document.querySelector(".hb-card-level")?.dataset.hbUser, "alice");
   assert.equal(document.querySelector(".hb-card-level")?.textContent, "Lv.1");
+  assert.equal(document.querySelector(".hb-btn-attention.hb-btn-followed")?.textContent, "Following");
+  assert.equal(document.querySelector('.hb-card-btns a.hb-btn-attention[href="login"]'), null);
 });
 
 test("未登录时吧等级为占位", () => {
@@ -627,6 +629,8 @@ test("未登录时吧等级为占位", () => {
 
   assert.equal(document.querySelector(".hb-card-level")?.textContent, "Lv.—");
   assert.equal(document.querySelector(".hb-card-level")?.dataset.hbUser, undefined);
+  assert.equal(document.querySelector(".hb-btn-attention.hb-btn-followed"), null);
+  assert.equal(document.querySelector('.hb-card-btns a.hb-btn-attention[href="login"]')?.textContent, "Follow");
 });
 
 test("当前用户回复显示我标识，楼主优先", () => {
