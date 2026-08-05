@@ -29,7 +29,7 @@ function enhanceHackerNews(document) {
   return document.defaultView.HackerBa.enhanceHackerNews(document);
 }
 
-test("吧头封面图通过扩展 URL 注入", () => {
+test("吧头封面图通过扩展 URL 注入", async () => {
   const document = createDocument(`
     <center><table id="hnmain"><tr><td></td></tr></table></center>
   `);
@@ -42,7 +42,9 @@ test("吧头封面图通过扩展 URL 注入", () => {
     },
   };
 
-  enhanceHackerNews(document);
+  loadScripts(document);
+  await document.defaultView.HackerBa.applyPreferences(document);
+  document.defaultView.HackerBa.enhanceHackerNews(document);
 
   const cover = document.querySelector(".hb-card-cover");
   assert.ok(cover);
@@ -51,6 +53,37 @@ test("吧头封面图通过扩展 URL 注入", () => {
     document.defaultView.HackerBa.BANNER_COVER_PATH,
     "src/icons/banner-process.jpg",
   );
+  assert.equal(document.documentElement.dataset.hbBannerCover, "1");
+});
+
+test("关闭首图时不注入封面并标记 data-hb-banner-cover", async () => {
+  const document = createDocument(`
+    <center><table id="hnmain"><tr><td></td></tr></table></center>
+  `);
+  document.defaultView.chrome = {
+    runtime: {
+      getURL(path) {
+        return `chrome-extension://hb-test/${path}`;
+      },
+    },
+    storage: {
+      sync: {
+        async get(defaults) {
+          return { ...defaults, showBannerCover: false };
+        },
+      },
+    },
+  };
+
+  loadScripts(document);
+  await document.defaultView.HackerBa.applyPreferences(document);
+  document.defaultView.HackerBa.enhanceHackerNews(document);
+
+  const cover = document.querySelector(".hb-card-cover");
+  assert.ok(cover);
+  assert.equal(cover.hidden, true);
+  assert.equal(cover.getAttribute("src"), null);
+  assert.equal(document.documentElement.dataset.hbBannerCover, "0");
 });
 
 test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨论 + 作者时间", () => {

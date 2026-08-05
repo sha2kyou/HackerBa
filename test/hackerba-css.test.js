@@ -14,6 +14,17 @@ test("吧头封面固定 3:1 比例", () => {
   assert.match(hackerBaCss, /\.hb-card-cover\s*\{[^}]*object-fit:\s*cover/s);
 });
 
+test("关闭首图时回退紧凑色条吧头", () => {
+  assert.match(
+    hackerBaCss,
+    /\[data-hb-banner-cover="0"\][\s\S]*?\.hb-card-banner\s*\{[^}]*aspect-ratio:\s*auto/s,
+  );
+  assert.match(
+    hackerBaCss,
+    /\[data-hb-banner-cover="0"\][\s\S]*?\.hb-card-cover[\s\S]*?display:\s*none/s,
+  );
+});
+
 test("吧头关注数和帖子数不受页面子元素颜色覆盖", () => {
   const dom = new JSDOM(`
     <!doctype html>

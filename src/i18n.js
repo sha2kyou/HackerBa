@@ -112,6 +112,9 @@
       optTitleClick: "Open discussion on title click",
       optTitleClickHint:
         "On: open the discussion page<br>Off: open the original link; a Discuss button appears next to the score",
+      optBannerCover: "Show forum cover image",
+      optBannerCoverHint:
+        "On: show the 3:1 cover on the forum header<br>Off: hide the cover and keep a compact header bar",
       optSave: "Save settings",
       optSaved: "Saved. Refresh Hacker News pages to apply.",
       optVersion: "Version",
@@ -228,6 +231,9 @@
       optTitleClick: "点击标题进入评论",
       optTitleClickHint:
         "开启：进入评论页<br>关闭：打开原文；分数右侧显示「进入讨论」",
+      optBannerCover: "显示吧头首图",
+      optBannerCoverHint:
+        "开启：在吧头显示 3:1 封面图<br>关闭：隐藏首图，保留紧凑色条吧头",
       optSave: "保存设置",
       optSaved: "已保存，刷新 Hacker News 页面后生效。",
       optVersion: "版本",

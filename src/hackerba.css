@@ -226,6 +226,23 @@ body.hackerba .hb-card-head {
   color: #fff;
 }
 
+html[data-hb-banner-cover="0"] body.hackerba .hb-card-banner {
+  aspect-ratio: auto;
+  border-color: #c9d8eb;
+  background: linear-gradient(180deg, #5b92d4 0%, #3d78c0 100%);
+}
+
+html[data-hb-banner-cover="0"] body.hackerba .hb-card-cover,
+html[data-hb-banner-cover="0"] body.hackerba .hb-card-banner::after {
+  display: none;
+}
+
+html[data-hb-banner-cover="0"] body.hackerba .hb-card-head {
+  position: relative;
+  align-items: flex-start;
+  padding: 12px 14px 14px;
+}
+
 body.hackerba .hb-card-avatar {
   display: grid;
   flex: 0 0 80px;
@@ -1494,6 +1511,11 @@ html[data-hb-theme="dark"] body.hackerba textarea {
 html[data-hb-theme="dark"] body.hackerba .hb-card-banner {
   border-color: #4a4036;
   background: #2a1810;
+}
+
+html[data-hb-theme="dark"][data-hb-banner-cover="0"] body.hackerba .hb-card-banner {
+  border-color: #3d5a80;
+  background: linear-gradient(180deg, #3f6fa8 0%, #2f5788 100%);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-card-banner::after {

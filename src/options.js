@@ -3,6 +3,7 @@ const language = document.querySelector("#language");
 const theme = document.querySelector("#theme");
 const density = document.querySelector("#density");
 const titleOpensDiscussion = document.querySelector("#titleOpensDiscussion");
+const showBannerCover = document.querySelector("#showBannerCover");
 const status = document.querySelector("#status");
 
 const { resolveLocale, t } = globalThis.HackerBaI18n;
@@ -32,11 +33,13 @@ async function restorePreferences() {
     theme: "light",
     density: "comfortable",
     titleOpensDiscussion: true,
+    showBannerCover: true,
   });
   language.value = preferences.language || "auto";
   theme.value = preferences.theme;
   density.value = preferences.density;
   titleOpensDiscussion.checked = preferences.titleOpensDiscussion !== false;
+  showBannerCover.checked = preferences.showBannerCover !== false;
   applyOptionsI18n(resolveLocale(language.value, browserLang()));
 }
 
@@ -52,6 +55,7 @@ form.addEventListener("submit", async (event) => {
     theme: theme.value,
     density: density.value,
     titleOpensDiscussion: titleOpensDiscussion.checked,
+    showBannerCover: showBannerCover.checked,
   });
   applyOptionsI18n(locale);
   status.value = t(locale, "optSaved");

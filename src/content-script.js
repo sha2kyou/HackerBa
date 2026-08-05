@@ -271,11 +271,17 @@ function resolveExtensionUrl(path) {
   }
 }
 
-function applyBannerCover(root) {
+function applyBannerCover(root, enabled = true) {
   const cover = root?.querySelector?.(".hb-card-cover");
   if (!cover) {
     return;
   }
+  if (!enabled) {
+    cover.removeAttribute("src");
+    cover.hidden = true;
+    return;
+  }
+  cover.hidden = false;
   const url = resolveExtensionUrl(BANNER_COVER_PATH);
   if (!url) {
     return;
@@ -414,7 +420,7 @@ function buildCommunityShell(document) {
   `;
 
   document.body.insertBefore(wrap, document.body.firstChild);
-  applyBannerCover(wrap);
+  applyBannerCover(wrap, document.documentElement.dataset.hbBannerCover !== "0");
   renderUserbar(document, session);
   if (session && Number.isFinite(session.karma)) {
     karmaCache.set(session.name, session.karma);
@@ -1517,6 +1523,7 @@ async function applyPreferences(document) {
     theme: "light",
     density: "comfortable",
     titleOpensDiscussion: true,
+    showBannerCover: true,
     language: "auto",
   };
 
@@ -1541,6 +1548,8 @@ async function applyPreferences(document) {
   document.documentElement.dataset.hbDensity = preferences.density || defaults.density;
   document.documentElement.dataset.hbTitleDiscussion =
     preferences.titleOpensDiscussion === false ? "0" : "1";
+  document.documentElement.dataset.hbBannerCover =
+    preferences.showBannerCover === false ? "0" : "1";
   document.documentElement.dataset.hbLang = locale;
   document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
   bindSystemThemeSync(document);
