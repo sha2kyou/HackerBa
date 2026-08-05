@@ -12,7 +12,6 @@ function enhanceHackerNews(document) {
   revealSourceIfNeeded(document);
   enhanceComments(document);
   bindSearchForm(document);
-  applyPreferences(document);
 }
 
 function localizeAuthLabel(text) {
@@ -488,6 +487,17 @@ function mapAlgoliaHits(hits = []) {
   });
 }
 
+function titleHrefForThread(document, thread) {
+  const openDiscussion = document.documentElement.dataset.hbTitleDiscussion !== "0";
+  if (openDiscussion) {
+    return thread.itemHref || "#";
+  }
+  if (/^https?:/i.test(thread.externalHref || "")) {
+    return thread.externalHref;
+  }
+  return thread.itemHref || thread.externalHref || "#";
+}
+
 function createThreadItem(document, thread) {
   const badges = [];
   if (thread.score >= 100) {
@@ -516,6 +526,11 @@ function createThreadItem(document, thread) {
         .join(" · ")
     : "";
 
+  const titleHref = titleHrefForThread(document, thread);
+  const titleAttrs = /^https?:/i.test(titleHref) && titleHref !== thread.itemHref
+    ? ` href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer"`
+    : ` href="${escapeAttr(titleHref)}"`;
+
   const item = document.createElement("li");
   item.className = "hb-thread-item";
   item.innerHTML = `
@@ -526,7 +541,7 @@ function createThreadItem(document, thread) {
       <div class="hb-thread-lz">
         <div class="hb-thread-title">
           ${badges.join("")}
-          <a class="hb-th-tit" href="${escapeAttr(thread.itemHref)}">${escapeHtml(thread.title)}</a>
+          <a class="hb-th-tit"${titleAttrs}>${escapeHtml(thread.title)}</a>
         </div>
         <div class="hb-thread-author-meta">
           <a class="hb-author" href="${escapeAttr(thread.authorHref)}" title="主题作者">${escapeHtml(thread.author)}</a>
@@ -1272,16 +1287,52 @@ function escapeAttr(value) {
 }
 
 async function applyPreferences(document) {
-  if (!globalThis.chrome?.storage?.sync) {
-    return;
-  }
-
-  const preferences = await chrome.storage.sync.get({
+  const defaults = {
     theme: "light",
     density: "comfortable",
-  });
-  document.documentElement.dataset.hbTheme = preferences.theme;
-  document.documentElement.dataset.hbDensity = preferences.density;
+    titleOpensDiscussion: true,
+  };
+
+  let preferences = defaults;
+  if (globalThis.chrome?.storage?.sync) {
+    preferences = await chrome.storage.sync.get(defaults);
+  }
+
+  const themePref = preferences.theme || defaults.theme;
+  document.documentElement.dataset.hbThemePref = themePref;
+  document.documentElement.dataset.hbTheme = resolveTheme(themePref, document.defaultView);
+  document.documentElement.dataset.hbDensity = preferences.density || defaults.density;
+  document.documentElement.dataset.hbTitleDiscussion =
+    preferences.titleOpensDiscussion === false ? "0" : "1";
+  bindSystemThemeSync(document);
+}
+
+function resolveTheme(themePref, view = globalThis) {
+  if (themePref === "system") {
+    return view?.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+  }
+  return themePref === "dark" ? "dark" : "light";
+}
+
+let hbThemeMediaBound = false;
+
+function bindSystemThemeSync(document) {
+  const mq = document.defaultView?.matchMedia?.("(prefers-color-scheme: dark)");
+  if (!mq || hbThemeMediaBound) {
+    return;
+  }
+  hbThemeMediaBound = true;
+  const onChange = () => {
+    if (document.documentElement.dataset.hbThemePref !== "system") {
+      return;
+    }
+    document.documentElement.dataset.hbTheme = mq.matches ? "dark" : "light";
+  };
+  if (typeof mq.addEventListener === "function") {
+    mq.addEventListener("change", onChange);
+  } else if (typeof mq.addListener === "function") {
+    mq.addListener(onChange);
+  }
 }
 
 globalThis.HackerBa = {
@@ -1292,6 +1343,7 @@ globalThis.HackerBa = {
   runLocalSearch,
   resolveListPager,
   createPager,
+  resolveTheme,
 };
 
 function startHackerBa(document = globalThis.document) {
@@ -1300,9 +1352,12 @@ function startHackerBa(document = globalThis.document) {
   }
 
   document.documentElement.classList.add("hb-boot");
+  // 尽早读主题，避免先以浅色变量露出
+  const prefsReady = applyPreferences(document);
 
-  const boot = () => {
+  const boot = async () => {
     try {
+      await prefsReady;
       enhanceHackerNews(document);
     } finally {
       document.documentElement.classList.remove("hb-boot");
@@ -1310,9 +1365,11 @@ function startHackerBa(document = globalThis.document) {
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
+    document.addEventListener("DOMContentLoaded", () => {
+      void boot();
+    }, { once: true });
   } else {
-    boot();
+    void boot();
   }
 
   // 防止改造失败时页面一直空白

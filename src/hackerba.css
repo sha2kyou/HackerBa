@@ -2,7 +2,7 @@
 
 /* 改造完成前隐藏原站，避免闪一下 HN 原生 UI */
 html.hb-boot {
-  background: #f5f5f5 !important;
+  background: var(--hb-bg) !important;
 }
 
 html.hb-boot body {
@@ -18,9 +18,19 @@ html.hb-boot body {
   --hb-hot: #e10602;
   --hb-good: #2d64b3;
   --hb-bg: #f5f5f5;
+  --hb-surface: #fff;
+  --hb-surface-2: #f8f8f8;
+  --hb-surface-3: #fafafa;
+  --hb-surface-soft: #f7f7f7;
   --hb-line: #e7e7e7;
+  --hb-line-strong: #e3e3e3;
+  --hb-input-border: #ccc;
+  --hb-input-border-strong: #b8b8b8;
   --hb-text: #333;
   --hb-muted: #999;
+  --hb-subtle: #666;
+  --hb-link: #2d64b3;
+  --hb-brand: #2932e1;
   --hb-width: 980px;
 }
 
@@ -45,8 +55,8 @@ body.hackerba .hb-wrap {
 /* ===== 顶栏 ===== */
 body.hackerba .hb-topbar {
   height: 48px;
-  border-bottom: 1px solid #e3e3e3;
-  background: #fff;
+  border-bottom: 1px solid var(--hb-line-strong);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-topbar-inner {
@@ -62,7 +72,7 @@ body.hackerba .hb-topbar-inner {
 body.hackerba .hb-brand {
   display: inline-flex;
   align-items: center;
-  color: #333;
+  color: var(--hb-text);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -75,7 +85,7 @@ body.hackerba .hb-brand-text {
 
 body.hackerba .hb-brand-text i {
   margin-right: 1px;
-  color: #2932e1;
+  color: var(--hb-brand);
   font-style: normal;
 }
 
@@ -94,38 +104,38 @@ body.hackerba .hb-search input {
   flex: 1;
   height: 30px;
   padding: 0 8px;
-  border: 1px solid #b8b8b8;
+  border: 1px solid var(--hb-input-border-strong);
   border-right: 0;
   border-radius: 0;
   outline: none;
-  background: #fff;
+  background: var(--hb-surface);
   font-size: 12px;
 }
 
 body.hackerba .hb-search input:focus {
-  border-color: #3385ff;
+  border-color: var(--hb-search);
 }
 
 body.hackerba .hb-search-btn {
   height: 30px;
   padding: 0 14px;
-  border: 1px solid #3385ff;
+  border: 1px solid var(--hb-search);
   border-radius: 0;
   color: #fff;
-  background: #3385ff;
+  background: var(--hb-search);
   font-size: 12px;
   cursor: pointer;
 }
 
 body.hackerba .hb-userbar {
   margin-left: auto;
-  color: #666;
+  color: var(--hb-subtle);
   white-space: nowrap;
   font-size: 12px;
 }
 
 body.hackerba .hb-userbar a {
-  color: #666;
+  color: var(--hb-subtle);
   text-decoration: none;
 }
 
@@ -136,7 +146,7 @@ body.hackerba .hb-userbar a:hover {
 body.hackerba .hb-user-name {
   max-width: 120px;
   overflow: hidden;
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -151,7 +161,7 @@ body.hackerba .hb-breadcrumb {
   width: var(--hb-width);
   max-width: calc(100% - 24px);
   margin: 8px auto 6px;
-  color: #666;
+  color: var(--hb-subtle);
   font-size: 12px;
 }
 
@@ -289,8 +299,8 @@ body.hackerba .hb-btn-mini-post {
 }
 
 body.hackerba .hb-btn-attention {
-  color: #2d64b3;
-  background: #fff;
+  color: var(--hb-link);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-btn-attention.hb-btn-followed {
@@ -312,16 +322,16 @@ body.hackerba .hb-content {
 body.hackerba .hb-main {
   flex: 1;
   min-width: 0;
-  border: 1px solid #e1e1e1;
-  background: #fff;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-tab-bar {
   display: flex;
   align-items: stretch;
   height: 38px;
-  border-bottom: 1px solid #e7e7e7;
-  background: #f5f7fa;
+  border-bottom: 1px solid var(--hb-line);
+  background: var(--hb-surface-soft);
 }
 
 body.hackerba .hb-tab-nav {
@@ -340,7 +350,7 @@ body.hackerba .hb-tab-nav a {
   display: inline-block;
   padding: 10px 14px 8px;
   border-bottom: 2px solid transparent;
-  color: #666;
+  color: var(--hb-subtle);
   text-decoration: none;
   font-size: 14px;
   line-height: 18px;
@@ -354,7 +364,7 @@ body.hackerba .hb-tab-nav .hb-tab-focus {
   border-bottom-color: var(--hb-blue);
   color: var(--hb-blue);
   font-weight: 700;
-  background: #fff;
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-tab-post {
@@ -375,14 +385,14 @@ body.hackerba .hb-thread-top {
   justify-content: space-between;
   height: 32px;
   padding: 0 12px;
-  border-bottom: 1px solid #eee;
-  background: #fcfcfc;
+  border-bottom: 1px solid var(--hb-line);
+  background: var(--hb-surface-3);
   font-size: 12px;
 }
 
 body.hackerba .hb-thread-sort a {
   margin-right: 14px;
-  color: #666;
+  color: var(--hb-subtle);
   text-decoration: none;
 }
 
@@ -396,7 +406,7 @@ body.hackerba .hb-thread-sort .hb-sort-focus {
 }
 
 body.hackerba .hb-thread-top-right {
-  color: #999;
+  color: var(--hb-muted);
 }
 
 body.hackerba .hb-btn-mini-post {
@@ -420,11 +430,11 @@ body.hackerba .hb-thread-item {
   display: flex;
   align-items: flex-start;
   padding: 8px 12px 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--hb-line);
 }
 
 body.hackerba .hb-thread-item:hover {
-  background: #fafafa;
+  background: var(--hb-surface-3);
 }
 
 body.hackerba .hb-thread-left {
@@ -439,9 +449,9 @@ body.hackerba .hb-rep-num {
   box-sizing: border-box;
   width: 37px;
   height: 22px;
-  border: 1px solid #eee;
+  border: 1px solid var(--hb-line);
   color: #ff7e23;
-  background: #f8f8f8;
+  background: var(--hb-surface-2);
   font-family: Arial, "Helvetica Neue", sans-serif;
   font-size: 12px;
   font-weight: 700;
@@ -498,7 +508,7 @@ body.hackerba .hb-icon-good {
 }
 
 body.hackerba .hb-th-tit {
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
   font-size: 14px;
   text-decoration: none !important;
 }
@@ -513,7 +523,7 @@ body.hackerba .hb-th-tit:hover {
 
 body.hackerba .hb-th-site {
   margin-left: 0;
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
   font-size: 12px;
   text-decoration: none !important;
 }
@@ -538,7 +548,7 @@ body.hackerba .hb-thread-author-meta {
 body.hackerba .hb-author {
   max-width: 78px;
   overflow: hidden;
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
   text-decoration: none !important;
   text-overflow: ellipsis;
 }
@@ -548,14 +558,14 @@ body.hackerba .hb-author:hover {
 }
 
 body.hackerba .hb-create-time {
-  color: #999;
+  color: var(--hb-muted);
 }
 
 body.hackerba .hb-thread-abs {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  color: #999;
+  color: var(--hb-muted);
   font-size: 12px;
   line-height: 18px;
   text-overflow: ellipsis;
@@ -564,19 +574,19 @@ body.hackerba .hb-thread-abs {
 
 body.hackerba .hb-search-empty {
   padding: 28px 16px 36px;
-  color: #999;
+  color: var(--hb-muted);
   font-size: 13px;
   text-align: center;
 }
 
 body.hackerba .hb-auth-panel {
   padding: 20px 18px 28px;
-  background: #fff;
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-auth-title {
   margin: 0 0 8px;
-  color: #333;
+  color: var(--hb-text);
   font-size: 20px;
   font-weight: 700;
 }
@@ -596,16 +606,16 @@ body.hackerba .hb-auth-cards {
 
 body.hackerba .hb-auth-card {
   padding: 16px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--hb-line);
   border-radius: 2px;
-  background: #fafafa;
+  background: var(--hb-surface-3);
 }
 
 body.hackerba .hb-auth-card h3 {
   margin: 0 0 14px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
-  color: #2d64b3;
+  border-bottom: 1px solid var(--hb-line);
+  color: var(--hb-link);
   font-size: 15px;
 }
 
@@ -620,7 +630,7 @@ body.hackerba .hb-auth-card table {
 
 body.hackerba .hb-auth-card td {
   padding: 6px 4px;
-  color: #666;
+  color: var(--hb-subtle);
   vertical-align: middle;
   font-size: 13px;
 }
@@ -632,9 +642,9 @@ body.hackerba .hb-auth-card input[type="password"] {
   min-width: 160px;
   height: 32px;
   padding: 0 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--hb-input-border);
   border-radius: 2px;
-  background: #fff;
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-auth-card .hb-auth-submit,
@@ -655,7 +665,7 @@ body.hackerba .hb-auth-card input[type="submit"] {
 body.hackerba .hb-auth-forgot {
   display: inline-block;
   margin-top: 10px;
-  color: #2d64b3;
+  color: var(--hb-link);
   text-decoration: none;
   font-size: 12px;
 }
@@ -667,7 +677,7 @@ body.hackerba .hb-auth-forgot:hover {
 body.hackerba .hb-auth-switch {
   display: inline-block;
   margin-top: 14px;
-  color: #2d64b3;
+  color: var(--hb-link);
   text-decoration: none;
   font-size: 13px;
 }
@@ -678,14 +688,14 @@ body.hackerba .hb-auth-switch:hover {
 
 body.hackerba .hb-doc-panel {
   padding: 22px 24px 32px;
-  background: #fff;
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-doc-title {
   margin: 0 0 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #eee;
-  color: #333;
+  border-bottom: 1px solid var(--hb-line);
+  color: var(--hb-text);
   font-size: 20px;
   font-weight: 700;
 }
@@ -707,7 +717,7 @@ body.hackerba .hb-doc-body b,
 body.hackerba .hb-doc-body strong {
   display: block;
   margin: 18px 0 8px;
-  color: #2d64b3;
+  color: var(--hb-link);
   font-size: 15px;
 }
 
@@ -727,15 +737,15 @@ body.hackerba .hb-pager {
   justify-content: center;
   gap: 10px;
   padding: 14px 12px 16px;
-  border-top: 1px solid #f0f0f0;
-  background: #fcfcfc;
+  border-top: 1px solid var(--hb-line);
+  background: var(--hb-surface-3);
   font-family: "Microsoft YaHei", sans-serif;
   font-size: 13px;
 }
 
 body.hackerba .hb-pager-info {
   min-width: 64px;
-  color: #666;
+  color: var(--hb-subtle);
   text-align: center;
 }
 
@@ -743,8 +753,8 @@ body.hackerba .hb-pager-link {
   padding: 4px 12px;
   border: 1px solid #d7d7d7;
   border-radius: 2px;
-  color: #666;
-  background: #fff;
+  color: var(--hb-subtle);
+  background: var(--hb-surface);
   text-decoration: none;
 }
 
@@ -755,10 +765,10 @@ body.hackerba .hb-pager-link:hover {
 
 body.hackerba .hb-pager-disabled {
   padding: 4px 12px;
-  border: 1px solid #eee;
+  border: 1px solid var(--hb-line);
   border-radius: 2px;
   color: #ccc;
-  background: #f7f7f7;
+  background: var(--hb-surface-soft);
   cursor: default;
 }
 
@@ -770,16 +780,16 @@ body.hackerba .hb-aside {
 
 body.hackerba .hb-aside-box {
   margin-bottom: 10px;
-  border: 1px solid #e1e1e1;
-  background: #fff;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-aside-title {
   position: relative;
   padding: 9px 12px 9px 14px;
-  border-bottom: 1px solid #f0f0f0;
-  background: #fafafa;
-  color: #333;
+  border-bottom: 1px solid var(--hb-line);
+  background: var(--hb-surface-3);
+  color: var(--hb-text);
   font-family: "Microsoft YaHei", sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -797,7 +807,7 @@ body.hackerba .hb-aside-title::before {
 
 body.hackerba .hb-aside-body {
   padding: 12px;
-  color: #666;
+  color: var(--hb-subtle);
   font-size: 12px;
   line-height: 1.8;
 }
@@ -812,7 +822,7 @@ body.hackerba .hb-aside-forum {
   align-items: center;
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px dashed #eee;
+  border-bottom: 1px dashed var(--hb-line);
 }
 
 body.hackerba .hb-aside-avatar {
@@ -826,12 +836,12 @@ body.hackerba .hb-aside-avatar {
 }
 
 body.hackerba .hb-aside-name {
-  color: #333;
+  color: var(--hb-text);
   font-weight: 700;
 }
 
 body.hackerba .hb-aside-meta {
-  color: #999;
+  color: var(--hb-muted);
 }
 
 body.hackerba .hb-aside-body .hb-aside-link {
@@ -864,7 +874,7 @@ body.hackerba .hb-hn-source[hidden] {
 body.hackerba .hb-hn-source.hb-source-visible {
   display: block !important;
   padding: 0;
-  background: #f5f5f5;
+  background: var(--hb-bg);
 }
 
 body.hackerba.hb-item-page .hb-main {
@@ -874,8 +884,8 @@ body.hackerba.hb-item-page .hb-main {
 
 body.hackerba.hb-item-page .hb-tab-bar {
   margin-bottom: 6px;
-  border: 1px solid #e1e1e1;
-  background: #f5f7fa;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface-soft);
 }
 
 body.hackerba.hb-item-page .hb-aside {
@@ -895,8 +905,8 @@ body.hackerba .hb-post-wrap {
 /* 帖子标题栏 core_title */
 body.hackerba .hb-core-title {
   margin: 0 0 6px;
-  border: 1px solid #e7e7e7;
-  background: #fff;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-core-title-wrap {
@@ -913,7 +923,7 @@ body.hackerba .hb-core-title-txt {
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: #333;
+  color: var(--hb-text);
   font-size: 16px;
   font-weight: 700;
   line-height: 24px;
@@ -930,7 +940,7 @@ body.hackerba .hb-core-title-btns {
 }
 
 body.hackerba .hb-core-meta {
-  color: #666;
+  color: var(--hb-subtle);
   font-size: 12px;
 }
 
@@ -969,8 +979,8 @@ body.hackerba .hb-floor {
   display: flex;
   align-items: stretch;
   margin: 0 0 6px;
-  border: 1px solid #e7e7e7;
-  background: #fff;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-floor-author {
@@ -982,8 +992,8 @@ body.hackerba .hb-floor-author {
   gap: 6px;
   width: 130px;
   padding: 12px 6px 14px;
-  background: #f8f8f8;
-  border-right: 1px solid #eee;
+  background: var(--hb-surface-2);
+  border-right: 1px solid var(--hb-line);
   text-align: center;
 }
 
@@ -1022,7 +1032,7 @@ body.hackerba .hb-floor-face {
 body.hackerba .hb-floor-avatar {
   width: 60px;
   height: 60px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--hb-line);
   border-radius: 2px;
   color: #fff;
   background: #7a7a7a;
@@ -1036,7 +1046,7 @@ body.hackerba .hb-floor-avatar {
 body.hackerba .hb-floor-name {
   max-width: 110px;
   overflow: hidden;
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
   font-size: 12px;
   font-weight: 400;
   line-height: 18px;
@@ -1050,7 +1060,7 @@ body.hackerba .hb-floor-name:hover {
 }
 
 body.hackerba .hb-floor-level {
-  color: #999;
+  color: var(--hb-muted);
   font-size: 12px;
   line-height: 16px;
 }
@@ -1071,7 +1081,7 @@ body.hackerba .hb-floor-main {
   flex-direction: column;
   min-width: 0;
   padding: 2px 14px 8px;
-  background: #fff;
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-floor-top {
@@ -1084,7 +1094,7 @@ body.hackerba .hb-floor-top {
 }
 
 body.hackerba .hb-floor-no {
-  color: #999;
+  color: var(--hb-muted);
   font-size: 12px;
 }
 
@@ -1095,18 +1105,18 @@ body.hackerba .hb-floor-lz .hb-floor-no {
 
 body.hackerba .hb-share-link {
   padding: 8px 10px;
-  border: 1px solid #eee;
-  background: #fafafa;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface-3);
 }
 
 body.hackerba .hb-share-label {
   margin-bottom: 4px;
-  color: #999;
+  color: var(--hb-muted);
   font-size: 12px;
 }
 
 body.hackerba .hb-main-link {
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
   font-size: 14px;
   line-height: 22px;
   text-decoration: none !important;
@@ -1119,13 +1129,13 @@ body.hackerba .hb-main-link:hover {
 
 body.hackerba .hb-main-site-line {
   margin-top: 4px;
-  color: #999;
+  color: var(--hb-muted);
   font-size: 12px;
 }
 
 body.hackerba .hb-floor-quote {
   margin: 0 0 8px;
-  color: #999;
+  color: var(--hb-muted);
   font-size: 12px;
   line-height: 20px;
 }
@@ -1133,14 +1143,14 @@ body.hackerba .hb-floor-quote {
 /* 楼中楼 j_lzl */
 body.hackerba .hb-lzl {
   margin: 8px 0 4px;
-  border: 1px solid #eee;
-  background: #f7f7f7;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface-soft);
 }
 
 body.hackerba .hb-lzl-hd {
   padding: 6px 10px;
-  border-bottom: 1px solid #eee;
-  color: #666;
+  border-bottom: 1px solid var(--hb-line);
+  color: var(--hb-subtle);
   font-size: 12px;
 }
 
@@ -1159,8 +1169,8 @@ body.hackerba .hb-lzl-list {
 
 body.hackerba .hb-lzl-item {
   padding: 8px 10px;
-  border-bottom: 1px solid #eee;
-  color: #333;
+  border-bottom: 1px solid var(--hb-line);
+  color: var(--hb-text);
   font-size: 12px;
   line-height: 20px;
   word-break: break-word;
@@ -1171,7 +1181,7 @@ body.hackerba .hb-lzl-item:last-child {
 }
 
 body.hackerba .hb-lzl-name {
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
   text-decoration: none !important;
 }
 
@@ -1192,18 +1202,18 @@ body.hackerba .hb-lzl-lz-tag {
 }
 
 body.hackerba .hb-lzl-to {
-  color: #999;
+  color: var(--hb-muted);
 }
 
 body.hackerba .hb-lzl-text,
 body.hackerba .hb-lzl-text .commtext {
-  color: #333 !important;
+  color: var(--hb-text) !important;
   font-size: 12px !important;
   line-height: 20px !important;
 }
 
 body.hackerba .hb-lzl-text a {
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
 }
 
 body.hackerba .hb-lzl-tail {
@@ -1212,16 +1222,16 @@ body.hackerba .hb-lzl-tail {
   justify-content: space-between;
   gap: 8px;
   margin-top: 4px;
-  color: #999;
+  color: var(--hb-muted);
   font-size: 12px;
 }
 
 body.hackerba .hb-lzl-age {
-  color: #999;
+  color: var(--hb-muted);
 }
 
 body.hackerba .hb-lzl-reply {
-  color: #666 !important;
+  color: var(--hb-subtle) !important;
   text-decoration: none !important;
 }
 
@@ -1233,7 +1243,7 @@ body.hackerba .hb-floor-content,
 body.hackerba .hb-floor-content .commtext {
   flex: 1;
   min-height: 48px;
-  color: #333 !important;
+  color: var(--hb-text) !important;
   font-family: "Microsoft YaHei", "PingFang SC", sans-serif !important;
   font-size: 14px !important;
   line-height: 24px !important;
@@ -1241,7 +1251,7 @@ body.hackerba .hb-floor-content .commtext {
 }
 
 body.hackerba .hb-floor-content a {
-  color: #2d64b3 !important;
+  color: var(--hb-link) !important;
 }
 
 body.hackerba .hb-floor-content p {
@@ -1252,8 +1262,8 @@ body.hackerba .hb-floor-content pre {
   margin: 8px 0;
   padding: 8px 10px;
   overflow: auto;
-  border: 1px solid #eee;
-  background: #fafafa;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface-3);
   font-size: 12px;
 }
 
@@ -1265,8 +1275,8 @@ body.hackerba .hb-floor-tail {
   gap: 10px;
   margin-top: 10px;
   padding-top: 6px;
-  border-top: 1px solid #f0f0f0;
-  color: #999;
+  border-top: 1px solid var(--hb-line);
+  color: var(--hb-muted);
   font-size: 12px;
 }
 
@@ -1282,11 +1292,11 @@ body.hackerba .hb-floor-score {
 }
 
 body.hackerba .hb-floor-age {
-  color: #999;
+  color: var(--hb-muted);
 }
 
 body.hackerba .hb-floor-reply {
-  color: #666 !important;
+  color: var(--hb-subtle) !important;
   text-decoration: none !important;
 }
 
@@ -1297,7 +1307,7 @@ body.hackerba .hb-floor-reply:hover {
 body.hackerba .hb-floor-toggle {
   padding: 0;
   border: 0;
-  color: #999;
+  color: var(--hb-muted);
   background: transparent;
   font-size: 12px;
   line-height: 18px;
@@ -1315,22 +1325,22 @@ body.hackerba .hb-floor-collapsed .hb-lzl {
 
 body.hackerba .hb-reply-panel {
   margin: 0 0 16px;
-  border: 1px solid #e7e7e7;
-  background: #fff;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-reply-panel-title {
   padding: 8px 14px;
-  border-bottom: 1px solid #eee;
-  background: #f7f7f7;
-  color: #333;
+  border-bottom: 1px solid var(--hb-line);
+  background: var(--hb-surface-soft);
+  color: var(--hb-text);
   font-size: 14px;
   font-weight: 700;
 }
 
 body.hackerba .hb-reply-box {
   padding: 12px 14px 14px;
-  background: #fff;
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-reply-box textarea {
@@ -1340,8 +1350,8 @@ body.hackerba .hb-reply-box textarea {
   min-height: 90px;
   margin: 0 0 8px;
   padding: 8px 10px;
-  border: 1px solid #ccc;
-  background: #fff;
+  border: 1px solid var(--hb-input-border);
+  background: var(--hb-surface);
   font-family: "Microsoft YaHei", sans-serif !important;
   font-size: 13px !important;
   resize: vertical;
@@ -1350,7 +1360,7 @@ body.hackerba .hb-reply-box textarea {
 body.hackerba .hb-reply-box a[href*="formatdoc"] {
   display: inline-block;
   margin: 0 10px 8px 0;
-  color: #999 !important;
+  color: var(--hb-muted) !important;
   font-size: 12px;
   text-decoration: none !important;
 }
@@ -1373,7 +1383,7 @@ body.hackerba .hb-reply-box input[type="submit"] {
 
 body.hackerba input,
 body.hackerba textarea {
-  border: 1px solid #ccc;
+  border: 1px solid var(--hb-input-border);
   border-radius: 1px;
   font: inherit;
 }
@@ -1387,24 +1397,51 @@ body.hackerba input[type="submit"] {
 }
 
 html[data-hb-theme="dark"] {
-  --hb-bg: #1a1a1a;
-  --hb-text: #ddd;
-  --hb-muted: #888;
-  --hb-line: #333;
+  color-scheme: dark;
+  --hb-blue: #8bb4e0;
+  --hb-blue-soft: #243044;
+  --hb-search: #4d8ef0;
+  --hb-orange: #ff943d;
+  --hb-rep: #ff943d;
+  --hb-good: #8bb4e0;
+  --hb-bg: #18191c;
+  --hb-surface: #24262b;
+  --hb-surface-2: #1e2025;
+  --hb-surface-3: #2a2c32;
+  --hb-surface-soft: #2e3138;
+  --hb-line: #3a3d45;
+  --hb-line-strong: #454851;
+  --hb-input-border: #4a4e58;
+  --hb-input-border-strong: #5c616c;
+  --hb-text: #e8e8ea;
+  --hb-muted: #9a9da5;
+  --hb-subtle: #b4b7bf;
+  --hb-link: #8bb4e0;
+  --hb-brand: #9aa3ff;
 }
 
-html[data-hb-theme="dark"] body.hackerba .hb-topbar,
-html[data-hb-theme="dark"] body.hackerba .hb-main,
-html[data-hb-theme="dark"] body.hackerba .hb-aside-box,
-html[data-hb-theme="dark"] body.hackerba .hb-floor,
-html[data-hb-theme="dark"] body.hackerba .fatitem {
-  border-color: #333;
-  background: #242424;
-  color: #ddd;
+html[data-hb-theme="dark"] body.hackerba .hb-search input,
+html[data-hb-theme="dark"] body.hackerba .hb-reply-box textarea,
+html[data-hb-theme="dark"] body.hackerba input,
+html[data-hb-theme="dark"] body.hackerba textarea {
+  color: var(--hb-text);
+  background: var(--hb-surface-3);
 }
 
-html[data-hb-theme="dark"] body.hackerba .hb-th-tit {
-  color: #e8e8e8 !important;
+html[data-hb-theme="dark"] body.hackerba .hb-card-banner {
+  border-color: #3d5a80;
+  background: linear-gradient(180deg, #3f6fa8 0%, #2f5788 100%);
+}
+
+html[data-hb-theme="dark"] body.hackerba .commtext,
+html[data-hb-theme="dark"] body.hackerba .hb-floor-content,
+html[data-hb-theme="dark"] body.hackerba .hb-lzl-text,
+html[data-hb-theme="dark"] body.hackerba .hb-lzl-text .commtext {
+  color: var(--hb-text) !important;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-thread-item:hover {
+  background: var(--hb-surface-3);
 }
 
 html[data-hb-density="compact"] body.hackerba .hb-thread-item {

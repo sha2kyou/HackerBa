@@ -16,6 +16,7 @@
           <select id="theme" name="theme">
             <option value="light">浅色</option>
             <option value="dark">深色</option>
+            <option value="system">跟随系统</option>
           </select>
         </label>
         <label>
@@ -24,6 +25,13 @@
             <option value="comfortable">舒适</option>
             <option value="compact">紧凑</option>
           </select>
+        </label>
+        <label class="hb-opt-switch">
+          <span>
+            <strong>标题打开讨论</strong>
+            <small>开启：点击标题进入评论页；关闭：点击标题打开原文（原 Hacker News 体验）</small>
+          </span>
+          <input id="titleOpensDiscussion" name="titleOpensDiscussion" type="checkbox" checked>
         </label>
         <button type="submit">保存设置</button>
         <output id="status" aria-live="polite"></output>

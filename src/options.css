@@ -59,3 +59,30 @@ output {
   min-height: 20px;
   color: #2670d9;
 }
+
+.hb-opt-switch {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  font-weight: 600;
+}
+
+.hb-opt-switch span {
+  display: grid;
+  gap: 4px;
+}
+
+.hb-opt-switch small {
+  color: #75839a;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.hb-opt-switch input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+}

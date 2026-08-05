@@ -57,6 +57,37 @@ test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨�
   assert.equal(item.querySelector(".hb-last-time"), null);
   assert.equal(item.querySelector(".hb-goto-item"), null);
   assert.equal(document.querySelector(".hb-hn-source")?.hidden, true);
+  assert.equal(document.documentElement.dataset.hbTitleDiscussion, "1");
+});
+
+test("关闭标题打开讨论时标题指向原文", () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title">
+          <span class="titleline">
+            <a href="https://example.com/x">A story</a>
+            <span class="sitebit comhead"> (<a href="from?site=example.com"><span class="sitestr">example.com</span></a>)</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="subtext">
+          <a href="item?id=1">3&nbsp;comments</a>
+        </td>
+      </tr>
+    </table>
+  `);
+  document.defaultView.eval(contentScript);
+  document.querySelector(".hb-wrap")?.remove();
+  document.body.classList.remove("hackerba");
+  document.documentElement.classList.remove("hackerba-page", "hb-boot");
+  document.documentElement.dataset.hbTitleDiscussion = "0";
+  document.defaultView.HackerBa.enhanceHackerNews(document);
+
+  const title = document.querySelector(".hb-th-tit");
+  assert.equal(title.getAttribute("href"), "https://example.com/x");
+  assert.equal(title.getAttribute("target"), "_blank");
 });
 
 test("顶栏使用 HackerBa 品牌，搜索在页内提交", () => {
@@ -694,4 +725,18 @@ test("搜索竞态只采用最后一次结果", async () => {
 
   assert.equal(document.querySelector(".hb-th-tit")?.textContent, "FAST");
   assert.match(document.querySelector(".hb-thread-count").textContent, /搜索到 1/);
+});
+
+test("主题跟随系统会解析为 light 或 dark", () => {
+  const document = createDocument(`<table id="hnmain"></table>`);
+  document.defaultView.eval(contentScript);
+  const { resolveTheme } = document.defaultView.HackerBa;
+  assert.equal(resolveTheme("light"), "light");
+  assert.equal(resolveTheme("dark"), "dark");
+  assert.equal(resolveTheme("system", {
+    matchMedia: () => ({ matches: true }),
+  }), "dark");
+  assert.equal(resolveTheme("system", {
+    matchMedia: () => ({ matches: false }),
+  }), "light");
 });
