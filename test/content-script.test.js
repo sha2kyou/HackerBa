@@ -3,6 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { JSDOM } from "jsdom";
 
+const i18nScript = await readFile(
+  new URL("../src/i18n.js", import.meta.url),
+  "utf8",
+);
 const contentScript = await readFile(
   new URL("../src/content-script.js", import.meta.url),
   "utf8",
@@ -15,8 +19,13 @@ function createDocument(body, url = "https://news.ycombinator.com/news") {
   }).window.document;
 }
 
-function enhanceHackerNews(document) {
+function loadScripts(document) {
+  document.defaultView.eval(i18nScript);
   document.defaultView.eval(contentScript);
+}
+
+function enhanceHackerNews(document) {
+  loadScripts(document);
   return document.defaultView.HackerBa.enhanceHackerNews(document);
 }
 
@@ -78,7 +87,7 @@ test("关闭标题打开讨论时标题指向原文", () => {
       </tr>
     </table>
   `);
-  document.defaultView.eval(contentScript);
+  loadScripts(document);
   document.querySelector(".hb-wrap")?.remove();
   document.body.classList.remove("hackerba");
   document.documentElement.classList.remove("hackerba-page", "hb-boot");
@@ -103,17 +112,17 @@ test("顶栏使用 HackerBa 品牌，搜索在页内提交", () => {
   enhanceHackerNews(document);
 
   assert.match(document.querySelector(".hb-topbar .hb-brand").textContent, /Hacker/);
-  assert.match(document.querySelector(".hb-topbar .hb-brand").textContent, /贴吧/);
+  assert.match(document.querySelector(".hb-topbar .hb-brand").textContent, /Ba/);
   assert.equal(document.querySelector(".hb-brand-logo"), null);
   assert.equal(document.querySelector(".hb-brand-baidu"), null);
   assert.equal(document.querySelector(".hb-search").getAttribute("data-hb-search"), "local");
-  assert.equal(document.querySelector(".hb-search-btn").textContent, "搜索");
+  assert.equal(document.querySelector(".hb-search-btn").textContent, "Search");
   assert.match(document.querySelector(".hb-search input").getAttribute("placeholder") || "", /Hacker News/);
 });
 
 test("Algolia 搜索结果映射为贴吧式帖子字段", () => {
   const document = createDocument(`<table id="hnmain"></table>`);
-  document.defaultView.eval(contentScript);
+  loadScripts(document);
   const threads = document.defaultView.HackerBa.mapAlgoliaHits([
     {
       objectID: "123",
@@ -166,11 +175,11 @@ test("搜索结果用贴吧列表样式渲染到主栏", async () => {
   document.querySelector(".hb-search input").value = "typed";
   await document.defaultView.HackerBa.runLocalSearch(document, "typed");
 
-  assert.equal(document.querySelector(".hb-thread-top .hb-thread-count").textContent, "搜索到 1 篇主题");
+  assert.equal(document.querySelector(".hb-thread-top .hb-thread-count").textContent, "Found 1 topics");
   assert.equal(document.querySelector(".hb-th-tit").textContent, "Typed results");
   assert.equal(document.querySelector(".hb-th-tit").getAttribute("href"), "item?id=99");
   assert.equal(document.querySelector(".hb-rep-num").textContent, "7");
-  assert.match(document.querySelector(".hb-breadcrumb").textContent, /搜索/);
+  assert.match(document.querySelector(".hb-breadcrumb").textContent, /Search/);
 });
 
 test("帖子行包含右侧最后回复区，并带列表工具条与面包屑", () => {
@@ -195,7 +204,7 @@ test("帖子行包含右侧最后回复区，并带列表工具条与面包屑",
   const item = document.querySelector(".hb-thread-item");
   assert.ok(document.querySelector(".hb-breadcrumb"));
   assert.ok(document.querySelector(".hb-thread-top"));
-  assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "最新回复");
+  assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "Latest replies");
   assert.ok(item.querySelector(".hb-thread-author-meta"));
   assert.match(item.querySelector(".hb-create-time").textContent, /2 hours ago/);
   assert.equal(item.querySelector(".hb-thread-reply-meta"), null);
@@ -256,9 +265,9 @@ test("未登录发帖页套上贴吧壳并美化登录提示", () => {
 
   assert.ok(document.querySelector(".hb-wrap"));
   assert.ok(document.querySelector(".hb-auth-panel"));
-  assert.match(document.querySelector(".hb-auth-title").textContent, /登录/);
+  assert.match(document.querySelector(".hb-auth-title").textContent, /Log in/);
   assert.equal(document.querySelectorAll(".hb-auth-card").length, 1);
-  assert.equal(document.querySelector(".hb-auth-card input[type='submit']").value, "登录");
+  assert.equal(document.querySelector(".hb-auth-card input[type='submit']").value, "Log in");
   assert.equal(document.querySelector(".hb-hn-source").classList.contains("hb-source-visible"), true);
 });
 
@@ -288,9 +297,9 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   );
 
   enhanceHackerNews(loginDoc);
-  assert.equal(loginDoc.querySelector(".hb-auth-title").textContent, "登录");
+  assert.equal(loginDoc.querySelector(".hb-auth-title").textContent, "Log in");
   assert.equal(loginDoc.querySelectorAll(".hb-auth-card").length, 1);
-  assert.equal(loginDoc.querySelector(".hb-auth-card h3").textContent, "登录");
+  assert.equal(loginDoc.querySelector(".hb-auth-card h3").textContent, "Log in");
   assert.equal(loginDoc.querySelector(".hb-auth-switch").getAttribute("href"), "login?mode=register");
 
   const registerDoc = createDocument(
@@ -315,9 +324,9 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   );
 
   enhanceHackerNews(registerDoc);
-  assert.equal(registerDoc.querySelector(".hb-auth-title").textContent, "注册");
+  assert.equal(registerDoc.querySelector(".hb-auth-title").textContent, "Sign up");
   assert.equal(registerDoc.querySelectorAll(".hb-auth-card").length, 1);
-  assert.equal(registerDoc.querySelector(".hb-auth-card h3").textContent, "注册账号");
+  assert.equal(registerDoc.querySelector(".hb-auth-card h3").textContent, "Create account");
   assert.equal(registerDoc.querySelector(".hb-auth-switch").getAttribute("href"), "login");
 });
 
@@ -342,7 +351,7 @@ test("吧规页保留正文并以文档样式展示", () => {
   assert.match(document.querySelector(".hb-doc-title").textContent, /Guidelines|吧规|规范/);
   assert.match(document.querySelector(".hb-doc-body").textContent, /On-Topic/);
   assert.match(document.querySelector(".hb-doc-body").textContent, /Be kind/);
-  assert.equal(document.querySelector(".hb-bc-current").textContent, "吧规");
+  assert.equal(document.querySelector(".hb-bc-current").textContent, "Rules");
   assert.equal(document.querySelector(".hb-hn-source").classList.contains("hb-source-visible"), true);
 });
 
@@ -363,13 +372,13 @@ test("导航职责分离：分区在 Tab，排序仅看帖，侧栏不含重复�
 
   assert.equal(
     [...document.querySelectorAll(".hb-tab-nav a")].map((a) => a.textContent).join(","),
-    "看帖,问答,作品,招聘,精品",
+    "Posts,Ask,Show,Jobs,Best",
   );
-  assert.equal(document.querySelector(".hb-tab-nav .hb-tab-focus").textContent, "看帖");
-  assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "最新发帖");
+  assert.equal(document.querySelector(".hb-tab-nav .hb-tab-focus").textContent, "Posts");
+  assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "Newest posts");
   assert.equal(
     [...document.querySelectorAll(".hb-thread-sort a")].map((a) => a.textContent).join(","),
-    "最新回复,最新发帖",
+    "Latest replies,Newest posts",
   );
   assert.equal(document.querySelector(".hb-aside-links"), null);
   assert.ok(document.querySelector(".hb-aside-box .hb-aside-link"));
@@ -390,9 +399,9 @@ test("非看帖分区不显示排序条", () => {
 
   enhanceHackerNews(document);
 
-  assert.equal(document.querySelector(".hb-tab-nav .hb-tab-focus").textContent, "问答");
+  assert.equal(document.querySelector(".hb-tab-nav .hb-tab-focus").textContent, "Ask");
   assert.equal(document.querySelector(".hb-thread-sort a"), null);
-  assert.equal(document.querySelector(".hb-thread-sort .hb-sort-focus").textContent, "问答");
+  assert.equal(document.querySelector(".hb-thread-sort .hb-sort-focus").textContent, "Ask");
 });
 
 test("为评论重建贴吧楼层卡片与折叠控件", () => {
@@ -437,21 +446,21 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
   assert.ok(main);
   assert.ok(document.querySelector(".hb-core-title"));
   assert.match(document.querySelector(".hb-core-title-txt").textContent, /Main post/);
-  assert.match(document.querySelector(".hb-core-meta").textContent, /回复贴：1/);
+  assert.match(document.querySelector(".hb-core-meta").textContent, /Replies: 1/);
   assert.equal(document.querySelector(".hb-core-title-ctrl"), null);
-  assert.equal(main.querySelector(".hb-floor-no").textContent, "1楼");
+  assert.equal(main.querySelector(".hb-floor-no").textContent, "1F");
   assert.equal(main.querySelector(".hb-floor-name").textContent, "alice");
   assert.ok(main.querySelector(".hb-louzhu"));
   assert.ok(main.querySelector(".hb-floor-level"));
   assert.ok(main.querySelector(".hb-share-link"));
   assert.equal(main.querySelector(".hb-main-title"), null);
   assert.equal(main.querySelector(".hb-reply-box form"), null);
-  assert.equal(document.querySelector(".hb-reply-panel-title")?.textContent, "发表回复");
-  assert.equal(document.querySelector('.hb-reply-box input[type="submit"]')?.value, "发表");
-  assert.equal(card.querySelector(".hb-floor-no").textContent, "2楼");
+  assert.equal(document.querySelector(".hb-reply-panel-title")?.textContent, "Post a reply");
+  assert.equal(document.querySelector('.hb-reply-box input[type="submit"]')?.value, "Submit");
+  assert.equal(card.querySelector(".hb-floor-no").textContent, "2F");
   assert.equal(card.querySelector(".hb-floor-name").textContent, "bob");
   assert.match(card.querySelector(".hb-floor-content").textContent, /Useful answer/);
-  assert.equal(card.querySelector(".hb-floor-reply").textContent, "回复");
+  assert.equal(card.querySelector(".hb-floor-reply").textContent, "Reply");
   assert.equal(button.getAttribute("aria-expanded"), "true");
   assert.ok(card.querySelector(".hb-floor-avatar"));
 
@@ -509,7 +518,7 @@ test("嵌套评论收进楼中楼", () => {
   enhanceHackerNews(document);
 
   assert.equal(document.querySelectorAll(".hb-floor-list .hb-floor").length, 1);
-  assert.equal(document.querySelector(".hb-floor-list .hb-floor-no").textContent, "2楼");
+  assert.equal(document.querySelector(".hb-floor-list .hb-floor-no").textContent, "2F");
   const lzl = document.querySelector(".hb-lzl");
   assert.ok(lzl);
   assert.equal(lzl.querySelector(".hb-lzl-num").textContent, "2");
@@ -518,7 +527,7 @@ test("嵌套评论收进楼中楼", () => {
   assert.match(items[0].textContent, /carol/);
   assert.match(items[0].textContent, /Nested/);
   assert.equal(items[0].querySelector(".hb-lzl-to"), null);
-  assert.match(items[1].querySelector(".hb-lzl-to").textContent, /回复 carol/);
+  assert.match(items[1].querySelector(".hb-lzl-to").textContent, /Reply to carol/);
   assert.match(items[1].textContent, /Deeper/);
 });
 
@@ -550,9 +559,9 @@ test("分页展示上一页/页码/下一页，并保留 morelink", () => {
     </table>
   `);
   enhanceHackerNews(page1);
-  assert.match(page1.querySelector(".hb-thread-count").textContent, /本页 1 篇主题 · 第 1 页/);
-  assert.equal(page1.querySelector(".hb-pager-disabled")?.textContent, "< 上一页");
-  assert.equal(page1.querySelector(".hb-pager-info")?.textContent, "第 1 页");
+  assert.match(page1.querySelector(".hb-thread-count").textContent, /This page: 1 topics · Page 1/);
+  assert.equal(page1.querySelector(".hb-pager-disabled")?.textContent, "< Prev");
+  assert.equal(page1.querySelector(".hb-pager-info")?.textContent, "Page 1");
   assert.equal(page1.querySelector(".hb-pager-next")?.getAttribute("href"), "?p=2");
 
   const page2 = createDocument(
@@ -568,9 +577,9 @@ test("分页展示上一页/页码/下一页，并保留 morelink", () => {
     "https://news.ycombinator.com/news?p=2",
   );
   enhanceHackerNews(page2);
-  assert.match(page2.querySelector(".hb-thread-count").textContent, /第 2 页/);
+  assert.match(page2.querySelector(".hb-thread-count").textContent, /Page 2/);
   assert.equal(page2.querySelector(".hb-pager-prev")?.getAttribute("href"), "news");
-  assert.equal(page2.querySelector(".hb-pager-info")?.textContent, "第 2 页");
+  assert.equal(page2.querySelector(".hb-pager-info")?.textContent, "Page 2");
   assert.equal(page2.querySelector(".hb-pager-next")?.getAttribute("href"), "?p=3");
 });
 
@@ -592,7 +601,7 @@ test("已登录时顶栏显示用户名与退出", () => {
 
   assert.equal(document.querySelector(".hb-user-name")?.textContent, "alice");
   assert.equal(document.querySelector(".hb-user-name")?.getAttribute("href"), "user?id=alice");
-  assert.equal(document.querySelector('.hb-userbar a[href^="logout"]')?.textContent, "退出");
+  assert.equal(document.querySelector('.hb-userbar a[href^="logout"]')?.textContent, "Log out");
   assert.equal(document.querySelector('.hb-userbar a[href="login"]'), null);
 });
 
@@ -679,7 +688,7 @@ test("看帖页搜索会移除帖子区", async () => {
   assert.equal(document.querySelector(".hb-post-wrap"), null);
   assert.equal(document.body.classList.contains("hb-item-page"), false);
   assert.equal(document.querySelector(".hb-th-tit")?.textContent, "Found");
-  assert.match(document.querySelector(".hb-thread-count").textContent, /搜索到 1/);
+  assert.match(document.querySelector(".hb-thread-count").textContent, /Found 1/);
 });
 
 test("搜索竞态只采用最后一次结果", async () => {
@@ -725,12 +734,12 @@ test("搜索竞态只采用最后一次结果", async () => {
   await slow;
 
   assert.equal(document.querySelector(".hb-th-tit")?.textContent, "FAST");
-  assert.match(document.querySelector(".hb-thread-count").textContent, /搜索到 1/);
+  assert.match(document.querySelector(".hb-thread-count").textContent, /Found 1/);
 });
 
 test("主题跟随系统会解析为 light 或 dark", () => {
   const document = createDocument(`<table id="hnmain"></table>`);
-  document.defaultView.eval(contentScript);
+  loadScripts(document);
   const { resolveTheme } = document.defaultView.HackerBa;
   assert.equal(resolveTheme("light"), "light");
   assert.equal(resolveTheme("dark"), "dark");
@@ -740,4 +749,28 @@ test("主题跟随系统会解析为 light 或 dark", () => {
   assert.equal(resolveTheme("system", {
     matchMedia: () => ({ matches: false }),
   }), "light");
+});
+
+test("语言偏好 zh 时界面为中文", () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A story</a></span></td>
+      </tr>
+      <tr><td class="subtext"><a href="item?id=1">3&nbsp;comments</a></td></tr>
+    </table>
+  `);
+  loadScripts(document);
+  document.querySelector(".hb-wrap")?.remove();
+  document.body.classList.remove("hackerba");
+  document.documentElement.classList.remove("hackerba-page", "hb-boot");
+  document.documentElement.dataset.hbLang = "zh";
+  document.defaultView.HackerBa.enhanceHackerNews(document);
+
+  assert.match(document.querySelector(".hb-brand").textContent, /贴吧/);
+  assert.equal(document.querySelector(".hb-search-btn").textContent, "搜索");
+  assert.equal(
+    [...document.querySelectorAll(".hb-tab-nav a")].map((a) => a.textContent).join(","),
+    "看帖,问答,作品,招聘,精品",
+  );
 });

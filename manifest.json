@@ -24,6 +24,7 @@
         "src/hackerba.css"
       ],
       "js": [
+        "src/i18n.js",
         "src/content-script.js"
       ],
       "run_at": "document_start"

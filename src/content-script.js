@@ -1,3 +1,17 @@
+let hbLocale = "en";
+
+function localeOf(document) {
+  return document?.documentElement?.dataset?.hbLang || hbLocale;
+}
+
+function t(key, vars, document) {
+  const i18n = globalThis.HackerBaI18n;
+  if (!i18n) {
+    return key;
+  }
+  return i18n.t(localeOf(document), key, vars);
+}
+
 function enhanceHackerNews(document) {
   if (!document?.body || document.body.classList.contains("hackerba")) {
     return;
@@ -14,19 +28,19 @@ function enhanceHackerNews(document) {
   bindSearchForm(document);
 }
 
-function localizeAuthLabel(text) {
+function localizeAuthLabel(text, document) {
   const value = String(text || "").trim().toLowerCase();
   if (value === "username:" || value === "username") {
-    return "用户名";
+    return t("username", null, document);
   }
   if (value === "password:" || value === "password") {
-    return "密码";
+    return t("password", null, document);
   }
   if (value === "login") {
-    return "登录";
+    return t("login", null, document);
   }
   if (value === "create account") {
-    return "注册账号";
+    return t("createAccount", null, document);
   }
   return text;
 }
@@ -69,13 +83,19 @@ function enhanceAuthPanel(document, host) {
 
   const title = document.createElement("h2");
   title.className = "hb-auth-title";
-  title.textContent = needLogin ? "登录后才能发帖" : mode === "register" ? "注册" : mode === "forgot" ? "找回密码" : "登录";
+  title.textContent = needLogin
+    ? t("loginRequiredTitle", null, document)
+    : mode === "register"
+      ? t("registerTitle", null, document)
+      : mode === "forgot"
+        ? t("forgotTitle", null, document)
+        : t("login", null, document);
   panel.append(title);
 
   if (needLogin) {
     const tip = document.createElement("p");
     tip.className = "hb-auth-tip";
-    tip.textContent = "你需要先登录账号，才能发表新帖。";
+    tip.textContent = t("loginRequiredTip", null, document);
     panel.append(tip);
   }
 
@@ -100,17 +120,21 @@ function enhanceAuthPanel(document, host) {
 
     const heading = document.createElement("h3");
     heading.textContent =
-      mode === "register" ? "注册账号" : mode === "forgot" ? "重置密码" : "登录";
+      mode === "register"
+        ? t("createAccount", null, document)
+        : mode === "forgot"
+          ? t("resetPassword", null, document)
+          : t("login", null, document);
     card.append(heading);
 
     form.querySelectorAll("td").forEach((cell) => {
       if (!cell.querySelector("input")) {
-        cell.textContent = localizeAuthLabel(cell.textContent);
+        cell.textContent = localizeAuthLabel(cell.textContent, document);
       }
     });
 
     form.querySelectorAll("input[type='submit']").forEach((button) => {
-      button.value = localizeAuthLabel(button.value);
+      button.value = localizeAuthLabel(button.value, document);
       button.classList.add("hb-auth-submit");
     });
 
@@ -120,7 +144,7 @@ function enhanceAuthPanel(document, host) {
       const forgot = host.querySelector("a[href='forgot']");
       if (forgot) {
         forgot.className = "hb-auth-forgot";
-        forgot.textContent = "忘记密码？";
+        forgot.textContent = t("forgotLink", null, document);
         card.append(forgot);
       }
     }
@@ -135,10 +159,10 @@ function enhanceAuthPanel(document, host) {
     switchLink.className = "hb-auth-switch";
     if (mode === "login") {
       switchLink.href = "login?mode=register";
-      switchLink.textContent = "没有账号？去注册";
+      switchLink.textContent = t("switchToRegister", null, document);
     } else {
       switchLink.href = "login";
-      switchLink.textContent = "已有账号？去登录";
+      switchLink.textContent = t("switchToLogin", null, document);
     }
     panel.append(switchLink);
   }
@@ -184,20 +208,24 @@ function wrapOrphanContent(document, orphanNodes) {
     const mode = getAuthMode(document);
     setBreadcrumbCurrent(
       document,
-      needLogin ? "登录发帖" : mode === "register" ? "注册" : "登录",
+      needLogin
+        ? t("crumbPostLogin", null, document)
+        : mode === "register"
+          ? t("registerTitle", null, document)
+          : t("login", null, document),
     );
     return enhanceAuthPanel(document, host);
   }
 
   const path = document.defaultView?.location?.pathname || "";
   if (/guidelines/i.test(path)) {
-    setBreadcrumbCurrent(document, "吧规");
+    setBreadcrumbCurrent(document, t("crumbRules", null, document));
   } else if (/security|showhn|newsfaq/i.test(path)) {
-    setBreadcrumbCurrent(document, "说明");
+    setBreadcrumbCurrent(document, t("crumbHelp", null, document));
   } else if (/forgot/i.test(path)) {
-    setBreadcrumbCurrent(document, "找回密码");
+    setBreadcrumbCurrent(document, t("crumbForgot", null, document));
   } else {
-    setBreadcrumbCurrent(document, "页面");
+    setBreadcrumbCurrent(document, t("crumbPage", null, document));
   }
   return enhanceDocumentPanel(document, host);
 }
@@ -213,7 +241,7 @@ function resolveSessionUser(document) {
     return null;
   }
   return {
-    name: userLink.textContent.trim() || "用户",
+    name: userLink.textContent.trim() || t("userFallback", null, document),
     href: userLink.getAttribute("href") || "login",
     logoutHref: logout.getAttribute("href") || "logout",
   };
@@ -226,16 +254,16 @@ function renderUserbar(document, session) {
   }
   if (!session) {
     bar.innerHTML = `
-      <a href="login">登录</a>
+      <a href="login">${escapeHtml(t("login", null, document))}</a>
       <span class="hb-user-sep">|</span>
-      <a href="login?mode=register">注册</a>
+      <a href="login?mode=register">${escapeHtml(t("register", null, document))}</a>
     `;
     return;
   }
   bar.innerHTML = `
     <a class="hb-user-name" href="${escapeAttr(session.href)}">${escapeHtml(session.name)}</a>
     <span class="hb-user-sep">|</span>
-    <a href="${escapeAttr(session.logoutHref)}">退出</a>
+    <a href="${escapeAttr(session.logoutHref)}">${escapeHtml(t("logout", null, document))}</a>
   `;
 }
 
@@ -262,11 +290,11 @@ function buildCommunityShell(document) {
     <div class="hb-topbar">
       <div class="hb-topbar-inner">
         <a class="hb-brand" href="news" title="HackerBa">
-          <span class="hb-brand-text"><i>Hacker</i>贴吧</span>
+          <span class="hb-brand-text"><i>Hacker</i>${escapeHtml(t("brandSuffix", null, document))}</span>
         </a>
         <form class="hb-search" data-hb-search="local" action="#" method="get">
-          <input name="q" type="search" placeholder="搜索 Hacker News" aria-label="搜索 Hacker News">
-          <button type="submit" class="hb-search-btn">搜索</button>
+          <input name="q" type="search" placeholder="${escapeAttr(t("searchPlaceholder", null, document))}" aria-label="${escapeAttr(t("searchAria", null, document))}">
+          <button type="submit" class="hb-search-btn">${escapeHtml(t("search", null, document))}</button>
         </form>
         <div class="hb-userbar"></div>
       </div>
@@ -274,7 +302,7 @@ function buildCommunityShell(document) {
     <div class="hb-breadcrumb">
       <a href="news">HackerBa</a>
       <span class="hb-bc-sep">&gt;</span>
-      <span class="hb-bc-current">Hacker News 吧</span>
+      <span class="hb-bc-current">${escapeHtml(t("forumName", null, document))}</span>
     </div>
     <div class="hb-card-banner">
       <div class="hb-card-head">
@@ -283,17 +311,17 @@ function buildCommunityShell(document) {
         </div>
         <div class="hb-card-info">
           <div class="hb-card-title-row">
-            <h1 class="hb-card-title">Hacker News 吧</h1>
-            <span class="hb-card-level" title="吧等级">Lv.12</span>
+            <h1 class="hb-card-title">${escapeHtml(t("forumName", null, document))}</h1>
+            <span class="hb-card-level" title="${escapeAttr(t("forumLevel", null, document))}">Lv.12</span>
           </div>
           <div class="hb-card-num">
-            <span><em>关注：</em><b>1,234,567</b></span>
-            <span><em>帖子：</em><b>98,765</b></span>
+            <span><em>${escapeHtml(t("followers", null, document))}</em><b>1,234,567</b></span>
+            <span><em>${escapeHtml(t("posts", null, document))}</em><b>98,765</b></span>
           </div>
-          <p class="hb-card-slogan">专注分享、讨论科技与创业的社区</p>
+          <p class="hb-card-slogan">${escapeHtml(t("slogan", null, document))}</p>
         </div>
         <div class="hb-card-btns">
-          <button type="button" class="hb-btn-attention hb-btn-followed" aria-pressed="true">已关注</button>
+          <button type="button" class="hb-btn-attention hb-btn-followed" aria-pressed="true">${escapeHtml(t("followed", null, document))}</button>
         </div>
       </div>
     </div>
@@ -301,43 +329,43 @@ function buildCommunityShell(document) {
       <div class="hb-main">
         <div class="hb-tab-bar">
           <ul class="hb-tab-nav">
-            <li><a href="news" data-hb-tab="posts">看帖</a></li>
-            <li><a href="ask" data-hb-tab="ask">问答</a></li>
-            <li><a href="show" data-hb-tab="show">作品</a></li>
-            <li><a href="jobs" data-hb-tab="jobs">招聘</a></li>
-            <li><a href="best" data-hb-tab="good">精品</a></li>
+            <li><a href="news" data-hb-tab="posts">${escapeHtml(t("tabPosts", null, document))}</a></li>
+            <li><a href="ask" data-hb-tab="ask">${escapeHtml(t("tabAsk", null, document))}</a></li>
+            <li><a href="show" data-hb-tab="show">${escapeHtml(t("tabShow", null, document))}</a></li>
+            <li><a href="jobs" data-hb-tab="jobs">${escapeHtml(t("tabJobs", null, document))}</a></li>
+            <li><a href="best" data-hb-tab="good">${escapeHtml(t("tabBest", null, document))}</a></li>
           </ul>
-          <a class="hb-tab-post" href="submit">发帖</a>
+          <a class="hb-tab-post" href="submit">${escapeHtml(t("post", null, document))}</a>
         </div>
         <div class="hb-thread-panel"></div>
       </div>
       <aside class="hb-aside">
         <div class="hb-aside-box">
-          <div class="hb-aside-title">本吧信息</div>
+          <div class="hb-aside-title">${escapeHtml(t("asideInfo", null, document))}</div>
           <div class="hb-aside-body">
             <div class="hb-aside-forum">
               <div class="hb-aside-avatar" aria-hidden="true">
                 <span class="hb-forum-mark">Y</span>
               </div>
               <div>
-                <div class="hb-aside-name">Hacker News 吧</div>
-                <div class="hb-aside-meta">目录：科技 / 创业</div>
+                <div class="hb-aside-name">${escapeHtml(t("forumName", null, document))}</div>
+                <div class="hb-aside-meta">${escapeHtml(t("asideCategory", null, document))}</div>
               </div>
             </div>
-            <p>吧主：Y Combinator</p>
-            <p>创建：2007 年</p>
-            <a class="hb-aside-link" href="newsguidelines.html">查看吧规 &gt;</a>
+            <p>${escapeHtml(t("asideOwner", null, document))}</p>
+            <p>${escapeHtml(t("asideCreated", null, document))}</p>
+            <a class="hb-aside-link" href="newsguidelines.html">${escapeHtml(t("asideRules", null, document))}</a>
           </div>
         </div>
         <div class="hb-aside-box">
-          <div class="hb-aside-title">温馨提示</div>
+          <div class="hb-aside-title">${escapeHtml(t("asideTipsTitle", null, document))}</div>
           <div class="hb-aside-body">
-            <p>分区在上方 Tab 切换；看帖下可用「最新回复 / 最新发帖」排序。</p>
+            <p>${escapeHtml(t("asideTips", null, document))}</p>
           </div>
         </div>
       </aside>
     </div>
-    <div class="hb-footer">© HackerBa · 界面仿贴吧，内容来自 Hacker News</div>
+    <div class="hb-footer">${escapeHtml(t("footer", null, document))}</div>
   `;
 
   document.body.insertBefore(wrap, document.body.firstChild);
@@ -400,12 +428,12 @@ function shouldShowSortBar(document) {
 function getSectionLabel(document) {
   const key = getCurrentPathKey(document);
   const labels = {
-    ask: "问答",
-    show: "作品",
-    jobs: "招聘",
-    best: "精品",
+    ask: t("tabAsk", null, document),
+    show: t("tabShow", null, document),
+    jobs: t("tabJobs", null, document),
+    best: t("tabBest", null, document),
   };
-  return labels[key] || "看帖";
+  return labels[key] || t("tabPosts", null, document);
 }
 
 function highlightActiveSort(document) {
@@ -444,21 +472,21 @@ function revealSourceIfNeeded(document) {
   source.classList.toggle("hb-source-visible", !hideSource);
 }
 
-function formatRelativeTime(createdAtUnix) {
+function formatRelativeTime(createdAtUnix, document) {
   if (!createdAtUnix) {
-    return "刚刚";
+    return t("justNow", null, document);
   }
   const seconds = Math.max(0, Math.floor(Date.now() / 1000) - Number(createdAtUnix));
   if (seconds < 60) {
-    return "刚刚";
+    return t("justNow", null, document);
   }
   if (seconds < 3600) {
-    return `${Math.floor(seconds / 60)} minutes ago`;
+    return t("minutesAgo", { n: Math.floor(seconds / 60) }, document);
   }
   if (seconds < 86400) {
-    return `${Math.floor(seconds / 3600)} hours ago`;
+    return t("hoursAgo", { n: Math.floor(seconds / 3600) }, document);
   }
-  return `${Math.floor(seconds / 86400)} days ago`;
+  return t("daysAgo", { n: Math.floor(seconds / 86400) }, document);
 }
 
 function hostnameFromUrl(url) {
@@ -469,15 +497,15 @@ function hostnameFromUrl(url) {
   }
 }
 
-function mapAlgoliaHits(hits = []) {
+function mapAlgoliaHits(hits = [], document) {
   return hits.map((hit) => {
     const externalHref = hit.url || "";
     const site = hostnameFromUrl(externalHref);
     return {
-      title: hit.title || hit.story_title || "(无标题)",
-      author: hit.author || "匿名",
+      title: hit.title || hit.story_title || t("untitled", null, document),
+      author: hit.author || t("anonymous", null, document),
       authorHref: hit.author ? `user?id=${encodeURIComponent(hit.author)}` : "login",
-      age: formatRelativeTime(hit.created_at_i),
+      age: formatRelativeTime(hit.created_at_i, document),
       score: Number(hit.points || 0),
       replyNum: String(hit.num_comments || 0),
       itemHref: `item?id=${encodeURIComponent(hit.objectID || hit.story_id || "")}`,
@@ -501,10 +529,14 @@ function titleHrefForThread(document, thread) {
 function createThreadItem(document, thread) {
   const badges = [];
   if (Number(thread.replyNum) >= 50) {
-    badges.push('<span class="hb-icon-hot" title="热门">热</span>');
+    badges.push(
+      `<span class="hb-icon-hot" title="${escapeAttr(t("hotTitle", null, document))}">${escapeHtml(t("hotBadge", null, document))}</span>`,
+    );
   }
   if (thread.score >= 100) {
-    badges.push('<span class="hb-icon-good" title="高分">精</span>');
+    badges.push(
+      `<span class="hb-icon-good" title="${escapeAttr(t("goodTitle", null, document))}">${escapeHtml(t("goodBadge", null, document))}</span>`,
+    );
   }
 
   const absParts = [];
@@ -512,7 +544,7 @@ function createThreadItem(document, thread) {
     absParts.push(thread.site);
   }
   if (thread.score) {
-    absParts.push(`${thread.score} 分`);
+    absParts.push(t("points", { n: thread.score }, document));
   }
 
   const absHtml = absParts.length
@@ -535,7 +567,7 @@ function createThreadItem(document, thread) {
   item.className = "hb-thread-item";
   item.innerHTML = `
     <div class="hb-thread-left">
-      <span class="hb-rep-num" title="回复">${escapeHtml(thread.replyNum)}</span>
+      <span class="hb-rep-num" title="${escapeAttr(t("repliesTitle", null, document))}">${escapeHtml(thread.replyNum)}</span>
     </div>
     <div class="hb-thread-body">
       <div class="hb-thread-lz">
@@ -544,8 +576,8 @@ function createThreadItem(document, thread) {
           <a class="hb-th-tit"${titleAttrs}>${escapeHtml(thread.title)}</a>
         </div>
         <div class="hb-thread-author-meta">
-          <a class="hb-author" href="${escapeAttr(thread.authorHref)}" title="主题作者">${escapeHtml(thread.author)}</a>
-          <span class="hb-create-time" title="创建时间">${escapeHtml(thread.age || "")}</span>
+          <a class="hb-author" href="${escapeAttr(thread.authorHref)}" title="${escapeAttr(t("authorTitle", null, document))}">${escapeHtml(thread.author)}</a>
+          <span class="hb-create-time" title="${escapeAttr(t("createdTitle", null, document))}">${escapeHtml(thread.age || "")}</span>
         </div>
       </div>
       <div class="hb-thread-detail-row">
@@ -604,7 +636,7 @@ function createPager(document, { page = 1, prevHref = "", nextHref = "", showPag
     const next = document.createElement("a");
     next.className = "hb-pager-link hb-pager-next";
     next.setAttribute("href", nextHref);
-    next.textContent = "下一页 >";
+    next.textContent = t("nextPage", null, document);
     pager.append(next);
     return pager;
   }
@@ -613,19 +645,19 @@ function createPager(document, { page = 1, prevHref = "", nextHref = "", showPag
     const prev = document.createElement("a");
     prev.className = "hb-pager-link hb-pager-prev";
     prev.setAttribute("href", prevHref);
-    prev.textContent = "< 上一页";
+    prev.textContent = t("prevPage", null, document);
     pager.append(prev);
   } else {
     const disabled = document.createElement("span");
     disabled.className = "hb-pager-disabled";
-    disabled.textContent = "< 上一页";
+    disabled.textContent = t("prevPage", null, document);
     pager.append(disabled);
   }
 
   if (showPageNum) {
     const info = document.createElement("span");
     info.className = "hb-pager-info";
-    info.textContent = `第 ${page} 页`;
+    info.textContent = t("pageNum", { n: page }, document);
     pager.append(info);
   }
 
@@ -633,12 +665,12 @@ function createPager(document, { page = 1, prevHref = "", nextHref = "", showPag
     const next = document.createElement("a");
     next.className = "hb-pager-link hb-pager-next";
     next.setAttribute("href", nextHref);
-    next.textContent = "下一页 >";
+    next.textContent = t("nextPage", null, document);
     pager.append(next);
   } else {
     const disabled = document.createElement("span");
     disabled.className = "hb-pager-disabled";
-    disabled.textContent = "下一页 >";
+    disabled.textContent = t("nextPage", null, document);
     pager.append(disabled);
   }
 
@@ -663,8 +695,8 @@ function renderThreadPanel(document, { threads, countLabel, showSort = true, sec
   top.innerHTML = showSort
     ? `
       <div class="hb-thread-sort">
-        <a href="news">最新回复</a>
-        <a href="newest">最新发帖</a>
+        <a href="news">${escapeHtml(t("sortLatestReply", null, document))}</a>
+        <a href="newest">${escapeHtml(t("sortNewest", null, document))}</a>
       </div>
       <div class="hb-thread-top-right">
         <span class="hb-thread-count">${escapeHtml(countLabel)}</span>
@@ -672,7 +704,7 @@ function renderThreadPanel(document, { threads, countLabel, showSort = true, sec
     `
     : `
       <div class="hb-thread-sort">
-        <span class="hb-sort-focus">${escapeHtml(sectionLabel || "列表")}</span>
+        <span class="hb-sort-focus">${escapeHtml(sectionLabel || t("list", null, document))}</span>
       </div>
       <div class="hb-thread-top-right">
         <span class="hb-thread-count">${escapeHtml(countLabel)}</span>
@@ -687,7 +719,7 @@ function renderThreadPanel(document, { threads, countLabel, showSort = true, sec
   if (threads.length === 0) {
     const empty = document.createElement("div");
     empty.className = "hb-search-empty";
-    empty.textContent = "没有找到相关主题";
+    empty.textContent = t("noTopics", null, document);
     nodes.push(empty);
   }
   if (pager) {
@@ -710,7 +742,7 @@ function storiesToThreads(document) {
       continue;
     }
 
-    const author = metaRow.querySelector(".hnuser")?.textContent?.trim() || "匿名";
+    const author = metaRow.querySelector(".hnuser")?.textContent?.trim() || t("anonymous", null, document);
     const authorHref = metaRow.querySelector(".hnuser")?.getAttribute("href") || "login";
     const age = metaRow.querySelector(".age")?.textContent?.trim() || "";
     const scoreText = metaRow.querySelector(".score")?.textContent?.trim() || "";
@@ -753,17 +785,19 @@ function rebuildThreadList(document) {
 
   const pagerState = resolveListPager(document);
   const showSort = shouldShowSortBar(document);
-  const pageHint = pagerState.showPageNum ? ` · 第 ${pagerState.page} 页` : "";
+  const pageHint = pagerState.showPageNum
+    ? t("pageHint", { n: pagerState.page }, document)
+    : "";
   renderThreadPanel(document, {
     threads,
-    countLabel: `本页 ${threads.length} 篇主题${pageHint}`,
+    countLabel: t("pageCount", { n: threads.length, hint: pageHint }, document),
     showSort,
     sectionLabel: getSectionLabel(document),
     pager: createPager(document, pagerState),
   });
 }
 
-async function searchHackerNews(query) {
+async function searchHackerNews(query, document) {
   const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story`;
   const response = await fetch(url);
   if (!response.ok) {
@@ -771,7 +805,7 @@ async function searchHackerNews(query) {
   }
   const data = await response.json();
   return {
-    threads: mapAlgoliaHits(data.hits || []),
+    threads: mapAlgoliaHits(data.hits || [], document),
     total: Number(data.nbHits || 0),
   };
 }
@@ -781,7 +815,9 @@ function updateSearchBreadcrumb(document, query) {
   if (!current) {
     return;
   }
-  current.textContent = query ? `搜索：${query}` : "Hacker News 吧";
+  current.textContent = query
+    ? t("searchCrumb", { q: query }, document)
+    : t("forumName", null, document);
 }
 
 let hbSearchSeq = 0;
@@ -796,21 +832,21 @@ async function runLocalSearch(document, query) {
   updateSearchBreadcrumb(document, query);
   renderThreadPanel(document, {
     threads: [],
-    countLabel: "搜索中…",
+    countLabel: t("searching", null, document),
     showSort: false,
-    sectionLabel: "搜索结果",
+    sectionLabel: t("searchResults", null, document),
   });
 
   try {
-    const { threads, total } = await searchHackerNews(query);
+    const { threads, total } = await searchHackerNews(query, document);
     if (seq !== hbSearchSeq) {
       return;
     }
     renderThreadPanel(document, {
       threads,
-      countLabel: `搜索到 ${total} 篇主题`,
+      countLabel: t("searchFound", { n: total }, document),
       showSort: false,
-      sectionLabel: "搜索结果",
+      sectionLabel: t("searchResults", null, document),
     });
   } catch {
     if (seq !== hbSearchSeq) {
@@ -818,9 +854,9 @@ async function runLocalSearch(document, query) {
     }
     renderThreadPanel(document, {
       threads: [],
-      countLabel: "搜索失败，请稍后重试",
+      countLabel: t("searchFailed", null, document),
       showSort: false,
-      sectionLabel: "搜索结果",
+      sectionLabel: t("searchResults", null, document),
     });
   }
 }
@@ -875,8 +911,8 @@ function createAuthorColumn(document, { user, userHref, isLz = false }) {
   if (isLz) {
     const badge = document.createElement("div");
     badge.className = "hb-louzhu";
-    badge.title = "楼主";
-    badge.innerHTML = "<span>楼主</span>";
+    badge.title = t("op", null, document);
+    badge.innerHTML = `<span>${escapeHtml(t("op", null, document))}</span>`;
     author.append(badge);
   }
 
@@ -900,7 +936,7 @@ function createAuthorColumn(document, { user, userHref, isLz = false }) {
 
   const level = document.createElement("div");
   level.className = "hb-floor-level";
-  level.innerHTML = `<span>等级</span><em>${userLevel(user)}</em>`;
+  level.innerHTML = `<span>${escapeHtml(t("level", null, document))}</span><em>${userLevel(user)}</em>`;
   author.append(level);
 
   return author;
@@ -913,8 +949,8 @@ function createCoreTitle(document, { title, replyCount }) {
     <div class="hb-core-title-wrap">
       <h1 class="hb-core-title-txt" title="${escapeAttr(title)}">${escapeHtml(title)}</h1>
       <div class="hb-core-title-btns">
-        <span class="hb-core-meta">回复贴：${escapeHtml(String(replyCount))}</span>
-        <a class="hb-core-quick-reply" href="#hb-reply">回复</a>
+        <span class="hb-core-meta">${escapeHtml(t("replyCount", { n: replyCount }, document))}</span>
+        <a class="hb-core-quick-reply" href="#hb-reply">${escapeHtml(t("reply", null, document))}</a>
       </div>
     </div>
   `;
@@ -928,17 +964,17 @@ function createReplyPanel(document, form) {
 
   const title = document.createElement("div");
   title.className = "hb-reply-panel-title";
-  title.textContent = "发表回复";
+  title.textContent = t("postReply", null, document);
   panel.append(title);
 
   form.querySelectorAll('input[type="submit"]').forEach((button) => {
     if (/add comment/i.test(button.value || "")) {
-      button.value = "发表";
+      button.value = t("submit", null, document);
     }
   });
   const help = form.querySelector('a[href*="formatdoc"]');
   if (help) {
-    help.textContent = "编辑帮助";
+    help.textContent = t("editHelp", null, document);
   }
 
   const box = document.createElement("div");
@@ -950,10 +986,10 @@ function createReplyPanel(document, form) {
 
 function buildMainFloor(document, fatitem, replyCount) {
   const titleLink = fatitem.querySelector(".titleline > a");
-  const title = titleLink?.textContent?.trim() || "无标题";
+  const title = titleLink?.textContent?.trim() || t("noTitle", null, document);
   const titleHref = titleLink?.getAttribute("href") || "#";
   const site = fatitem.querySelector(".sitestr")?.textContent?.trim() || "";
-  const user = fatitem.querySelector(".hnuser")?.textContent?.trim() || "匿名";
+  const user = fatitem.querySelector(".hnuser")?.textContent?.trim() || t("anonymous", null, document);
   const userHref = fatitem.querySelector(".hnuser")?.getAttribute("href") || "login";
   const age = fatitem.querySelector(".age")?.textContent?.trim() || "";
   const score = fatitem.querySelector(".score")?.textContent?.trim() || "";
@@ -976,7 +1012,7 @@ function buildMainFloor(document, fatitem, replyCount) {
 
   const top = document.createElement("div");
   top.className = "hb-floor-top";
-  top.innerHTML = `<span class="hb-floor-no">1楼</span>`;
+  top.innerHTML = `<span class="hb-floor-no">${escapeHtml(t("floor", { n: 1 }, document))}</span>`;
   main.append(top);
 
   const content = document.createElement("div");
@@ -987,7 +1023,7 @@ function buildMainFloor(document, fatitem, replyCount) {
     const share = document.createElement("div");
     share.className = "hb-share-link";
     share.innerHTML = `
-      <div class="hb-share-label">分享链接：</div>
+      <div class="hb-share-label">${escapeHtml(t("shareLink", null, document))}</div>
       <a class="hb-main-link" href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>
       ${site ? `<div class="hb-main-site-line">${escapeHtml(site)}</div>` : ""}
     `;
@@ -1016,7 +1052,7 @@ function buildMainFloor(document, fatitem, replyCount) {
   const replyA = document.createElement("a");
   replyA.className = "hb-floor-reply";
   replyA.href = "#hb-reply";
-  replyA.textContent = "回复";
+  replyA.textContent = t("reply", null, document);
   meta.append(replyA);
 
   main.append(meta);
@@ -1049,20 +1085,23 @@ function createFloorCard(document, comment, floor, firstUser) {
 
   const floorNo = document.createElement("span");
   floorNo.className = "hb-floor-no";
-  floorNo.textContent = `${floor}楼`;
+  floorNo.textContent = t("floor", { n: floor }, document);
   top.append(floorNo);
 
   const toggle = document.createElement("button");
   toggle.className = "hb-floor-toggle";
   toggle.type = "button";
-  toggle.textContent = "收起";
+  toggle.textContent = t("collapse", null, document);
   toggle.setAttribute("aria-expanded", "true");
-  toggle.setAttribute("aria-label", "收起该楼层");
+  toggle.setAttribute("aria-label", t("collapseFloor", null, document));
   toggle.addEventListener("click", () => {
     const collapsed = card.classList.toggle("hb-floor-collapsed");
-    toggle.textContent = collapsed ? "展开" : "收起";
+    toggle.textContent = collapsed ? t("expand", null, document) : t("collapse", null, document);
     toggle.setAttribute("aria-expanded", String(!collapsed));
-    toggle.setAttribute("aria-label", `${collapsed ? "展开" : "收起"}该楼层`);
+    toggle.setAttribute(
+      "aria-label",
+      collapsed ? t("expandFloor", null, document) : t("collapseFloor", null, document),
+    );
   });
   top.append(toggle);
   main.append(top);
@@ -1092,7 +1131,7 @@ function createFloorCard(document, comment, floor, firstUser) {
       const a = document.createElement("a");
       a.className = "hb-floor-reply";
       a.setAttribute("href", replyLink.getAttribute("href") || "#");
-      a.textContent = "回复";
+      a.textContent = t("reply", null, document);
       tail.append(a);
     }
   }
@@ -1112,7 +1151,7 @@ function ensureLzlContainer(document, floorCard) {
   lzl = document.createElement("div");
   lzl.className = "hb-lzl";
   lzl.innerHTML = `
-    <div class="hb-lzl-hd">共<em class="hb-lzl-num">0</em>条回复</div>
+    <div class="hb-lzl-hd">${escapeHtml(t("lzlCountPrefix", null, document))}<em class="hb-lzl-num">0</em>${escapeHtml(t("lzlCountSuffix", null, document))}</div>
     <ul class="hb-lzl-list"></ul>
   `;
   main?.append(lzl);
@@ -1149,7 +1188,7 @@ function createLzlItem(document, comment, { firstUser, replyTo = "" }) {
   if (isLz) {
     const badge = document.createElement("span");
     badge.className = "hb-lzl-lz-tag";
-    badge.textContent = "楼主";
+    badge.textContent = t("op", null, document);
     item.append(badge);
   }
 
@@ -1158,7 +1197,7 @@ function createLzlItem(document, comment, { firstUser, replyTo = "" }) {
   if (replyTo) {
     const to = document.createElement("span");
     to.className = "hb-lzl-to";
-    to.textContent = `回复 ${replyTo} : `;
+    to.textContent = t("replyTo", { name: replyTo }, document);
     item.append(to);
   }
 
@@ -1184,7 +1223,7 @@ function createLzlItem(document, comment, { firstUser, replyTo = "" }) {
       const a = document.createElement("a");
       a.className = "hb-lzl-reply";
       a.href = replyLink.getAttribute("href") || "#";
-      a.textContent = "回复";
+      a.textContent = t("reply", null, document);
       tail.append(a);
     }
   }
@@ -1291,6 +1330,7 @@ async function applyPreferences(document) {
     theme: "light",
     density: "comfortable",
     titleOpensDiscussion: true,
+    language: "auto",
   };
 
   let preferences = defaults;
@@ -1299,11 +1339,23 @@ async function applyPreferences(document) {
   }
 
   const themePref = preferences.theme || defaults.theme;
+  const languagePref = preferences.language || defaults.language;
+  const browserLang =
+    document.defaultView?.navigator?.language ||
+    globalThis.navigator?.language ||
+    "";
+  const locale = globalThis.HackerBaI18n
+    ? globalThis.HackerBaI18n.resolveLocale(languagePref, browserLang)
+    : "en";
+  hbLocale = locale;
+
   document.documentElement.dataset.hbThemePref = themePref;
   document.documentElement.dataset.hbTheme = resolveTheme(themePref, document.defaultView);
   document.documentElement.dataset.hbDensity = preferences.density || defaults.density;
   document.documentElement.dataset.hbTitleDiscussion =
     preferences.titleOpensDiscussion === false ? "0" : "1";
+  document.documentElement.dataset.hbLang = locale;
+  document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
   bindSystemThemeSync(document);
 }
 
@@ -1344,6 +1396,7 @@ globalThis.HackerBa = {
   resolveListPager,
   createPager,
   resolveTheme,
+  applyPreferences,
 };
 
 function startHackerBa(document = globalThis.document) {
