@@ -1,5 +1,14 @@
 /* HackerBa — 贴吧吧页细节还原 */
 
+/* 改造完成前隐藏原站，避免闪一下 HN 原生 UI */
+html.hb-boot {
+  background: #f5f5f5 !important;
+}
+
+html.hb-boot body {
+  opacity: 0 !important;
+}
+
 :root {
   --hb-blue: #2d64b3;
   --hb-blue-soft: #e8f0fa;

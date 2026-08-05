@@ -1294,6 +1294,33 @@ globalThis.HackerBa = {
   createPager,
 };
 
+function startHackerBa(document = globalThis.document) {
+  if (!document?.documentElement) {
+    return;
+  }
+
+  document.documentElement.classList.add("hb-boot");
+
+  const boot = () => {
+    try {
+      enhanceHackerNews(document);
+    } finally {
+      document.documentElement.classList.remove("hb-boot");
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+
+  // 防止改造失败时页面一直空白
+  setTimeout(() => {
+    document.documentElement.classList.remove("hb-boot");
+  }, 2500);
+}
+
 if (typeof document !== "undefined") {
-  enhanceHackerNews(document);
+  startHackerBa(document);
 }
