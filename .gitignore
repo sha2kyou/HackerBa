@@ -1,1 +1,3 @@
 node_modules/
+.preview-item.*
+.DS_Store

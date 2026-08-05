@@ -4,6 +4,16 @@ Chrome 扩展：把 [Hacker News](https://news.ycombinator.com) 改造成贴吧�
 
 界面仿经典百度贴吧吧页 / 看帖页；内容仍来自 Hacker News（列表、帖子、搜索等）。
 
+## 界面预览
+
+### 列表页
+
+![HackerBa 列表页](docs/images/hackerba-list.png)
+
+### 看帖页
+
+![HackerBa 看帖页](docs/images/hackerba-thread.png)
+
 ## 功能
 
 - 列表页：回复数、标题、作者与时间、域名外链、贴吧式分页
