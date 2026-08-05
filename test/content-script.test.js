@@ -406,6 +406,7 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
   assert.ok(document.querySelector(".hb-core-title"));
   assert.match(document.querySelector(".hb-core-title-txt").textContent, /Main post/);
   assert.match(document.querySelector(".hb-core-meta").textContent, /回复贴：1/);
+  assert.equal(document.querySelector(".hb-core-title-ctrl"), null);
   assert.equal(main.querySelector(".hb-floor-no").textContent, "1楼");
   assert.equal(main.querySelector(".hb-floor-name").textContent, "alice");
   assert.ok(main.querySelector(".hb-louzhu"));
@@ -539,4 +540,158 @@ test("分页展示上一页/页码/下一页，并保留 morelink", () => {
   assert.equal(page2.querySelector(".hb-pager-prev")?.getAttribute("href"), "news");
   assert.equal(page2.querySelector(".hb-pager-info")?.textContent, "第 2 页");
   assert.equal(page2.querySelector(".hb-pager-next")?.getAttribute("href"), "?p=3");
+});
+
+test("已登录时顶栏显示用户名与退出", () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr>
+        <td><span class="pagetop"><b><a href="news">Hacker News</a></b></span></td>
+        <td><span class="pagetop"><a href="user?id=alice">alice</a> (3) | <a href="logout?auth=x">logout</a></span></td>
+      </tr>
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A</a></span></td>
+      </tr>
+      <tr><td class="subtext"><a href="item?id=1">1&nbsp;comment</a></td></tr>
+    </table>
+  `);
+
+  enhanceHackerNews(document);
+
+  assert.equal(document.querySelector(".hb-user-name")?.textContent, "alice");
+  assert.equal(document.querySelector(".hb-user-name")?.getAttribute("href"), "user?id=alice");
+  assert.equal(document.querySelector('.hb-userbar a[href^="logout"]')?.textContent, "退出");
+  assert.equal(document.querySelector('.hb-userbar a[href="login"]'), null);
+});
+
+test("cursor 分页只显示下一页", () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A</a></span></td>
+      </tr>
+      <tr><td class="subtext"><a href="item?id=1">1&nbsp;comment</a></td></tr>
+      <tr><td class="title"><a href="newest?next=abc" class="morelink" rel="next">More</a></td></tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/newest?next=xyz",
+  );
+
+  enhanceHackerNews(document);
+
+  assert.equal(document.querySelector(".hb-pager-prev"), null);
+  assert.equal(document.querySelector(".hb-pager-disabled"), null);
+  assert.equal(document.querySelector(".hb-pager-info"), null);
+  assert.equal(document.querySelector(".hb-pager-next")?.getAttribute("href"), "newest?next=abc");
+});
+
+test("看帖页搜索会移除帖子区", async () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr><td>
+        <table class="fatitem">
+          <tr class="athing">
+            <td class="title"><span class="titleline"><a href="https://example.com">Main</a></span></td>
+          </tr>
+          <tr>
+            <td class="subtext">
+              by <a class="hnuser" href="user?id=alice">alice</a>
+              <span class="age">1 hour ago</span>
+              | <a href="item?id=1">1&nbsp;comment</a>
+            </td>
+          </tr>
+          <tr>
+            <td><form action="comment"><textarea name="text"></textarea><input type="submit" value="add comment"></form></td>
+          </tr>
+        </table>
+        <table class="comment-tree">
+          <tr class="athing comtr">
+            <td class="ind" indent="0"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=bob">bob</a></span>
+              <div class="comment"><span class="commtext">Hi</span></div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/item?id=1",
+  );
+
+  enhanceHackerNews(document);
+  assert.ok(document.querySelector(".hb-post-wrap"));
+
+  document.defaultView.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      hits: [
+        {
+          objectID: "9",
+          title: "Found",
+          url: "https://example.com/f",
+          author: "carol",
+          points: 1,
+          num_comments: 0,
+          created_at_i: Math.floor(Date.now() / 1000),
+        },
+      ],
+      nbHits: 1,
+    }),
+  });
+
+  await document.defaultView.HackerBa.runLocalSearch(document, "Found");
+
+  assert.equal(document.querySelector(".hb-post-wrap"), null);
+  assert.equal(document.body.classList.contains("hb-item-page"), false);
+  assert.equal(document.querySelector(".hb-th-tit")?.textContent, "Found");
+  assert.match(document.querySelector(".hb-thread-count").textContent, /搜索到 1/);
+});
+
+test("搜索竞态只采用最后一次结果", async () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A</a></span></td>
+      </tr>
+      <tr><td class="subtext"><a href="item?id=1">1&nbsp;comment</a></td></tr>
+    </table>
+  `);
+  enhanceHackerNews(document);
+
+  let releaseSlow;
+  const slowReady = new Promise((resolve) => {
+    releaseSlow = resolve;
+  });
+
+  document.defaultView.fetch = async (url) => {
+    if (String(url).includes("slow")) {
+      await slowReady;
+      return {
+        ok: true,
+        json: async () => ({
+          hits: [{ objectID: "1", title: "SLOW", author: "a", points: 1, num_comments: 0, created_at_i: 1 }],
+          nbHits: 1,
+        }),
+      };
+    }
+    return {
+      ok: true,
+      json: async () => ({
+        hits: [{ objectID: "2", title: "FAST", author: "b", points: 1, num_comments: 0, created_at_i: 1 }],
+        nbHits: 1,
+      }),
+    };
+  };
+
+  const slow = document.defaultView.HackerBa.runLocalSearch(document, "slow");
+  const fast = document.defaultView.HackerBa.runLocalSearch(document, "fast");
+  await fast;
+  releaseSlow();
+  await slow;
+
+  assert.equal(document.querySelector(".hb-th-tit")?.textContent, "FAST");
+  assert.match(document.querySelector(".hb-thread-count").textContent, /搜索到 1/);
 });

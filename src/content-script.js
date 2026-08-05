@@ -203,11 +203,49 @@ function wrapOrphanContent(document, orphanNodes) {
   return enhanceDocumentPanel(document, host);
 }
 
+function resolveSessionUser(document) {
+  const logout = document.querySelector('.pagetop a[href^="logout"]');
+  if (!logout) {
+    return null;
+  }
+  const top = logout.closest(".pagetop") || document;
+  const userLink = top.querySelector('a[href^="user?id="]');
+  if (!userLink) {
+    return null;
+  }
+  return {
+    name: userLink.textContent.trim() || "用户",
+    href: userLink.getAttribute("href") || "login",
+    logoutHref: logout.getAttribute("href") || "logout",
+  };
+}
+
+function renderUserbar(document, session) {
+  const bar = document.querySelector(".hb-userbar");
+  if (!bar) {
+    return;
+  }
+  if (!session) {
+    bar.innerHTML = `
+      <a href="login">登录</a>
+      <span class="hb-user-sep">|</span>
+      <a href="login?mode=register">注册</a>
+    `;
+    return;
+  }
+  bar.innerHTML = `
+    <a class="hb-user-name" href="${escapeAttr(session.href)}">${escapeHtml(session.name)}</a>
+    <span class="hb-user-sep">|</span>
+    <a href="${escapeAttr(session.logoutHref)}">退出</a>
+  `;
+}
+
 function buildCommunityShell(document) {
   if (document.querySelector(".hb-wrap")) {
     return;
   }
 
+  const session = resolveSessionUser(document);
   const existingMain = document.querySelector("#hnmain");
   const orphanNodes = [];
   if (!existingMain) {
@@ -231,11 +269,7 @@ function buildCommunityShell(document) {
           <input name="q" type="search" placeholder="搜索 Hacker News" aria-label="搜索 Hacker News">
           <button type="submit" class="hb-search-btn">搜索</button>
         </form>
-        <div class="hb-userbar">
-          <a href="login">登录</a>
-          <span class="hb-user-sep">|</span>
-          <a href="login?mode=register">注册</a>
-        </div>
+        <div class="hb-userbar"></div>
       </div>
     </div>
     <div class="hb-breadcrumb">
@@ -308,6 +342,7 @@ function buildCommunityShell(document) {
   `;
 
   document.body.insertBefore(wrap, document.body.firstChild);
+  renderUserbar(document, session);
 
   const source = document.createElement("div");
   source.className = "hb-hn-source hb-source-hidden";
@@ -548,6 +583,17 @@ function createPager(document, { page = 1, prevHref = "", nextHref = "", showPag
   const pager = document.createElement("div");
   pager.className = "hb-pager";
 
+  // cursor 分页（如 newest?next=）没有可靠上一页，只展示下一页
+  const cursorOnly = Boolean(nextHref && !prevHref && !showPageNum);
+  if (cursorOnly) {
+    const next = document.createElement("a");
+    next.className = "hb-pager-link hb-pager-next";
+    next.setAttribute("href", nextHref);
+    next.textContent = "下一页 >";
+    pager.append(next);
+    return pager;
+  }
+
   if (prevHref) {
     const prev = document.createElement("a");
     prev.className = "hb-pager-link hb-pager-prev";
@@ -590,9 +636,12 @@ function renderThreadPanel(document, { threads, countLabel, showSort = true, sec
     return;
   }
 
-  panel.querySelectorAll(".hb-thread-top, .hb-thread-list, .hb-pager, .hb-search-empty").forEach((node) => {
-    node.remove();
-  });
+  panel
+    .querySelectorAll(".hb-thread-top, .hb-thread-list, .hb-pager, .hb-search-empty, .hb-post-wrap")
+    .forEach((node) => {
+      node.remove();
+    });
+  document.body.classList.remove("hb-item-page");
 
   const top = document.createElement("div");
   top.className = "hb-thread-top";
@@ -720,12 +769,15 @@ function updateSearchBreadcrumb(document, query) {
   current.textContent = query ? `搜索：${query}` : "Hacker News 吧";
 }
 
+let hbSearchSeq = 0;
+
 async function runLocalSearch(document, query) {
   const panel = document.querySelector(".hb-thread-panel");
   if (!panel) {
     return;
   }
 
+  const seq = ++hbSearchSeq;
   updateSearchBreadcrumb(document, query);
   renderThreadPanel(document, {
     threads: [],
@@ -736,6 +788,9 @@ async function runLocalSearch(document, query) {
 
   try {
     const { threads, total } = await searchHackerNews(query);
+    if (seq !== hbSearchSeq) {
+      return;
+    }
     renderThreadPanel(document, {
       threads,
       countLabel: `搜索到 ${total} 篇主题`,
@@ -743,6 +798,9 @@ async function runLocalSearch(document, query) {
       sectionLabel: "搜索结果",
     });
   } catch {
+    if (seq !== hbSearchSeq) {
+      return;
+    }
     renderThreadPanel(document, {
       threads: [],
       countLabel: "搜索失败，请稍后重试",
@@ -830,11 +888,6 @@ function createCoreTitle(document, { title, replyCount }) {
         <span class="hb-core-meta">回复贴：${escapeHtml(String(replyCount))}</span>
         <a class="hb-core-quick-reply" href="#hb-reply">回复</a>
       </div>
-    </div>
-    <div class="hb-core-title-ctrl">
-      <span class="hb-core-ctrl-item hb-core-ctrl-on">全部</span>
-      <span class="hb-core-ctrl-sep">|</span>
-      <span class="hb-core-ctrl-item">只看楼主</span>
     </div>
   `;
   return bar;

@@ -3,6 +3,12 @@
   "name": "HackerBa",
   "version": "0.1.0",
   "description": "将 Hacker News 改造成贴吧式阅读体验。",
+  "icons": {
+    "16": "src/icons/icon16.png",
+    "32": "src/icons/icon32.png",
+    "48": "src/icons/icon48.png",
+    "128": "src/icons/icon128.png"
+  },
   "permissions": [
     "storage"
   ],
@@ -23,15 +29,5 @@
       "run_at": "document_idle"
     }
   ],
-  "options_page": "src/options.html",
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "src/icons/y18.svg"
-      ],
-      "matches": [
-        "https://news.ycombinator.com/*"
-      ]
-    }
-  ]
+  "options_page": "src/options.html"
 }

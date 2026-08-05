@@ -124,6 +124,14 @@ body.hackerba .hb-userbar a:hover {
   color: var(--hb-blue);
 }
 
+body.hackerba .hb-user-name {
+  max-width: 120px;
+  overflow: hidden;
+  color: #2d64b3 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 body.hackerba .hb-user-sep {
   margin: 0 6px;
   color: #ccc;
@@ -932,30 +940,6 @@ body.hackerba .hb-core-quick-reply {
 
 body.hackerba .hb-core-quick-reply:hover {
   background: #f07018;
-}
-
-body.hackerba .hb-core-title-ctrl {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-top: 1px solid #f0f0f0;
-  background: #fafafa;
-  color: #666;
-  font-size: 12px;
-}
-
-body.hackerba .hb-core-ctrl-item {
-  color: #666;
-}
-
-body.hackerba .hb-core-ctrl-on {
-  color: #2d64b3;
-  font-weight: 700;
-}
-
-body.hackerba .hb-core-ctrl-sep {
-  color: #ddd;
 }
 
 body.hackerba .hb-main-floor {
