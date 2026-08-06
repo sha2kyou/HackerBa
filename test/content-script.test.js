@@ -380,6 +380,45 @@ test("未登录发帖页套上贴吧壳并美化登录提示", () => {
   assert.equal(document.querySelector(".hb-hn-source .hb-auth-panel"), null);
 });
 
+test("已登录发帖页渲染为独立发帖表单", () => {
+  const document = createDocument(
+    `
+    <form method="post" action="r">
+      <input type="hidden" name="fnid" value="abc">
+      <input type="hidden" name="fnop" value="submit-page">
+      <table border="0">
+        <tr><td>title</td><td><input type="text" name="title" value="" size="50"></td></tr>
+        <tr><td>url</td><td><input type="url" name="url" value="" size="50"></td></tr>
+        <tr><td></td><td><b>or</b></td></tr>
+        <tr><td>text</td><td><textarea name="text" rows="4" cols="49"></textarea></td></tr>
+        <tr><td></td><td><input type="submit" value="submit"></td></tr>
+        <tr><td></td><td><a href="formatdoc">help</a></td></tr>
+      </table>
+    </form>
+  `,
+    "https://news.ycombinator.com/submit",
+  );
+
+  enhanceHackerNews(document);
+
+  assert.ok(document.querySelector(".hb-modal .hb-compose-panel"));
+  assert.equal(document.querySelector(".hb-compose-title")?.textContent, "New post");
+  assert.equal(document.querySelector(".hb-auth-panel"), null);
+  assert.equal(document.querySelector('.hb-compose-field input[name="title"]')?.classList.contains("hb-compose-input"), true);
+  assert.equal(document.querySelector('.hb-compose-field input[name="url"]')?.classList.contains("hb-compose-input"), true);
+  assert.equal(document.querySelector('.hb-compose-field input[name="url"]')?.getAttribute("type"), "text");
+  assert.equal(document.querySelector('.hb-compose-field input[name="url"]')?.getAttribute("inputmode"), "url");
+  assert.equal(document.querySelector('.hb-compose-field textarea[name="text"]')?.classList.contains("hb-compose-textarea"), true);
+  assert.equal(document.querySelector('.hb-compose-field input[name="title"]')?.getAttribute("size"), null);
+  assert.equal(document.querySelector('.hb-compose-field textarea[name="text"]')?.getAttribute("cols"), null);
+  assert.equal(document.querySelector(".hb-compose-or")?.textContent, "or");
+  assert.equal(document.querySelector(".hb-compose-panel .hb-form-actions .hb-primary-btn")?.value, "Submit");
+  assert.equal(document.querySelector(".hb-compose-help")?.textContent, "Formatting help");
+  assert.equal(document.querySelector('input[name="fnid"]')?.value, "abc");
+  assert.equal(document.querySelector(".hb-bc-current")?.textContent, "New post");
+  assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
+});
+
 test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   const loginDoc = createDocument(
     `
@@ -535,6 +574,19 @@ test("列表页点击登录/吧规为页内弹框，关闭不跳转", async () =
       <p>On-Topic: Anything that good hackers would find interesting.</p>
     </td></tr></table></center>
   `;
+  const submitHtml = `
+    <form method="post" action="r">
+      <input type="hidden" name="fnid" value="abc">
+      <input type="hidden" name="fnop" value="submit-page">
+      <table border="0">
+        <tr><td>title</td><td><input type="text" name="title" size="50"></td></tr>
+        <tr><td>url</td><td><input type="url" name="url" size="50"></td></tr>
+        <tr><td></td><td><b>or</b></td></tr>
+        <tr><td>text</td><td><textarea name="text" rows="4" cols="49"></textarea></td></tr>
+        <tr><td></td><td><input type="submit" value="submit"></td></tr>
+      </table>
+    </form>
+  `;
 
   document.defaultView.fetch = async (url) => {
     const href = String(url);
@@ -548,6 +600,12 @@ test("列表页点击登录/吧规为页内弹框，关闭不跳转", async () =
       return {
         ok: true,
         text: async () => rulesHtml,
+      };
+    }
+    if (href.includes("submit")) {
+      return {
+        ok: true,
+        text: async () => submitHtml,
       };
     }
     return { ok: false, status: 404, text: async () => "" };
@@ -593,6 +651,28 @@ test("列表页点击登录/吧规为页内弹框，关闭不跳转", async () =
   assert.equal(document.defaultView.location.pathname, "/news");
   assert.ok(document.querySelector(".hb-modal .hb-doc-panel"));
   assert.match(document.querySelector(".hb-doc-body").textContent, /On-Topic/);
+
+  document.querySelector(".hb-modal-close").click();
+  assert.equal(document.querySelector(".hb-modal-overlay"), null);
+
+  const postLink = document.querySelector("a.hb-tab-post[href='submit']");
+  assert.ok(postLink);
+  assert.equal(document.defaultView.HackerBa.isPopupHref("submit", document), true);
+  postLink.dispatchEvent(
+    new document.defaultView.MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+    }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(document.defaultView.location.pathname, "/news");
+  assert.ok(document.querySelector(".hb-modal .hb-compose-panel"));
+  assert.equal(document.querySelector(".hb-compose-title")?.textContent, "New post");
+  assert.equal(document.body.classList.contains("hb-popup-standalone"), false);
+  assert.ok(document.querySelector('.hb-compose-field input[name="title"]'));
 });
 
 test("用户信息页以弹层展示，不点亮看帖 Tab", () => {

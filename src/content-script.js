@@ -61,9 +61,19 @@ function resolvePageUrl(document, pageUrl) {
 
 function detectOrphanPageKind(document, host, pageUrl) {
   const path = resolvePageUrl(document, pageUrl).pathname || "";
+  const hasCompose = Boolean(
+    host.querySelector(
+      "form input[name='title'], form input[name='url'], form textarea[name='text']",
+    ),
+  );
+  const hasAuth = Boolean(host.querySelector("form input[name='acct']"));
+
+  if (hasCompose && !hasAuth) {
+    return "submit";
+  }
   if (
     /\/(login|submit|forgot|changepw)/i.test(path) ||
-    host.querySelector("form input[name='acct']")
+    hasAuth
   ) {
     return "auth";
   }
@@ -570,6 +580,146 @@ function enhanceUserPanel(document, host, { userId, titleHint } = {}) {
   return panel;
 }
 
+function createComposeField(document, { labelKey, control, hintKey }) {
+  const field = document.createElement("div");
+  field.className = "hb-compose-field";
+
+  const controlId = `hb-compose-${control?.getAttribute?.("name") || "field"}`;
+  const caption = document.createElement("label");
+  caption.className = "hb-compose-label";
+  caption.htmlFor = controlId;
+  caption.textContent = t(labelKey, null, document);
+  field.append(caption);
+
+  if (control) {
+    normalizeComposeControl(control, controlId);
+    field.append(control);
+  }
+
+  if (hintKey) {
+    const hint = document.createElement("p");
+    hint.className = "hb-compose-hint";
+    hint.textContent = t(hintKey, null, document);
+    field.append(hint);
+  }
+
+  return field;
+}
+
+function normalizeComposeControl(control, controlId) {
+  if (!control) {
+    return;
+  }
+  control.id = controlId;
+  control.classList.add("hb-compose-control");
+  control.removeAttribute("size");
+  control.removeAttribute("rows");
+  control.removeAttribute("cols");
+  control.removeAttribute("style");
+  control.removeAttribute("width");
+  if (control.tagName === "TEXTAREA") {
+    control.classList.add("hb-compose-textarea");
+  } else {
+    control.classList.add("hb-compose-input");
+    // url 原生装饰在各浏览器表现不一，统一成 text 外观
+    if (String(control.getAttribute("type") || "").toLowerCase() === "url") {
+      control.setAttribute("type", "text");
+      control.setAttribute("inputmode", "url");
+      control.setAttribute("autocomplete", "url");
+    }
+  }
+}
+
+function enhanceSubmitPanel(document, host) {
+  const panel = document.createElement("div");
+  panel.className = "hb-compose-panel";
+
+  const title = document.createElement("h2");
+  title.className = "hb-compose-title";
+  title.textContent = t("composeTitle", null, document);
+  panel.append(title);
+
+  const tip = document.createElement("p");
+  tip.className = "hb-compose-tip";
+  tip.textContent = t("composeTip", null, document);
+  panel.append(tip);
+
+  const form = host.querySelector("form");
+  if (!form) {
+    return enhanceDocumentPanel(document, host, t("composeTitle", null, document));
+  }
+
+  const hiddens = [...form.querySelectorAll("input[type='hidden']")];
+  const titleInput = form.querySelector("input[name='title']");
+  const urlInput = form.querySelector("input[name='url']");
+  const textArea = form.querySelector("textarea[name='text']");
+  const submitBtn = form.querySelector("input[type='submit']");
+  const help = form.querySelector('a[href*="formatdoc"]');
+
+  const body = document.createElement("div");
+  body.className = "hb-compose-body";
+
+  if (titleInput) {
+    body.append(
+      createComposeField(document, {
+        labelKey: "composeFieldTitle",
+        control: titleInput,
+      }),
+    );
+  }
+  if (urlInput) {
+    body.append(
+      createComposeField(document, {
+        labelKey: "composeFieldUrl",
+        control: urlInput,
+        hintKey: "composeUrlHint",
+      }),
+    );
+  }
+  if (urlInput && textArea) {
+    const divider = document.createElement("div");
+    divider.className = "hb-compose-or";
+    const mark = document.createElement("span");
+    mark.textContent = t("composeOr", null, document);
+    divider.append(mark);
+    body.append(divider);
+  }
+  if (textArea) {
+    body.append(
+      createComposeField(document, {
+        labelKey: "composeFieldText",
+        control: textArea,
+        hintKey: "composeTextHint",
+      }),
+    );
+  }
+
+  while (form.firstChild) {
+    form.firstChild.remove();
+  }
+  hiddens.forEach((node) => form.append(node));
+  form.append(body);
+
+  const actions = document.createElement("div");
+  actions.className = "hb-form-actions";
+  if (help) {
+    help.textContent = t("editHelp", null, document);
+    help.classList.add("hb-compose-help");
+    const left = document.createElement("div");
+    left.className = "hb-form-actions-left";
+    left.append(help);
+    actions.append(left);
+  }
+  if (submitBtn) {
+    submitBtn.classList.add("hb-primary-btn");
+    submitBtn.value = t("composeSubmit", null, document);
+    actions.append(submitBtn);
+  }
+  form.append(actions);
+  panel.append(form);
+  return panel;
+}
+
 function wrapOrphanContent(document, orphanNodes, pageUrl, options = {}) {
   const updateBreadcrumb = options.updateBreadcrumb !== false;
   const host = document.createElement("div");
@@ -590,6 +740,13 @@ function wrapOrphanContent(document, orphanNodes, pageUrl, options = {}) {
       );
     }
     return enhanceAuthPanel(document, host, url);
+  }
+
+  if (kind === "submit") {
+    if (updateBreadcrumb) {
+      setBreadcrumbCurrent(document, t("crumbPost", null, document));
+    }
+    return enhanceSubmitPanel(document, host);
   }
 
   const path = url.pathname || "";
@@ -618,7 +775,7 @@ function isPopupHref(href, document) {
       return false;
     }
     const key = url.pathname.replace(/^\//, "").split("/")[0] || "";
-    if (key === "login" || key === "forgot" || key === "changepw" || key === "user") {
+    if (key === "login" || key === "forgot" || key === "changepw" || key === "user" || key === "submit") {
       return true;
     }
     return /guidelines|security|showhn|newsfaq|formatdoc/i.test(url.pathname);
@@ -640,7 +797,8 @@ function shouldSuppressTabFocus(document) {
     key === "user" ||
     key === "login" ||
     key === "forgot" ||
-    key === "changepw"
+    key === "changepw" ||
+    key === "submit"
   ) {
     return true;
   }
@@ -2570,6 +2728,7 @@ globalThis.HackerBa = {
   openInPagePopup,
   closePopupModal,
   buildPopupPanelFromHtml,
+  enhanceSubmitPanel,
   BANNER_COVER_PATH,
   openSettingsModal,
   buildSettingsPanel,

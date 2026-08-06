@@ -1993,6 +1993,186 @@ html[data-hb-density="compact"] body.hackerba .hb-thread-item {
   }
 }
 
+body.hackerba .hb-modal:has(.hb-compose-panel) {
+  width: min(600px, 100%);
+}
+
+body.hackerba .hb-compose-panel {
+  padding: 16px 18px 18px;
+  background: var(--hb-surface);
+}
+
+body.hackerba .hb-compose-panel form {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.hackerba .hb-compose-title {
+  margin: 0 0 8px;
+  padding: 0 28px 8px 0;
+  border-bottom: 1px solid var(--hb-line);
+  color: var(--hb-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+body.hackerba .hb-compose-tip {
+  margin: 0 0 16px;
+  color: var(--hb-subtle);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+body.hackerba .hb-compose-body {
+  display: grid;
+  gap: 16px;
+}
+
+body.hackerba .hb-compose-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body.hackerba .hb-compose-label {
+  display: block;
+  margin: 0;
+  color: var(--hb-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+body.hackerba .hb-compose-hint {
+  margin: 0;
+  color: var(--hb-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+body.hackerba .hb-compose-panel .hb-compose-control,
+body.hackerba .hb-compose-panel .hb-compose-input,
+body.hackerba .hb-compose-panel .hb-compose-textarea,
+body.hackerba .hb-compose-panel input[type="text"],
+body.hackerba .hb-compose-panel input[type="url"],
+body.hackerba .hb-compose-panel textarea {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  border: 1px solid var(--hb-input-border) !important;
+  border-radius: var(--hb-radius-sm) !important;
+  outline: none !important;
+  background: var(--hb-surface-2) !important;
+  box-shadow: none !important;
+  color: var(--hb-text) !important;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+  letter-spacing: normal !important;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.hackerba .hb-compose-panel .hb-compose-input,
+body.hackerba .hb-compose-panel input[type="text"],
+body.hackerba .hb-compose-panel input[type="url"] {
+  height: var(--hb-control-h) !important;
+  min-height: var(--hb-control-h) !important;
+  max-height: var(--hb-control-h) !important;
+  padding: 0 12px !important;
+}
+
+body.hackerba .hb-compose-panel .hb-compose-textarea,
+body.hackerba .hb-compose-panel textarea {
+  height: auto !important;
+  min-height: 132px !important;
+  max-height: none !important;
+  padding: 10px 12px !important;
+  resize: vertical !important;
+  overflow: auto !important;
+}
+
+body.hackerba .hb-compose-panel .hb-compose-control:focus,
+body.hackerba .hb-compose-panel .hb-compose-input:focus,
+body.hackerba .hb-compose-panel .hb-compose-textarea:focus,
+body.hackerba .hb-compose-panel input[type="text"]:focus,
+body.hackerba .hb-compose-panel input[type="url"]:focus,
+body.hackerba .hb-compose-panel textarea:focus {
+  border-color: var(--hb-accent) !important;
+  background: var(--hb-surface) !important;
+  box-shadow: var(--hb-focus-ring) !important;
+}
+
+body.hackerba .hb-compose-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -2px 0;
+  color: var(--hb-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+body.hackerba .hb-compose-or::before,
+body.hackerba .hb-compose-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--hb-line);
+}
+
+body.hackerba .hb-compose-help {
+  color: var(--hb-muted) !important;
+  font-size: 13px;
+  text-decoration: none !important;
+}
+
+body.hackerba .hb-compose-help:hover {
+  color: var(--hb-accent) !important;
+}
+
+body.hackerba .hb-compose-panel .hb-form-actions {
+  margin-top: 16px;
+}
+
+body.hackerba .hb-compose-panel .hb-primary-btn,
+body.hackerba .hb-compose-panel input[type="submit"] {
+  width: auto !important;
+  min-width: 96px !important;
+  max-width: none !important;
+  height: var(--hb-btn-h) !important;
+  min-height: var(--hb-btn-h) !important;
+  max-height: var(--hb-btn-h) !important;
+  padding: 0 16px !important;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-compose-panel .hb-compose-control,
+html[data-hb-theme="dark"] body.hackerba .hb-compose-panel .hb-compose-input,
+html[data-hb-theme="dark"] body.hackerba .hb-compose-panel .hb-compose-textarea,
+html[data-hb-theme="dark"] body.hackerba .hb-compose-panel input[type="text"],
+html[data-hb-theme="dark"] body.hackerba .hb-compose-panel input[type="url"],
+html[data-hb-theme="dark"] body.hackerba .hb-compose-panel textarea {
+  color: var(--hb-text) !important;
+  background: var(--hb-surface-3) !important;
+}
+
 /* ===== 插件设置弹层 ===== */
 body.hackerba .hb-modal:has(.hb-settings-panel) {
   width: min(440px, 100%);
