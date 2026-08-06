@@ -411,6 +411,8 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   assert.equal(loginDoc.querySelector(".hb-auth-card h3").textContent, "Log in");
   assert.equal(loginDoc.querySelector(".hb-auth-switch").getAttribute("href"), "login?mode=register");
   assert.ok(loginDoc.querySelector(".hb-modal .hb-auth-panel"));
+  assert.ok(loginDoc.querySelector(".hb-auth-card .hb-form-actions .hb-primary-btn"));
+  assert.ok(loginDoc.querySelector(".hb-auth-card .hb-form-actions-left .hb-auth-forgot"));
   assert.equal(loginDoc.body.classList.contains("hb-popup-page"), true);
   assert.equal(loginDoc.body.classList.contains("hb-popup-standalone"), true);
   assert.equal(loginDoc.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
@@ -1011,6 +1013,74 @@ test("已登录时顶栏显示用户名与退出", () => {
   assert.equal(document.querySelector(".hb-btn-attention.hb-btn-followed")?.textContent, "Following");
   assert.equal(document.querySelector(".hb-btn-checkin.hb-btn-checked")?.textContent, "Checked in");
   assert.equal(document.querySelector('.hb-card-btns a.hb-btn-attention[href="login"]'), null);
+});
+
+test("顶栏提供插件设置入口", async () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A</a></span></td>
+      </tr>
+      <tr><td class="subtext"><a href="item?id=1">1&nbsp;comment</a></td></tr>
+    </table>
+  `);
+  const stored = {};
+  let reloaded = false;
+  document.defaultView.chrome = {
+    runtime: {
+      getManifest() {
+        return { version: "0.2.0" };
+      },
+    },
+    storage: {
+      sync: {
+        async get(defaults) {
+          return { ...defaults, ...stored };
+        },
+        async set(values) {
+          Object.assign(stored, values);
+        },
+      },
+    },
+  };
+  document.defaultView.hbReloadPage = () => {
+    reloaded = true;
+  };
+
+  enhanceHackerNews(document);
+
+  const link = document.querySelector(".hb-userbar .hb-settings-link");
+  assert.ok(link);
+  assert.equal(link.getAttribute("href"), "#");
+  assert.equal(link.textContent, "Settings");
+
+  link.dispatchEvent(
+    new document.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }),
+  );
+
+  const panel = document.querySelector(".hb-modal .hb-settings-panel");
+  assert.ok(panel);
+  assert.equal(panel.querySelector(".hb-settings-title")?.textContent, "Settings");
+  assert.ok(panel.querySelector("#hb-preferences"));
+  assert.ok(panel.querySelector(".hb-settings-section-title"));
+  assert.ok(panel.querySelector(".hb-settings-toggle"));
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(panel.querySelector("#theme")?.value, "light");
+  assert.equal(panel.querySelector("#accentColor")?.value, "blue");
+
+  panel.querySelector("#theme").value = "dark";
+  panel.querySelector("#accentColor").value = "orange";
+  panel.querySelector("#showBannerCover").checked = true;
+  panel.querySelector("#hb-preferences").dispatchEvent(
+    new document.defaultView.Event("submit", { bubbles: true, cancelable: true }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(stored.theme, "dark");
+  assert.equal(stored.accentColor, "orange");
+  assert.equal(stored.showBannerCover, true);
+  assert.equal(reloaded, true);
 });
 
 test("未登录时吧等级为占位", () => {

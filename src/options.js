@@ -1,6 +1,7 @@
 const form = document.querySelector("#preferences");
 const language = document.querySelector("#language");
 const theme = document.querySelector("#theme");
+const accentColor = document.querySelector("#accentColor");
 const density = document.querySelector("#density");
 const titleOpensDiscussion = document.querySelector("#titleOpensDiscussion");
 const discussionOpensNewTab = document.querySelector("#discussionOpensNewTab");
@@ -11,6 +12,20 @@ const { resolveLocale, t } = globalThis.HackerBaI18n;
 
 function browserLang() {
   return globalThis.navigator?.language || "";
+}
+
+function applyOptionsTheme(themePref) {
+  let resolved = themePref;
+  if (themePref === "system") {
+    resolved = globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+  document.documentElement.dataset.hbTheme = resolved === "dark" ? "dark" : "light";
+}
+
+function applyOptionsAccent(accentPref) {
+  document.documentElement.dataset.hbAccent = accentPref === "orange" ? "orange" : "blue";
 }
 
 function applyOptionsI18n(locale) {
@@ -32,6 +47,7 @@ async function restorePreferences() {
   const preferences = await chrome.storage.sync.get({
     language: "auto",
     theme: "light",
+    accentColor: "blue",
     density: "comfortable",
     titleOpensDiscussion: true,
     discussionOpensNewTab: true,
@@ -39,15 +55,26 @@ async function restorePreferences() {
   });
   language.value = preferences.language || "auto";
   theme.value = preferences.theme;
+  accentColor.value = preferences.accentColor === "orange" ? "orange" : "blue";
   density.value = preferences.density;
   titleOpensDiscussion.checked = preferences.titleOpensDiscussion !== false;
   discussionOpensNewTab.checked = preferences.discussionOpensNewTab !== false;
   showBannerCover.checked = preferences.showBannerCover === true;
+  applyOptionsTheme(theme.value);
+  applyOptionsAccent(accentColor.value);
   applyOptionsI18n(resolveLocale(language.value, browserLang()));
 }
 
 language.addEventListener("change", () => {
   applyOptionsI18n(resolveLocale(language.value, browserLang()));
+});
+
+theme.addEventListener("change", () => {
+  applyOptionsTheme(theme.value);
+});
+
+accentColor.addEventListener("change", () => {
+  applyOptionsAccent(accentColor.value);
 });
 
 form.addEventListener("submit", async (event) => {
@@ -56,11 +83,14 @@ form.addEventListener("submit", async (event) => {
   await chrome.storage.sync.set({
     language: language.value,
     theme: theme.value,
+    accentColor: accentColor.value,
     density: density.value,
     titleOpensDiscussion: titleOpensDiscussion.checked,
     discussionOpensNewTab: discussionOpensNewTab.checked,
     showBannerCover: showBannerCover.checked,
   });
+  applyOptionsTheme(theme.value);
+  applyOptionsAccent(accentColor.value);
   applyOptionsI18n(locale);
   status.value = t(locale, "optSaved");
 });

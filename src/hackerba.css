@@ -10,18 +10,27 @@ html.hb-boot body {
 }
 
 :root {
-  --hb-blue: #3370ff;
-  --hb-blue-soft: #eaf0ff;
-  --hb-search: #3370ff;
-  --hb-orange: #ff6b1a;
-  --hb-rep: #ff6b1a;
+  /* 主题色：默认贴吧蓝；橙/蓝不再混用 */
+  --hb-accent: #3370ff;
+  --hb-accent-hover: #2b5fe0;
+  --hb-accent-soft: #eaf0ff;
+  --hb-blue: var(--hb-accent);
+  --hb-blue-soft: var(--hb-accent-soft);
+  --hb-search: var(--hb-accent);
+  --hb-search-hover: var(--hb-accent-hover);
+  --hb-orange: var(--hb-accent);
+  --hb-orange-hover: var(--hb-accent-hover);
+  --hb-orange-soft: var(--hb-accent-soft);
+  --hb-rep: var(--hb-accent);
   --hb-hot: #ff3b30;
-  --hb-good: #3370ff;
+  --hb-good: var(--hb-accent);
+  --hb-me: #18a058;
   --hb-bg: #f0f1f4;
   --hb-surface: #fff;
   --hb-surface-2: #f7f8fa;
   --hb-surface-3: #f5f6f8;
   --hb-surface-soft: #f7f8fa;
+  --hb-hover-bg: #fafbfc;
   --hb-line: #ebedf0;
   --hb-line-strong: #e3e5e8;
   --hb-input-border: #dce0e5;
@@ -29,12 +38,25 @@ html.hb-boot body {
   --hb-text: #1f2329;
   --hb-muted: #8a9199;
   --hb-subtle: #646a73;
-  --hb-link: #3370ff;
-  --hb-brand: #3370ff;
+  --hb-disabled-text: #c5c9cf;
+  --hb-link: var(--hb-accent);
+  --hb-brand: var(--hb-accent);
   --hb-radius: 12px;
   --hb-radius-sm: 8px;
+  --hb-radius-xs: 6px;
+  --hb-control-h: 36px;
+  --hb-btn-h: 34px;
   --hb-width: 1100px;
   --hb-shadow: 0 1px 2px rgb(31 35 41 / 6%);
+  --hb-shadow-lg: 0 16px 48px rgb(31 35 41 / 18%);
+  --hb-overlay: rgb(15 23 42 / 42%);
+  --hb-focus-ring: 0 0 0 2px color-mix(in srgb, var(--hb-accent) 22%, transparent);
+}
+
+html[data-hb-accent="orange"] {
+  --hb-accent: #ff6600;
+  --hb-accent-hover: #e65c00;
+  --hb-accent-soft: #fff3eb;
 }
 
 html.hackerba-page,
@@ -111,7 +133,7 @@ body.hackerba .hb-search {
 
 body.hackerba .hb-search input {
   flex: 1;
-  height: 36px;
+  height: var(--hb-control-h);
   padding: 0 12px;
   border: 1px solid var(--hb-input-border);
   border-right: 0;
@@ -119,16 +141,17 @@ body.hackerba .hb-search input {
   outline: none;
   background: var(--hb-surface-2);
   font-size: 13px;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 body.hackerba .hb-search input:focus {
   border-color: var(--hb-search);
   background: var(--hb-surface);
+  box-shadow: var(--hb-focus-ring);
 }
 
 body.hackerba .hb-search-btn {
-  height: 36px;
+  height: var(--hb-control-h);
   padding: 0 16px;
   border: 1px solid var(--hb-search);
   border-radius: 0 var(--hb-radius-sm) var(--hb-radius-sm) 0;
@@ -137,6 +160,12 @@ body.hackerba .hb-search-btn {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+body.hackerba .hb-search-btn:hover {
+  border-color: var(--hb-search-hover);
+  background: var(--hb-search-hover);
 }
 
 body.hackerba .hb-userbar {
@@ -165,7 +194,7 @@ body.hackerba .hb-user-name {
 
 body.hackerba .hb-user-sep {
   margin: 0 8px;
-  color: #d0d3d8;
+  color: var(--hb-line-strong);
 }
 
 /* ===== 面包屑 ===== */
@@ -184,7 +213,7 @@ body.hackerba .hb-breadcrumb a {
 
 body.hackerba .hb-bc-sep {
   margin: 0 6px;
-  color: #c0c4cc;
+  color: var(--hb-line-strong);
 }
 
 /* ===== 吧头 ===== */
@@ -280,9 +309,9 @@ body.hackerba .hb-card-avatar {
   height: 84px;
   place-items: center;
   overflow: hidden;
-  border: 3px solid #fff;
+  border: 3px solid var(--hb-surface);
   border-radius: 16px;
-  background: #ff6600;
+  background: var(--hb-orange);
   box-shadow: 0 2px 8px rgb(31 35 41 / 12%);
 }
 
@@ -322,7 +351,7 @@ body.hackerba .hb-card-title {
 
 body.hackerba .hb-card-level {
   padding: 0 7px;
-  border-radius: 6px;
+  border-radius: var(--hb-radius-xs);
   color: #9a5b00;
   background: #ffe8b8;
   font-size: 12px;
@@ -334,19 +363,19 @@ body.hackerba .hb-card-num {
   display: flex;
   gap: 18px;
   margin-bottom: 4px;
-  color: #646a73;
+  color: var(--hb-subtle);
   font-size: 13px;
   line-height: 20px;
 }
 
 body.hackerba .hb-card-num em {
   margin-right: 4px;
-  color: #8a9199 !important;
+  color: var(--hb-muted) !important;
   font-style: normal;
 }
 
 body.hackerba .hb-card-num b {
-  color: #1f2329 !important;
+  color: var(--hb-text) !important;
   font-weight: 700;
 }
 
@@ -366,12 +395,13 @@ body.hackerba .hb-card-btns {
 
 body.hackerba .hb-btn-attention,
 body.hackerba .hb-btn-checkin,
-body.hackerba .hb-tab-post,
-body.hackerba .hb-btn-mini-post {
-  display: inline-block;
+body.hackerba .hb-tab-post {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   min-width: 76px;
-  height: 34px;
+  height: var(--hb-btn-h);
   padding: 0 14px;
   border: 0;
   border-radius: var(--hb-radius-sm);
@@ -379,13 +409,18 @@ body.hackerba .hb-btn-mini-post {
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
-  line-height: 34px;
+  line-height: 1;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 body.hackerba .hb-btn-attention {
   color: var(--hb-orange);
-  background: #fff3eb;
+  background: var(--hb-orange-soft);
+}
+
+body.hackerba .hb-btn-attention:hover {
+  background: color-mix(in srgb, var(--hb-orange) 18%, #fff);
 }
 
 body.hackerba .hb-btn-attention.hb-btn-followed {
@@ -394,15 +429,27 @@ body.hackerba .hb-btn-attention.hb-btn-followed {
   cursor: default;
 }
 
+body.hackerba .hb-btn-attention.hb-btn-followed:hover {
+  background: var(--hb-surface-2);
+}
+
 body.hackerba .hb-btn-checkin {
   color: #fff;
   background: var(--hb-orange);
+}
+
+body.hackerba .hb-btn-checkin:hover {
+  background: var(--hb-orange-hover);
 }
 
 body.hackerba .hb-btn-checkin.hb-btn-checked {
   color: var(--hb-subtle);
   background: var(--hb-surface-2);
   cursor: default;
+}
+
+body.hackerba .hb-btn-checkin.hb-btn-checked:hover {
+  background: var(--hb-surface-2);
 }
 
 /* ===== 内容区 ===== */
@@ -471,11 +518,12 @@ body.hackerba .hb-tab-post {
   align-self: center;
   margin-right: 12px;
   min-width: 64px;
-  height: 32px;
-  padding: 0 14px;
-  line-height: 32px;
   color: #fff;
   background: var(--hb-orange);
+}
+
+body.hackerba .hb-tab-post:hover {
+  background: var(--hb-orange-hover);
 }
 
 /* ===== 列表工具条 ===== */
@@ -509,16 +557,6 @@ body.hackerba .hb-thread-top-right {
   color: var(--hb-muted);
 }
 
-body.hackerba .hb-btn-mini-post {
-  min-width: auto;
-  height: 26px;
-  padding: 0 10px;
-  line-height: 26px;
-  color: #fff;
-  background: var(--hb-orange);
-  font-size: 12px;
-}
-
 /* ===== 帖子列表 ===== */
 body.hackerba .hb-thread-list {
   margin: 0;
@@ -540,7 +578,7 @@ body.hackerba .hb-thread-item:last-child {
 }
 
 body.hackerba .hb-thread-item:hover {
-  background: #fafbfc;
+  background: var(--hb-hover-bg);
 }
 
 body.hackerba .hb-thread-left {
@@ -559,9 +597,9 @@ body.hackerba .hb-rep-num {
   height: 24px;
   padding: 0 8px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--hb-radius-xs);
   color: var(--hb-orange);
-  background: #fff3eb;
+  background: var(--hb-orange-soft);
   font-family: "DIN Alternate", "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -621,11 +659,11 @@ body.hackerba .hb-icon-good {
 }
 
 body.hackerba .hb-icon-hot {
-  background: #e10602;
+  background: var(--hb-hot);
 }
 
 body.hackerba .hb-icon-good {
-  background: #2d64b3;
+  background: var(--hb-good);
 }
 
 body.hackerba .hb-th-tit {
@@ -726,7 +764,6 @@ body.hackerba .hb-search-empty {
 }
 
 body.hackerba .hb-auth-panel {
-  padding: 20px 18px 28px;
   background: var(--hb-surface);
 }
 
@@ -747,7 +784,7 @@ body.hackerba .hb-modal-backdrop {
   margin: 0;
   padding: 0;
   border: 0;
-  background: rgb(15 23 42 / 42%);
+  background: var(--hb-overlay);
   cursor: pointer;
 }
 
@@ -759,36 +796,38 @@ body.hackerba .hb-modal {
   max-height: calc(100vh - 24px);
   overflow: auto;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--hb-radius);
   background: var(--hb-surface);
-  box-shadow: 0 16px 48px rgb(31 35 41 / 18%);
+  box-shadow: var(--hb-shadow-lg);
 }
 
-body.hackerba .hb-modal:has(.hb-doc-panel) {
+body.hackerba .hb-modal:has(.hb-doc-panel),
+body.hackerba .hb-modal:has(.hb-user-panel) {
   width: min(680px, 100%);
 }
 
 body.hackerba .hb-modal .hb-doc-panel,
 body.hackerba .hb-modal .hb-auth-panel {
-  padding: 12px 14px 10px;
+  padding: 16px 18px 18px;
 }
 
 body.hackerba .hb-modal-close {
   position: absolute;
-  top: 6px;
-  right: 8px;
+  top: 10px;
+  right: 10px;
   z-index: 2;
   width: 28px;
   height: 28px;
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--hb-radius-sm);
   color: var(--hb-muted);
   background: transparent;
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 body.hackerba .hb-modal-close:hover {
@@ -802,23 +841,28 @@ body.hackerba.hb-popup-page .hb-aside {
   user-select: none;
 }
 
-body.hackerba .hb-modal-loading {
+body.hackerba .hb-modal-loading,
+body.hackerba .hb-modal .hb-modal-loading {
   padding: 36px 24px;
   color: var(--hb-muted);
   font-size: 14px;
   text-align: center;
 }
 
-body.hackerba .hb-auth-title {
-  margin: 0 0 8px;
+body.hackerba .hb-auth-title,
+body.hackerba .hb-doc-title {
+  margin: 0 0 12px;
+  padding: 0 28px 8px 0;
+  border-bottom: 1px solid var(--hb-line);
   color: var(--hb-text);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
+  line-height: 1.3;
 }
 
 body.hackerba .hb-auth-tip {
-  margin: 0 0 18px;
-  color: #e06a00;
+  margin: 0 0 16px;
+  color: var(--hb-orange);
   font-size: 13px;
 }
 
@@ -861,23 +905,65 @@ body.hackerba .hb-auth-card td {
 }
 
 body.hackerba .hb-auth-card input[type="text"],
-body.hackerba .hb-auth-card input[type="password"] {
+body.hackerba .hb-auth-card input[type="password"],
+body.hackerba .hb-user-panel .hb-doc-body textarea,
+body.hackerba .hb-user-panel .hb-doc-body input[type="text"],
+body.hackerba .hb-reply-box textarea {
   box-sizing: border-box;
   width: 100%;
-  min-width: 160px;
-  height: 32px;
-  padding: 0 8px;
+  max-width: 100%;
+  margin: 0;
   border: 1px solid var(--hb-input-border);
   border-radius: var(--hb-radius-sm);
+  outline: none;
+  background: var(--hb-surface-2);
+  color: var(--hb-text);
+  font: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.hackerba .hb-auth-card input[type="text"],
+body.hackerba .hb-auth-card input[type="password"],
+body.hackerba .hb-user-panel .hb-doc-body input[type="text"] {
+  height: var(--hb-control-h);
+  min-height: var(--hb-control-h);
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+body.hackerba .hb-user-panel .hb-doc-body textarea,
+body.hackerba .hb-reply-box textarea {
+  min-height: 96px;
+  padding: 10px 12px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+body.hackerba .hb-reply-box textarea {
+  display: block;
+  min-height: 100px;
+  margin: 0 0 8px;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif !important;
+  font-size: 14px !important;
+}
+
+body.hackerba .hb-auth-card input[type="text"]:focus,
+body.hackerba .hb-auth-card input[type="password"]:focus,
+body.hackerba .hb-user-panel .hb-doc-body textarea:focus,
+body.hackerba .hb-user-panel .hb-doc-body input[type="text"]:focus,
+body.hackerba .hb-reply-box textarea:focus,
+body.hackerba input:focus,
+body.hackerba textarea:focus {
+  border-color: var(--hb-blue);
   background: var(--hb-surface);
+  box-shadow: var(--hb-focus-ring);
 }
 
 body.hackerba .hb-auth-forgot {
   display: inline-block;
-  margin-top: 10px;
   color: var(--hb-link);
   text-decoration: none;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 body.hackerba .hb-auth-forgot:hover {
@@ -897,22 +983,12 @@ body.hackerba .hb-auth-switch:hover {
 }
 
 body.hackerba .hb-doc-panel {
-  padding: 12px 14px 10px;
+  padding: 16px 18px 18px;
   background: var(--hb-surface);
 }
 
-body.hackerba .hb-doc-title {
-  margin: 0 0 8px;
-  padding: 0 28px 6px 0;
-  border-bottom: 1px solid var(--hb-line);
-  color: var(--hb-text);
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
 body.hackerba .hb-doc-body {
-  color: #444;
+  color: var(--hb-subtle);
   font-size: 14px;
   line-height: 1.65;
 }
@@ -970,28 +1046,6 @@ body.hackerba .hb-user-panel .hb-doc-body td:last-child {
   width: auto !important;
 }
 
-body.hackerba .hb-user-panel .hb-doc-body textarea,
-body.hackerba .hb-user-panel .hb-doc-body input[type="text"] {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-  min-height: 36px;
-  padding: 8px 10px;
-  border: 1px solid var(--hb-input-border);
-  border-radius: var(--hb-radius-sm);
-  background: var(--hb-surface-2);
-}
-
-body.hackerba .hb-user-panel .hb-doc-body textarea {
-  min-height: 96px;
-  resize: vertical;
-}
-
-body.hackerba .hb-user-panel .hb-form-actions {
-  margin-top: 16px;
-  padding-top: 4px;
-}
-
 body.hackerba .hb-profile-karma {
   color: var(--hb-text);
   font-weight: 700;
@@ -1001,7 +1055,7 @@ body.hackerba .hb-profile-level {
   display: inline-block;
   margin-left: 6px;
   padding: 0 7px;
-  border-radius: 6px;
+  border-radius: var(--hb-radius-xs);
   color: #9a5b00;
   background: #ffe8b8;
   font-size: 12px;
@@ -1021,18 +1075,21 @@ body.hackerba .hb-profile-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  height: 32px;
   padding: 0 12px;
+  border: 1px solid var(--hb-line);
   border-radius: var(--hb-radius-sm);
   background: var(--hb-surface-2);
   color: var(--hb-link) !important;
   text-decoration: none !important;
   font-size: 13px;
   font-weight: 600;
-  line-height: 30px;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 body.hackerba .hb-profile-link:hover {
+  border-color: var(--hb-blue);
   background: var(--hb-blue-soft);
 }
 
@@ -1041,7 +1098,9 @@ body.hackerba .hb-form-actions {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hb-line);
 }
 
 body.hackerba .hb-form-actions-left {
@@ -1049,7 +1108,6 @@ body.hackerba .hb-form-actions-left {
 }
 
 body.hackerba .hb-primary-btn,
-body.hackerba .hb-auth-card .hb-auth-submit,
 body.hackerba .hb-auth-card input[type="submit"],
 body.hackerba .hb-reply-box input[type="submit"],
 body.hackerba .hb-user-panel input[type="submit"],
@@ -1059,7 +1117,7 @@ body.hackerba input[type="submit"] {
   align-items: center;
   justify-content: center;
   min-width: 96px;
-  height: 34px;
+  height: var(--hb-btn-h);
   margin: 0;
   padding: 0 16px;
   border: 0 !important;
@@ -1068,8 +1126,9 @@ body.hackerba input[type="submit"] {
   background: var(--hb-orange) !important;
   font-size: 13px;
   font-weight: 600;
-  line-height: 34px;
+  line-height: 1;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 body.hackerba .hb-primary-btn:hover,
@@ -1077,19 +1136,7 @@ body.hackerba .hb-auth-card input[type="submit"]:hover,
 body.hackerba .hb-reply-box input[type="submit"]:hover,
 body.hackerba .hb-user-panel input[type="submit"]:hover,
 body.hackerba input[type="submit"]:hover {
-  background: #f05f12 !important;
-}
-
-body.hackerba .hb-auth-card .hb-auth-submit,
-body.hackerba .hb-auth-card input[type="submit"] {
-  margin-top: 10px;
-  float: right;
-}
-
-body.hackerba .hb-auth-card form::after {
-  display: block;
-  clear: both;
-  content: "";
+  background: var(--hb-orange-hover) !important;
 }
 
 @media (max-width: 860px) {
@@ -1142,7 +1189,7 @@ body.hackerba .hb-pager-disabled {
   padding: 6px 14px;
   border: 1px solid var(--hb-line);
   border-radius: var(--hb-radius-sm);
-  color: #c5c9cf;
+  color: var(--hb-disabled-text);
   background: var(--hb-surface-2);
   cursor: default;
 }
@@ -1210,7 +1257,7 @@ body.hackerba .hb-aside-avatar {
   place-items: center;
   overflow: hidden;
   border-radius: 10px;
-  background: #ff6600;
+  background: var(--hb-orange);
 }
 
 body.hackerba .hb-aside-name {
@@ -1239,7 +1286,7 @@ body.hackerba .hb-footer {
   width: var(--hb-width);
   max-width: calc(100% - 32px);
   margin: 0 auto 36px;
-  color: #a0a6ad;
+  color: var(--hb-muted);
   font-size: 12px;
   text-align: center;
 }
@@ -1327,20 +1374,23 @@ body.hackerba .hb-core-meta {
 }
 
 body.hackerba .hb-core-quick-reply {
-  display: inline-block;
-  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--hb-btn-h);
   padding: 0 16px;
   border-radius: var(--hb-radius-sm);
   color: #fff !important;
   background: var(--hb-orange);
   font-size: 13px;
   font-weight: 600;
-  line-height: 32px;
+  line-height: 1;
   text-decoration: none !important;
+  transition: background 0.15s ease;
 }
 
 body.hackerba .hb-core-quick-reply:hover {
-  background: #f05f12;
+  background: var(--hb-orange-hover);
 }
 
 body.hackerba .hb-main-floor {
@@ -1416,7 +1466,7 @@ body.hackerba .hb-louzhu span {
 }
 
 body.hackerba .hb-me span {
-  background: #18a058;
+  background: var(--hb-me);
 }
 
 body.hackerba .hb-floor-face {
@@ -1606,7 +1656,7 @@ body.hackerba .hb-lzl-lz-tag {
 }
 
 body.hackerba .hb-lzl-me-tag {
-  background: #2db55d;
+  background: var(--hb-me);
 }
 
 body.hackerba .hb-lzl-to {
@@ -1696,7 +1746,7 @@ body.hackerba .hb-floor-tail-left {
 }
 
 body.hackerba .hb-floor-score {
-  color: #ff7e23;
+  color: var(--hb-orange);
 }
 
 body.hackerba .hb-floor-age {
@@ -1755,25 +1805,14 @@ body.hackerba .hb-reply-box {
 }
 
 body.hackerba .hb-reply-box textarea {
-  box-sizing: border-box;
-  display: block;
   width: 100% !important;
-  min-height: 100px;
-  margin: 0 0 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--hb-input-border);
-  border-radius: var(--hb-radius-sm);
-  background: var(--hb-surface-2);
-  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif !important;
-  font-size: 14px !important;
-  resize: vertical;
 }
 
 body.hackerba .hb-reply-box a[href*="formatdoc"] {
   display: inline-block;
   margin: 0;
   color: var(--hb-muted) !important;
-  font-size: 12px;
+  font-size: 13px;
   text-decoration: none !important;
 }
 
@@ -1790,17 +1829,17 @@ body.hackerba textarea {
 
 html[data-hb-theme="dark"] {
   color-scheme: dark;
-  --hb-blue: #6b9fff;
-  --hb-blue-soft: #1d2740;
-  --hb-search: #4d82f3;
-  --hb-orange: #ff7a33;
-  --hb-rep: #ff7a33;
-  --hb-good: #6b9fff;
+  --hb-accent: #6b9fff;
+  --hb-accent-hover: #7ba8ff;
+  --hb-accent-soft: #1d2740;
+  --hb-hot: #ff3b30;
+  --hb-me: #2db55d;
   --hb-bg: #12141a;
   --hb-surface: #1c1f27;
   --hb-surface-2: #161922;
   --hb-surface-3: #222632;
   --hb-surface-soft: #222632;
+  --hb-hover-bg: #1a1d26;
   --hb-line: #2c3140;
   --hb-line-strong: #353b4d;
   --hb-input-border: #3a4154;
@@ -1808,9 +1847,17 @@ html[data-hb-theme="dark"] {
   --hb-text: #e8eaed;
   --hb-muted: #8b93a7;
   --hb-subtle: #a8b0c0;
-  --hb-link: #6b9fff;
-  --hb-brand: #6b9fff;
+  --hb-disabled-text: #5c6578;
   --hb-shadow: 0 1px 2px rgb(0 0 0 / 28%);
+  --hb-shadow-lg: 0 16px 48px rgb(0 0 0 / 45%);
+  --hb-overlay: rgb(0 0 0 / 58%);
+  --hb-focus-ring: 0 0 0 2px color-mix(in srgb, var(--hb-accent) 28%, transparent);
+}
+
+html[data-hb-theme="dark"][data-hb-accent="orange"] {
+  --hb-accent: #ff7a33;
+  --hb-accent-hover: #ff8c4d;
+  --hb-accent-soft: rgb(255 122 51 / 14%);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-topbar {
@@ -1819,6 +1866,10 @@ html[data-hb-theme="dark"] body.hackerba .hb-topbar {
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-search input,
+html[data-hb-theme="dark"] body.hackerba .hb-auth-card input[type="text"],
+html[data-hb-theme="dark"] body.hackerba .hb-auth-card input[type="password"],
+html[data-hb-theme="dark"] body.hackerba .hb-user-panel .hb-doc-body textarea,
+html[data-hb-theme="dark"] body.hackerba .hb-user-panel .hb-doc-body input[type="text"],
 html[data-hb-theme="dark"] body.hackerba .hb-reply-box textarea,
 html[data-hb-theme="dark"] body.hackerba input,
 html[data-hb-theme="dark"] body.hackerba textarea {
@@ -1843,9 +1894,8 @@ html[data-hb-theme="dark"] body.hackerba .hb-card-banner-clip::after {
   );
 }
 
-html[data-hb-theme="dark"] body.hackerba .hb-btn-attention {
-  color: var(--hb-orange);
-  background: rgb(255 107 26 / 14%);
+html[data-hb-theme="dark"] body.hackerba .hb-btn-attention:hover {
+  background: color-mix(in srgb, var(--hb-orange) 22%, transparent);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-btn-attention.hb-btn-followed,
@@ -1854,13 +1904,9 @@ html[data-hb-theme="dark"] body.hackerba .hb-btn-checkin.hb-btn-checked {
   background: var(--hb-surface-3);
 }
 
-html[data-hb-theme="dark"] body.hackerba .hb-thread-item:hover {
-  background: #1a1d26;
-}
-
-html[data-hb-theme="dark"] body.hackerba .hb-rep-num {
-  color: var(--hb-orange);
-  background: rgb(255 107 26 / 14%);
+html[data-hb-theme="dark"] body.hackerba .hb-btn-attention.hb-btn-followed:hover,
+html[data-hb-theme="dark"] body.hackerba .hb-btn-checkin.hb-btn-checked:hover {
+  background: var(--hb-surface-3);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-rep-zero {
@@ -1908,22 +1954,14 @@ html[data-hb-theme="dark"] body.hackerba .hb-card-num b {
   color: #e8eaed !important;
 }
 
-html[data-hb-theme="dark"] body.hackerba .hb-profile-level {
+html[data-hb-theme="dark"] body.hackerba .hb-profile-level,
+html[data-hb-theme="dark"] body.hackerba .hb-card-level {
   color: #ffd089;
   background: #4a3818;
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-profile-link {
   background: var(--hb-surface-3);
-}
-
-html[data-hb-theme="dark"] body.hackerba .hb-card-level {
-  color: #ffd089;
-  background: #4a3818;
-}
-
-html[data-hb-theme="dark"] body.hackerba .hb-doc-body {
-  color: var(--hb-subtle);
 }
 
 html[data-hb-density="compact"] body.hackerba .hb-thread-item {
@@ -1953,4 +1991,236 @@ html[data-hb-density="compact"] body.hackerba .hb-thread-item {
   body.hackerba .hb-card-btns {
     display: none;
   }
+}
+
+/* ===== 插件设置弹层 ===== */
+body.hackerba .hb-modal:has(.hb-settings-panel) {
+  width: min(440px, 100%);
+}
+
+body.hackerba .hb-settings-panel {
+  padding: 22px 22px 18px;
+}
+
+body.hackerba .hb-settings-head {
+  margin: 0 0 18px;
+  padding: 0 28px 14px 0;
+  border-bottom: 1px solid var(--hb-line);
+}
+
+body.hackerba .hb-settings-title {
+  margin: 0;
+  color: var(--hb-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+body.hackerba .hb-settings-subtitle {
+  margin: 6px 0 0;
+  color: var(--hb-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+body.hackerba .hb-settings-form {
+  display: grid;
+  gap: 18px;
+}
+
+body.hackerba .hb-settings-section-title {
+  margin: 0 0 10px;
+  color: var(--hb-subtle);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+body.hackerba .hb-settings-grid {
+  display: grid;
+  gap: 12px;
+}
+
+body.hackerba .hb-settings-field {
+  display: grid;
+  gap: 6px;
+}
+
+body.hackerba .hb-settings-label {
+  color: var(--hb-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+body.hackerba .hb-settings-select {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--hb-control-h);
+  min-height: var(--hb-control-h);
+  padding: 0 12px;
+  border: 1px solid var(--hb-input-border);
+  border-radius: var(--hb-radius-sm);
+  outline: none;
+  color: var(--hb-text);
+  background: var(--hb-surface-2);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--hb-muted) 50%),
+    linear-gradient(135deg, var(--hb-muted) 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 1px), calc(100% - 11px) calc(50% - 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+body.hackerba .hb-settings-select:hover {
+  border-color: var(--hb-input-border-strong);
+}
+
+body.hackerba .hb-settings-select:focus {
+  border-color: var(--hb-blue);
+  background-color: var(--hb-surface);
+  box-shadow: var(--hb-focus-ring);
+}
+
+body.hackerba .hb-settings-list {
+  display: grid;
+  gap: 8px;
+}
+
+body.hackerba .hb-settings-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--hb-line);
+  border-radius: var(--hb-radius-sm);
+  background: var(--hb-surface-2);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+body.hackerba .hb-settings-switch:hover {
+  border-color: var(--hb-line-strong);
+  background: var(--hb-hover-bg);
+}
+
+body.hackerba .hb-settings-switch-text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+body.hackerba .hb-settings-switch-text strong {
+  color: var(--hb-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+body.hackerba .hb-settings-switch-text small {
+  color: var(--hb-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+body.hackerba .hb-settings-toggle {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 24px;
+}
+
+body.hackerba .hb-settings-toggle input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+body.hackerba .hb-settings-toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--hb-line-strong);
+  transition: background 0.18s ease;
+}
+
+body.hackerba .hb-settings-toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(31 35 41 / 18%);
+  transition: transform 0.18s ease;
+}
+
+body.hackerba .hb-settings-toggle input:checked + .hb-settings-toggle-track {
+  background: var(--hb-blue);
+}
+
+body.hackerba .hb-settings-toggle input:checked + .hb-settings-toggle-track::after {
+  transform: translateX(16px);
+}
+
+body.hackerba .hb-settings-toggle input:focus-visible + .hb-settings-toggle-track {
+  box-shadow: var(--hb-focus-ring);
+}
+
+body.hackerba .hb-settings-footer {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid var(--hb-line);
+}
+
+body.hackerba .hb-settings-about {
+  color: var(--hb-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+body.hackerba .hb-settings-about a {
+  color: var(--hb-blue);
+  text-decoration: none;
+}
+
+body.hackerba .hb-settings-about a:hover {
+  text-decoration: underline;
+}
+
+body.hackerba .hb-settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body.hackerba .hb-settings-actions output {
+  min-height: 18px;
+  color: var(--hb-blue);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-settings-select {
+  background-color: var(--hb-surface-3);
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-settings-switch {
+  background: var(--hb-surface-3);
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-settings-toggle-track {
+  background: #3a3f4a;
 }

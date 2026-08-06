@@ -1,7 +1,34 @@
 :root {
-  color: #1f2937;
-  background: #eef3fa;
-  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  --hb-accent: #3370ff;
+  --hb-accent-hover: #2b5fe0;
+  --hb-accent-soft: #eaf0ff;
+  --hb-blue: var(--hb-accent);
+  --hb-orange: var(--hb-accent);
+  --hb-orange-hover: var(--hb-accent-hover);
+  --hb-bg: #f0f1f4;
+  --hb-surface: #fff;
+  --hb-surface-2: #f7f8fa;
+  --hb-line: #ebedf0;
+  --hb-input-border: #dce0e5;
+  --hb-text: #1f2329;
+  --hb-muted: #8a9199;
+  --hb-subtle: #646a73;
+  --hb-radius: 12px;
+  --hb-radius-sm: 8px;
+  --hb-control-h: 36px;
+  --hb-btn-h: 34px;
+  --hb-shadow: 0 1px 2px rgb(31 35 41 / 6%);
+  --hb-shadow-lg: 0 16px 48px rgb(31 35 41 / 18%);
+  --hb-focus-ring: 0 0 0 2px color-mix(in srgb, var(--hb-accent) 22%, transparent);
+  color: var(--hb-text);
+  background: var(--hb-bg);
+  font: 14px/1.55 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+html[data-hb-accent="orange"] {
+  --hb-accent: #ff6600;
+  --hb-accent-hover: #e65c00;
+  --hb-accent-soft: #fff3eb;
 }
 
 body {
@@ -12,19 +39,22 @@ main {
   width: min(460px, calc(100% - 40px));
   margin: 48px auto;
   padding: 28px;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 12px 30px rgb(31 65 114 / 12%);
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface);
+  box-shadow: var(--hb-shadow-lg);
 }
 
 h1 {
   margin: 0;
-  color: #2670d9;
+  color: var(--hb-accent);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 p {
   margin: 4px 0 24px;
-  color: #75839a;
+  color: var(--hb-subtle);
 }
 
 form {
@@ -38,26 +68,46 @@ label {
   font-weight: 600;
 }
 
-select,
-button {
-  min-height: 38px;
-  padding: 0 10px;
-  border: 1px solid #cad7e8;
-  border-radius: 6px;
+select {
+  box-sizing: border-box;
+  min-height: var(--hb-control-h);
+  padding: 0 12px;
+  border: 1px solid var(--hb-input-border);
+  border-radius: var(--hb-radius-sm);
+  outline: none;
+  background: var(--hb-surface-2);
+  color: var(--hb-text);
   font: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+select:focus {
+  border-color: var(--hb-accent);
+  background: var(--hb-surface);
+  box-shadow: var(--hb-focus-ring);
 }
 
 button {
+  box-sizing: border-box;
+  min-height: var(--hb-btn-h);
+  padding: 0 16px;
   border: 0;
+  border-radius: var(--hb-radius-sm);
   color: #fff;
-  background: #2670d9;
+  background: var(--hb-accent);
+  font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+button:hover {
+  background: var(--hb-accent-hover);
 }
 
 output {
   min-height: 20px;
-  color: #2670d9;
+  color: var(--hb-accent);
 }
 
 .hb-opt-switch {
@@ -74,7 +124,7 @@ output {
 }
 
 .hb-opt-switch small {
-  color: #75839a;
+  color: var(--hb-subtle);
   font-weight: 400;
   font-size: 12px;
   line-height: 1.4;
@@ -85,12 +135,13 @@ output {
   height: 18px;
   margin-top: 2px;
   flex: 0 0 auto;
+  accent-color: var(--hb-accent);
 }
 
 .hb-opt-about {
   margin-top: 28px;
   padding-top: 20px;
-  border-top: 1px solid #e4ebf5;
+  border-top: 1px solid var(--hb-line);
   display: grid;
   gap: 8px;
 }
@@ -100,14 +151,38 @@ output {
   display: flex;
   gap: 8px;
   font-size: 13px;
-  color: #75839a;
+  color: var(--hb-subtle);
 }
 
 .hb-opt-about a {
-  color: #2670d9;
+  color: var(--hb-accent);
   text-decoration: none;
 }
 
 .hb-opt-about a:hover {
   text-decoration: underline;
+}
+
+html[data-hb-theme="dark"] {
+  color-scheme: dark;
+  --hb-accent: #6b9fff;
+  --hb-accent-hover: #7ba8ff;
+  --hb-accent-soft: #1d2740;
+  --hb-bg: #12141a;
+  --hb-surface: #1c1f27;
+  --hb-surface-2: #161922;
+  --hb-line: #2c3140;
+  --hb-input-border: #3a4154;
+  --hb-text: #e8eaed;
+  --hb-muted: #8b93a7;
+  --hb-subtle: #a8b0c0;
+  --hb-shadow: 0 1px 2px rgb(0 0 0 / 28%);
+  --hb-shadow-lg: 0 16px 48px rgb(0 0 0 / 45%);
+  --hb-focus-ring: 0 0 0 2px color-mix(in srgb, var(--hb-accent) 28%, transparent);
+}
+
+html[data-hb-theme="dark"][data-hb-accent="orange"] {
+  --hb-accent: #ff7a33;
+  --hb-accent-hover: #ff8c4d;
+  --hb-accent-soft: rgb(255 122 51 / 14%);
 }

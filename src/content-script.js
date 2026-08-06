@@ -27,6 +27,7 @@ function enhanceHackerNews(document) {
   enhanceComments(document);
   bindSearchForm(document);
   bindPopupLinks(document);
+  bindSettingsLink(document);
   void hydrateUserLevels(document);
 }
 
@@ -148,18 +149,29 @@ function enhanceAuthPanel(document, host, pageUrl) {
 
     form.querySelectorAll("input[type='submit']").forEach((button) => {
       button.value = localizeAuthLabel(button.value, document);
-      button.classList.add("hb-auth-submit", "hb-primary-btn");
+      button.classList.add("hb-primary-btn");
     });
 
     card.append(form);
 
+    const actions = document.createElement("div");
+    actions.className = "hb-form-actions";
     if (mode === "login") {
       const forgot = host.querySelector("a[href='forgot']");
       if (forgot) {
         forgot.className = "hb-auth-forgot";
         forgot.textContent = t("forgotLink", null, document);
-        card.append(forgot);
+        const left = document.createElement("div");
+        left.className = "hb-form-actions-left";
+        left.append(forgot);
+        actions.append(left);
       }
+    }
+    form.querySelectorAll('input[type="submit"]').forEach((button) => {
+      actions.append(button);
+    });
+    if (actions.childNodes.length > 0) {
+      form.append(actions);
     }
 
     cards.append(card);
@@ -659,7 +671,7 @@ function closePopupModal(document) {
 
 function createPopupLoadingPanel(document) {
   const panel = document.createElement("div");
-  panel.className = "hb-doc-panel hb-modal-loading";
+  panel.className = "hb-modal-loading";
   const title = document.createElement("p");
   title.textContent = t("popupLoading", null, document);
   panel.append(title);
@@ -868,10 +880,27 @@ function resolveSessionUser(document) {
 }
 
 const BANNER_COVER_PATH = "src/icons/banner-process.jpg";
+const DEFAULT_PREFERENCES = {
+  theme: "light",
+  density: "comfortable",
+  accentColor: "blue",
+  titleOpensDiscussion: true,
+  discussionOpensNewTab: true,
+  showBannerCover: false,
+  language: "auto",
+};
 
 function resolveExtensionUrl(path) {
   try {
     return globalThis.chrome?.runtime?.getURL?.(path) || "";
+  } catch {
+    return "";
+  }
+}
+
+function extensionVersion() {
+  try {
+    return globalThis.chrome?.runtime?.getManifest?.()?.version || "";
   } catch {
     return "";
   }
@@ -895,23 +924,317 @@ function applyBannerCover(root, enabled = true) {
   cover.src = url;
 }
 
+function createSettingsSelect(document, { id, labelKey, options }) {
+  const label = document.createElement("label");
+  label.className = "hb-settings-field";
+  label.setAttribute("for", id);
+
+  const caption = document.createElement("span");
+  caption.className = "hb-settings-label";
+  caption.textContent = t(labelKey, null, document);
+  label.append(caption);
+
+  const select = document.createElement("select");
+  select.className = "hb-settings-select";
+  select.id = id;
+  select.name = id;
+  for (const option of options) {
+    const node = document.createElement("option");
+    node.value = option.value;
+    node.textContent = t(option.labelKey, null, document);
+    select.append(node);
+  }
+  label.append(select);
+  return { label, select };
+}
+
+function createSettingsSwitch(document, { id, titleKey, hintKey }) {
+  const label = document.createElement("label");
+  label.className = "hb-settings-switch";
+  label.setAttribute("for", id);
+
+  const text = document.createElement("span");
+  text.className = "hb-settings-switch-text";
+  const strong = document.createElement("strong");
+  strong.textContent = t(titleKey, null, document);
+  const hint = document.createElement("small");
+  hint.innerHTML = t(hintKey, null, document).replaceAll("<br>", " · ");
+  text.append(strong, hint);
+
+  const toggle = document.createElement("span");
+  toggle.className = "hb-settings-toggle";
+  const input = document.createElement("input");
+  input.id = id;
+  input.name = id;
+  input.type = "checkbox";
+  const track = document.createElement("span");
+  track.className = "hb-settings-toggle-track";
+  track.setAttribute("aria-hidden", "true");
+  toggle.append(input, track);
+
+  label.append(text, toggle);
+  return { label, input };
+}
+
+function createSettingsSection(document, titleKey, nodes) {
+  const section = document.createElement("section");
+  section.className = "hb-settings-section";
+  const heading = document.createElement("h3");
+  heading.className = "hb-settings-section-title";
+  heading.textContent = t(titleKey, null, document);
+  section.append(heading);
+  for (const node of nodes) {
+    section.append(node);
+  }
+  return section;
+}
+
+function buildSettingsPanel(document) {
+  const panel = document.createElement("div");
+  panel.className = "hb-settings-panel";
+
+  const head = document.createElement("header");
+  head.className = "hb-settings-head";
+  const title = document.createElement("h2");
+  title.className = "hb-settings-title";
+  title.textContent = t("pluginSettings", null, document);
+  const subtitle = document.createElement("p");
+  subtitle.className = "hb-settings-subtitle";
+  subtitle.textContent = t("optSubtitle", null, document);
+  head.append(title, subtitle);
+  panel.append(head);
+
+  const form = document.createElement("form");
+  form.className = "hb-settings-form";
+  form.id = "hb-preferences";
+
+  const language = createSettingsSelect(document, {
+    id: "language",
+    labelKey: "optLanguage",
+    options: [
+      { value: "auto", labelKey: "optLangAuto" },
+      { value: "en", labelKey: "optLangEn" },
+      { value: "zh", labelKey: "optLangZh" },
+    ],
+  });
+  const theme = createSettingsSelect(document, {
+    id: "theme",
+    labelKey: "optTheme",
+    options: [
+      { value: "light", labelKey: "optThemeLight" },
+      { value: "dark", labelKey: "optThemeDark" },
+      { value: "system", labelKey: "optThemeSystem" },
+    ],
+  });
+  const density = createSettingsSelect(document, {
+    id: "density",
+    labelKey: "optDensity",
+    options: [
+      { value: "comfortable", labelKey: "optDensityComfortable" },
+      { value: "compact", labelKey: "optDensityCompact" },
+    ],
+  });
+  const accentColor = createSettingsSelect(document, {
+    id: "accentColor",
+    labelKey: "optAccentColor",
+    options: [
+      { value: "blue", labelKey: "optAccentBlue" },
+      { value: "orange", labelKey: "optAccentOrange" },
+    ],
+  });
+  const titleClick = createSettingsSwitch(document, {
+    id: "titleOpensDiscussion",
+    titleKey: "optTitleClick",
+    hintKey: "optTitleClickHint",
+  });
+  const discussionTab = createSettingsSwitch(document, {
+    id: "discussionOpensNewTab",
+    titleKey: "optDiscussionNewTab",
+    hintKey: "optDiscussionNewTabHint",
+  });
+  const bannerCover = createSettingsSwitch(document, {
+    id: "showBannerCover",
+    titleKey: "optBannerCover",
+    hintKey: "optBannerCoverHint",
+  });
+
+  const appearanceGrid = document.createElement("div");
+  appearanceGrid.className = "hb-settings-grid";
+  appearanceGrid.append(language.label, theme.label, density.label, accentColor.label);
+
+  const readingList = document.createElement("div");
+  readingList.className = "hb-settings-list";
+  readingList.append(titleClick.label, discussionTab.label, bannerCover.label);
+
+  form.append(
+    createSettingsSection(document, "optSectionAppearance", [appearanceGrid]),
+    createSettingsSection(document, "optSectionReading", [readingList]),
+  );
+
+  const footer = document.createElement("div");
+  footer.className = "hb-settings-footer";
+
+  const about = document.createElement("div");
+  about.className = "hb-settings-about";
+  const version = extensionVersion();
+  const aboutBits = [];
+  if (version) {
+    aboutBits.push(`${t("optVersion", null, document)} ${version}`);
+  }
+  const developerLink = document.createElement("a");
+  developerLink.href = "https://github.com/sha2kyou";
+  developerLink.target = "_blank";
+  developerLink.rel = "noopener noreferrer";
+  developerLink.textContent = "sha2kyou";
+  const repositoryLink = document.createElement("a");
+  repositoryLink.href = "https://github.com/sha2kyou/HackerBa";
+  repositoryLink.target = "_blank";
+  repositoryLink.rel = "noopener noreferrer";
+  repositoryLink.textContent = "GitHub";
+  if (aboutBits.length) {
+    about.append(document.createTextNode(aboutBits.join(" · ")), document.createTextNode(" · "));
+  }
+  about.append(developerLink, document.createTextNode(" · "), repositoryLink);
+
+  const actions = document.createElement("div");
+  actions.className = "hb-settings-actions";
+  const status = document.createElement("output");
+  status.id = "hb-settings-status";
+  status.setAttribute("aria-live", "polite");
+  const submit = document.createElement("button");
+  submit.type = "submit";
+  submit.className = "hb-primary-btn";
+  submit.textContent = t("optSave", null, document);
+  actions.append(status, submit);
+
+  footer.append(about, actions);
+  form.append(footer);
+  panel.append(form);
+
+  void hydrateSettingsForm(document, {
+    language: language.select,
+    theme: theme.select,
+    density: density.select,
+    accentColor: accentColor.select,
+    titleOpensDiscussion: titleClick.input,
+    discussionOpensNewTab: discussionTab.input,
+    showBannerCover: bannerCover.input,
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    void saveSettingsForm(document, {
+      language: language.select,
+      theme: theme.select,
+      density: density.select,
+      accentColor: accentColor.select,
+      titleOpensDiscussion: titleClick.input,
+      discussionOpensNewTab: discussionTab.input,
+      showBannerCover: bannerCover.input,
+      status,
+    });
+  });
+
+  return panel;
+}
+
+async function readPreferences() {
+  if (globalThis.chrome?.storage?.sync) {
+    return chrome.storage.sync.get(DEFAULT_PREFERENCES);
+  }
+  return { ...DEFAULT_PREFERENCES };
+}
+
+async function hydrateSettingsForm(document, fields) {
+  const preferences = await readPreferences();
+  fields.language.value = preferences.language || DEFAULT_PREFERENCES.language;
+  fields.theme.value = preferences.theme || DEFAULT_PREFERENCES.theme;
+  fields.density.value = preferences.density || DEFAULT_PREFERENCES.density;
+  fields.accentColor.value = preferences.accentColor || DEFAULT_PREFERENCES.accentColor;
+  fields.titleOpensDiscussion.checked = preferences.titleOpensDiscussion !== false;
+  fields.discussionOpensNewTab.checked = preferences.discussionOpensNewTab !== false;
+  fields.showBannerCover.checked = preferences.showBannerCover === true;
+}
+
+async function saveSettingsForm(document, fields) {
+  const next = {
+    language: fields.language.value,
+    theme: fields.theme.value,
+    density: fields.density.value,
+    accentColor: fields.accentColor.value,
+    titleOpensDiscussion: fields.titleOpensDiscussion.checked,
+    discussionOpensNewTab: fields.discussionOpensNewTab.checked,
+    showBannerCover: fields.showBannerCover.checked,
+  };
+  if (globalThis.chrome?.storage?.sync) {
+    await chrome.storage.sync.set(next);
+  }
+  reloadPage(document);
+}
+
+function reloadPage(document) {
+  const win = document.defaultView;
+  if (typeof win?.hbReloadPage === "function") {
+    win.hbReloadPage();
+    return;
+  }
+  win?.location?.reload?.();
+}
+
+function openSettingsModal(document) {
+  const wrap = document.querySelector(".hb-wrap");
+  if (!wrap) {
+    return;
+  }
+  presentPopupModal(document, wrap, buildSettingsPanel(document));
+}
+
+function renderSettingsLink(document) {
+  return `
+    <span class="hb-user-sep">|</span>
+    <a class="hb-settings-link" href="#" role="button">${escapeHtml(t("pluginSettings", null, document))}</a>
+  `;
+}
+
+function bindSettingsLink(document) {
+  if (document.documentElement.dataset.hbSettingsBound === "1") {
+    return;
+  }
+  document.documentElement.dataset.hbSettingsBound = "1";
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      const link = event.target?.closest?.("a.hb-settings-link");
+      if (!link) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      openSettingsModal(document);
+    },
+    true,
+  );
+}
+
 function renderUserbar(document, session) {
   const bar = document.querySelector(".hb-userbar");
   if (!bar) {
     return;
   }
+  const settingsLink = renderSettingsLink(document);
   if (!session) {
     bar.innerHTML = `
       <a href="login">${escapeHtml(t("login", null, document))}</a>
       <span class="hb-user-sep">|</span>
-      <a href="login?mode=register">${escapeHtml(t("register", null, document))}</a>
+      <a href="login?mode=register">${escapeHtml(t("register", null, document))}</a>${settingsLink}
     `;
     return;
   }
   bar.innerHTML = `
     <a class="hb-user-name" href="${escapeAttr(session.href)}">${escapeHtml(session.name)}</a>
     <span class="hb-user-sep">|</span>
-    <a href="${escapeAttr(session.logoutHref)}">${escapeHtml(t("logout", null, document))}</a>
+    <a href="${escapeAttr(session.logoutHref)}">${escapeHtml(t("logout", null, document))}</a>${settingsLink}
   `;
 }
 
@@ -2171,22 +2494,13 @@ function escapeAttr(value) {
 }
 
 async function applyPreferences(document) {
-  const defaults = {
-    theme: "light",
-    density: "comfortable",
-    titleOpensDiscussion: true,
-    discussionOpensNewTab: true,
-    showBannerCover: false,
-    language: "auto",
-  };
-
-  let preferences = defaults;
+  let preferences = DEFAULT_PREFERENCES;
   if (globalThis.chrome?.storage?.sync) {
-    preferences = await chrome.storage.sync.get(defaults);
+    preferences = await chrome.storage.sync.get(DEFAULT_PREFERENCES);
   }
 
-  const themePref = preferences.theme || defaults.theme;
-  const languagePref = preferences.language || defaults.language;
+  const themePref = preferences.theme || DEFAULT_PREFERENCES.theme;
+  const languagePref = preferences.language || DEFAULT_PREFERENCES.language;
   const browserLang =
     document.defaultView?.navigator?.language ||
     globalThis.navigator?.language ||
@@ -2198,7 +2512,10 @@ async function applyPreferences(document) {
 
   document.documentElement.dataset.hbThemePref = themePref;
   document.documentElement.dataset.hbTheme = resolveTheme(themePref, document.defaultView);
-  document.documentElement.dataset.hbDensity = preferences.density || defaults.density;
+  document.documentElement.dataset.hbDensity = preferences.density || DEFAULT_PREFERENCES.density;
+  document.documentElement.dataset.hbAccent = resolveAccentColor(
+    preferences.accentColor || DEFAULT_PREFERENCES.accentColor,
+  );
   document.documentElement.dataset.hbTitleDiscussion =
     preferences.titleOpensDiscussion === false ? "0" : "1";
   document.documentElement.dataset.hbDiscussionBlank =
@@ -2208,6 +2525,10 @@ async function applyPreferences(document) {
   document.documentElement.dataset.hbLang = locale;
   document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
   bindSystemThemeSync(document);
+}
+
+function resolveAccentColor(accentPref) {
+  return accentPref === "orange" ? "orange" : "blue";
 }
 
 function resolveTheme(themePref, view = globalThis) {
@@ -2247,6 +2568,7 @@ globalThis.HackerBa = {
   resolveListPager,
   createPager,
   resolveTheme,
+  resolveAccentColor,
   applyPreferences,
   userLevelFromKarma,
   applyBannerCover,
@@ -2255,6 +2577,8 @@ globalThis.HackerBa = {
   closePopupModal,
   buildPopupPanelFromHtml,
   BANNER_COVER_PATH,
+  openSettingsModal,
+  buildSettingsPanel,
   KARMA_LEVEL_REF,
   KARMA_LEVEL_AT_REF,
 };
