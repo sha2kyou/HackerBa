@@ -783,6 +783,7 @@ test("导航职责分离：分区在 Tab，排序仅看帖，侧栏不含重复�
   );
   assert.equal(document.querySelector(".hb-aside-links"), null);
   assert.ok(document.querySelector(".hb-aside-box .hb-aside-link"));
+  assert.equal(document.querySelectorAll(".hb-aside-box").length, 1);
 });
 
 test("非看帖分区不显示排序条", () => {

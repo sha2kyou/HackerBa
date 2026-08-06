@@ -1341,12 +1341,6 @@ function buildCommunityShell(document) {
             <a class="hb-aside-link" href="newsguidelines.html">${escapeHtml(t("asideRules", null, document))}</a>
           </div>
         </div>
-        <div class="hb-aside-box">
-          <div class="hb-aside-title">${escapeHtml(t("asideTipsTitle", null, document))}</div>
-          <div class="hb-aside-body">
-            <p>${escapeHtml(t("asideTips", null, document))}</p>
-          </div>
-        </div>
       </aside>
     </div>
     <div class="hb-footer">${escapeHtml(t("footer", null, document))}</div>

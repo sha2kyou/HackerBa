@@ -26,9 +26,6 @@
       asideOwner: "Owner: Y Combinator",
       asideCreated: "Created: 2007",
       asideRules: "Forum rules >",
-      asideTipsTitle: "Tips",
-      asideTips:
-        "Switch sections with the tabs above. On Posts, sort by Default or Newest posts.",
       footer: "© {brand} · Tieba-style UI, content from Hacker News",
       login: "Log in",
       register: "Sign up",
@@ -178,8 +175,6 @@
       asideOwner: "吧主：Y Combinator",
       asideCreated: "创建：2007 年",
       asideRules: "查看吧规 >",
-      asideTipsTitle: "温馨提示",
-      asideTips: "分区在上方 Tab 切换；看帖下可用「默认排序 / 最新发帖」排序。",
       footer: "© {brand} · 界面仿贴吧，内容来自 Hacker News",
       login: "登录",
       register: "注册",
