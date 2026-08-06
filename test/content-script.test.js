@@ -449,12 +449,20 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
 test("吧规页以弹层展示，不挂在看帖主栏", () => {
   const document = createDocument(`
     <center>
+      <br><br>
       <table width="500">
         <tr><td bgcolor="#fafaf0">
+          <img src="yc500.gif" width="500">
+          <br><br>
           <b>Hacker News Guidelines</b>
+          <br><br>
+          <b>What to Submit</b>
           <p>On-Topic: Anything that good hackers would find interesting.</p>
           <b>In Comments</b>
           <p>Be kind. Don't be snarky.</p>
+          <br><br><br>
+          <table width="100%" bgcolor="#ff6600" cellpadding="0"><tr><td></td></tr></table>
+          <p align="center"><span class="foot"><br><br></span></p>
         </td></tr>
       </table>
     </center>
@@ -469,6 +477,10 @@ test("吧规页以弹层展示，不挂在看帖主栏", () => {
   assert.match(document.querySelector(".hb-doc-title").textContent, /Guidelines|吧规|规范/);
   assert.match(document.querySelector(".hb-doc-body").textContent, /On-Topic/);
   assert.match(document.querySelector(".hb-doc-body").textContent, /Be kind/);
+  assert.equal(document.querySelector(".hb-doc-body img"), null);
+  assert.equal(document.querySelector(".hb-doc-body .foot"), null);
+  assert.equal(document.querySelector('.hb-doc-body table[bgcolor="#ff6600"]'), null);
+  assert.doesNotMatch(document.querySelector(".hb-doc-body").innerHTML, /^(?:\s*<br\s*\/?>)+/i);
   assert.equal(document.querySelector(".hb-bc-current").textContent, "Rules");
   assert.equal(document.body.classList.contains("hb-popup-page"), true);
   assert.equal(document.body.classList.contains("hb-popup-standalone"), true);
@@ -665,9 +677,11 @@ test("中文语言下个人资料标签本地化", () => {
   assert.match(bodyText, /声望：/);
   assert.match(bodyText, /简介：/);
   assert.match(bodyText, /10 年前/);
-  assert.match(bodyText, /提交/);
-  assert.match(bodyText, /评论/);
-  assert.match(bodyText, /收藏/);
+  assert.ok(document.querySelector(".hb-profile-links"));
+  assert.equal(
+    [...document.querySelectorAll(".hb-profile-link")].map((a) => a.textContent).join(","),
+    "提交,评论,收藏",
+  );
   assert.equal(document.querySelector(".hb-user-panel .hb-primary-btn")?.value, "更新资料");
 });
 

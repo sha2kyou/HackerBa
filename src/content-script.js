@@ -183,6 +183,66 @@ function enhanceAuthPanel(document, host, pageUrl) {
   return panel;
 }
 
+function cleanDocumentClone(clone) {
+  if (!clone) {
+    return;
+  }
+
+  clone.querySelectorAll("img, script, style, .foot").forEach((node) => node.remove());
+  clone.querySelectorAll("table").forEach((table) => {
+    const bg = (table.getAttribute("bgcolor") || "").toLowerCase();
+    if (bg === "#ff6600" || bg === "ff6600") {
+      table.remove();
+    }
+  });
+  clone.querySelectorAll('td[bgcolor], tr[bgcolor]').forEach((node) => {
+    const bg = (node.getAttribute("bgcolor") || "").toLowerCase();
+    if (bg === "#ff6600" || bg === "ff6600") {
+      node.closest("table")?.remove() || node.remove();
+    }
+  });
+
+  const isSkippableEdge = (node) => {
+    if (!node) {
+      return false;
+    }
+    if (node.nodeType === 3) {
+      return !String(node.textContent || "").trim();
+    }
+    if (node.nodeType !== 1) {
+      return true;
+    }
+    const tag = node.tagName;
+    if (tag === "BR" || tag === "HR") {
+      return true;
+    }
+    if ((tag === "P" || tag === "DIV" || tag === "SPAN") && !String(node.textContent || "").trim()) {
+      return !node.querySelector("input, textarea, a, img, button");
+    }
+    return false;
+  };
+
+  while (clone.firstChild && isSkippableEdge(clone.firstChild)) {
+    clone.firstChild.remove();
+  }
+  while (clone.lastChild && isSkippableEdge(clone.lastChild)) {
+    clone.lastChild.remove();
+  }
+
+  // Collapse consecutive <br> into at most one
+  const brs = [...clone.querySelectorAll("br")];
+  for (const br of brs) {
+    const prev = br.previousSibling;
+    if (
+      prev &&
+      ((prev.nodeType === 1 && prev.tagName === "BR") ||
+        (prev.nodeType === 3 && !String(prev.textContent || "").trim() && prev.previousSibling?.nodeType === 1 && prev.previousSibling.tagName === "BR"))
+    ) {
+      br.remove();
+    }
+  }
+}
+
 function enhanceDocumentPanel(document, host, titleHint) {
   const panel = document.createElement("div");
   panel.className = "hb-doc-panel";
@@ -202,11 +262,11 @@ function enhanceDocumentPanel(document, host, titleHint) {
 
   const sourceRoot = pickDocumentSourceRoot(host);
   const clone = sourceRoot.cloneNode(true);
-  clone.querySelectorAll("img, script, style").forEach((node) => node.remove());
   const firstBold = clone.querySelector("b, h1, h2");
   if (firstBold && firstBold.textContent.trim() === heading) {
     firstBold.remove();
   }
+  cleanDocumentClone(clone);
   body.append(clone);
   panel.append(body);
   return panel;
@@ -389,6 +449,62 @@ function attachProfileKarmaLevel(document, root) {
   }
 }
 
+function regroupProfileLinks(document, root) {
+  if (!root) {
+    return;
+  }
+
+  const linkRows = [];
+  for (const row of [...root.querySelectorAll("tr")]) {
+    const cells = [...row.querySelectorAll(":scope > td")];
+    if (cells.length < 2) {
+      continue;
+    }
+    const labelEmpty = !String(cells[0].textContent || "").trim();
+    const links = [...cells[1].querySelectorAll(":scope > a")];
+    if (!labelEmpty || links.length !== 1) {
+      continue;
+    }
+
+    const link = links[0];
+    const href = link.getAttribute("href") || "";
+    const text = String(link.textContent || "").trim().toLowerCase();
+    const isProfileNav =
+      /submitted\?/i.test(href) ||
+      /threads\?/i.test(href) ||
+      /favorites\?/i.test(href) ||
+      text === "submissions" ||
+      text === "comments" ||
+      text === "favorites" ||
+      text === "提交" ||
+      text === "评论" ||
+      text === "收藏";
+    if (!isProfileNav) {
+      continue;
+    }
+    linkRows.push({ row, link });
+  }
+
+  if (linkRows.length === 0) {
+    return;
+  }
+
+  const wrap = document.createElement("div");
+  wrap.className = "hb-profile-links";
+  for (const { row, link } of linkRows) {
+    link.classList.add("hb-profile-link");
+    wrap.append(link);
+    row.remove();
+  }
+
+  const table = root.querySelector("table") || root.closest?.("table") || root;
+  if (table?.parentNode) {
+    table.after(wrap);
+  } else {
+    root.append(wrap);
+  }
+}
+
 function enhanceUserPanel(document, host, { userId, titleHint } = {}) {
   const panel = document.createElement("div");
   panel.className = "hb-doc-panel hb-user-panel";
@@ -427,6 +543,7 @@ function enhanceUserPanel(document, host, { userId, titleHint } = {}) {
 
   localizeUserProfile(document, clone);
   attachProfileKarmaLevel(document, clone);
+  regroupProfileLinks(document, clone);
 
   body.append(clone);
   if (actions.childNodes.length > 0) {
