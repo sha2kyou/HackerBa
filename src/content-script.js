@@ -760,7 +760,7 @@ function renderThreadPanel(document, { threads, countLabel, showSort = true, sec
   top.innerHTML = showSort
     ? `
       <div class="hb-thread-sort">
-        <a href="news">${escapeHtml(t("sortLatestReply", null, document))}</a>
+        <a href="news">${escapeHtml(t("sortDefault", null, document))}</a>
         <a href="newest">${escapeHtml(t("sortNewest", null, document))}</a>
       </div>
       <div class="hb-thread-top-right">

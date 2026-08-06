@@ -267,7 +267,7 @@ test("帖子行包含右侧最后回复区，并带列表工具条与面包屑",
   const item = document.querySelector(".hb-thread-item");
   assert.ok(document.querySelector(".hb-breadcrumb"));
   assert.ok(document.querySelector(".hb-thread-top"));
-  assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "Latest replies");
+  assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "Default");
   assert.ok(item.querySelector(".hb-thread-author-meta"));
   assert.match(item.querySelector(".hb-create-time").textContent, /2 hours ago/);
   assert.equal(item.querySelector(".hb-thread-reply-meta"), null);
@@ -441,7 +441,7 @@ test("导航职责分离：分区在 Tab，排序仅看帖，侧栏不含重复�
   assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "Newest posts");
   assert.equal(
     [...document.querySelectorAll(".hb-thread-sort a")].map((a) => a.textContent).join(","),
-    "Latest replies,Newest posts",
+    "Default,Newest posts",
   );
   assert.equal(document.querySelector(".hb-aside-links"), null);
   assert.ok(document.querySelector(".hb-aside-box .hb-aside-link"));
