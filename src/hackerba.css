@@ -1,4 +1,4 @@
-/* HackerBa — 贴吧吧页细节还原 */
+/* HackerBa — 现代贴吧式社区皮肤 */
 
 /* 改造完成前隐藏原站，避免闪一下 HN 原生 UI */
 html.hb-boot {
@@ -10,28 +10,31 @@ html.hb-boot body {
 }
 
 :root {
-  --hb-blue: #2d64b3;
-  --hb-blue-soft: #e8f0fa;
-  --hb-search: #3385ff;
-  --hb-orange: #ff7f24;
-  --hb-rep: #fe7100;
-  --hb-hot: #e10602;
-  --hb-good: #2d64b3;
-  --hb-bg: #f5f5f5;
+  --hb-blue: #3370ff;
+  --hb-blue-soft: #eaf0ff;
+  --hb-search: #3370ff;
+  --hb-orange: #ff6b1a;
+  --hb-rep: #ff6b1a;
+  --hb-hot: #ff3b30;
+  --hb-good: #3370ff;
+  --hb-bg: #f0f1f4;
   --hb-surface: #fff;
-  --hb-surface-2: #f8f8f8;
-  --hb-surface-3: #fafafa;
-  --hb-surface-soft: #f7f7f7;
-  --hb-line: #e7e7e7;
-  --hb-line-strong: #e3e3e3;
-  --hb-input-border: #ccc;
-  --hb-input-border-strong: #b8b8b8;
-  --hb-text: #333;
-  --hb-muted: #999;
-  --hb-subtle: #666;
-  --hb-link: #2d64b3;
-  --hb-brand: #2932e1;
-  --hb-width: 980px;
+  --hb-surface-2: #f7f8fa;
+  --hb-surface-3: #f5f6f8;
+  --hb-surface-soft: #f7f8fa;
+  --hb-line: #ebedf0;
+  --hb-line-strong: #e3e5e8;
+  --hb-input-border: #dce0e5;
+  --hb-input-border-strong: #c9ced6;
+  --hb-text: #1f2329;
+  --hb-muted: #8a9199;
+  --hb-subtle: #646a73;
+  --hb-link: #3370ff;
+  --hb-brand: #3370ff;
+  --hb-radius: 12px;
+  --hb-radius-sm: 8px;
+  --hb-width: 1100px;
+  --hb-shadow: 0 1px 2px rgb(31 35 41 / 6%);
 }
 
 html.hackerba-page,
@@ -40,7 +43,8 @@ body.hackerba {
   padding: 0 !important;
   background: var(--hb-bg) !important;
   color: var(--hb-text);
-  font: 12px/1.5 "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
+  font: 14px/1.55 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
 }
 
 body.hackerba > *:not(.hb-wrap) {
@@ -54,17 +58,21 @@ body.hackerba .hb-wrap {
 
 /* ===== 顶栏 ===== */
 body.hackerba .hb-topbar {
-  height: 48px;
-  border-bottom: 1px solid var(--hb-line-strong);
-  background: var(--hb-surface);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 56px;
+  border-bottom: 1px solid rgb(31 35 41 / 6%);
+  background: rgb(255 255 255 / 92%);
+  backdrop-filter: saturate(1.2) blur(10px);
 }
 
 body.hackerba .hb-topbar-inner {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
   width: var(--hb-width);
-  max-width: calc(100% - 24px);
+  max-width: calc(100% - 32px);
   height: 100%;
   margin: 0 auto;
 }
@@ -80,6 +88,7 @@ body.hackerba .hb-brand {
 body.hackerba .hb-brand-text {
   font-size: 20px;
   font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
@@ -92,7 +101,7 @@ body.hackerba .hb-brand-text i {
 body.hackerba .hb-search {
   display: flex;
   flex: 1;
-  max-width: 420px;
+  max-width: 460px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -102,28 +111,31 @@ body.hackerba .hb-search {
 
 body.hackerba .hb-search input {
   flex: 1;
-  height: 30px;
-  padding: 0 8px;
-  border: 1px solid var(--hb-input-border-strong);
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--hb-input-border);
   border-right: 0;
-  border-radius: 0;
+  border-radius: var(--hb-radius-sm) 0 0 var(--hb-radius-sm);
   outline: none;
-  background: var(--hb-surface);
-  font-size: 12px;
+  background: var(--hb-surface-2);
+  font-size: 13px;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 body.hackerba .hb-search input:focus {
   border-color: var(--hb-search);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-search-btn {
-  height: 30px;
-  padding: 0 14px;
+  height: 36px;
+  padding: 0 16px;
   border: 1px solid var(--hb-search);
-  border-radius: 0;
+  border-radius: 0 var(--hb-radius-sm) var(--hb-radius-sm) 0;
   color: #fff;
   background: var(--hb-search);
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -131,7 +143,7 @@ body.hackerba .hb-userbar {
   margin-left: auto;
   color: var(--hb-subtle);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 body.hackerba .hb-userbar a {
@@ -152,17 +164,17 @@ body.hackerba .hb-user-name {
 }
 
 body.hackerba .hb-user-sep {
-  margin: 0 6px;
-  color: #ccc;
+  margin: 0 8px;
+  color: #d0d3d8;
 }
 
 /* ===== 面包屑 ===== */
 body.hackerba .hb-breadcrumb {
   width: var(--hb-width);
-  max-width: calc(100% - 24px);
-  margin: 8px auto 6px;
+  max-width: calc(100% - 32px);
+  margin: 14px auto 10px;
   color: var(--hb-subtle);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 body.hackerba .hb-breadcrumb a {
@@ -171,27 +183,30 @@ body.hackerba .hb-breadcrumb a {
 }
 
 body.hackerba .hb-bc-sep {
-  margin: 0 5px;
-  color: #bbb;
+  margin: 0 6px;
+  color: #c0c4cc;
 }
 
 /* ===== 吧头 ===== */
 body.hackerba .hb-card-banner {
   position: relative;
   width: var(--hb-width);
-  max-width: calc(100% - 24px);
+  max-width: calc(100% - 32px);
   margin: 0 auto;
   overflow: visible;
-  border: 1px solid #c9b8a8;
-  aspect-ratio: 4 / 1;
-  background: #3d2418;
+  border: 0;
+  border-radius: var(--hb-radius);
+  background: transparent;
+  box-shadow: var(--hb-shadow);
 }
 
 body.hackerba .hb-card-banner-clip {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 0;
   overflow: hidden;
+  border-radius: var(--hb-radius) var(--hb-radius) 0 0;
+  aspect-ratio: 4 / 1;
+  background: #2b211c;
   pointer-events: none;
 }
 
@@ -209,32 +224,30 @@ body.hackerba .hb-card-banner-clip::after {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgb(0 0 0 / 10%) 0%,
-    transparent 38%,
-    rgb(0 0 0 / 58%) 100%
+    rgb(0 0 0 / 8%) 0%,
+    transparent 45%,
+    rgb(0 0 0 / 28%) 100%
   );
   content: "";
   pointer-events: none;
 }
 
 body.hackerba .hb-card-head {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  position: relative;
   z-index: 2;
   display: flex;
   align-items: flex-end;
-  gap: 12px;
-  padding: 36px 14px 12px;
-  color: #fff;
+  gap: 16px;
+  padding: 0 20px 18px;
+  color: var(--hb-text);
+  background: var(--hb-surface);
+  border-radius: 0 0 var(--hb-radius) var(--hb-radius);
 }
 
 html[data-hb-banner-cover="0"] body.hackerba .hb-card-banner {
   aspect-ratio: auto;
   overflow: hidden;
-  border-color: #c9d8eb;
-  background: linear-gradient(180deg, #5b92d4 0%, #3d78c0 100%);
+  background: var(--hb-surface);
 }
 
 html[data-hb-banner-cover="0"] body.hackerba .hb-card-banner-clip,
@@ -243,32 +256,34 @@ html[data-hb-banner-cover="0"] body.hackerba .hb-card-cover {
 }
 
 html[data-hb-banner-cover="0"] body.hackerba .hb-card-head {
-  position: relative;
-  align-items: flex-start;
-  padding: 12px 14px 14px;
+  align-items: center;
+  padding: 18px 20px;
+  border-radius: var(--hb-radius);
+  background:
+    linear-gradient(135deg, #fff7f0 0%, #fff 42%, #f3f7ff 100%);
 }
 
 html[data-hb-banner-cover="1"] body.hackerba .hb-card-avatar {
   position: relative;
   z-index: 3;
-  margin-bottom: -36px;
+  margin-top: -36px;
 }
 
 html[data-hb-banner-cover="1"] body.hackerba .hb-content {
-  margin-top: 44px;
+  margin-top: 16px;
 }
 
 body.hackerba .hb-card-avatar {
   display: grid;
-  flex: 0 0 80px;
-  width: 80px;
-  height: 80px;
+  flex: 0 0 84px;
+  width: 84px;
+  height: 84px;
   place-items: center;
   overflow: hidden;
-  border: 2px solid #fff;
-  border-radius: 2px;
+  border: 3px solid #fff;
+  border-radius: 16px;
   background: #ff6600;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 22%);
+  box-shadow: 0 2px 8px rgb(31 35 41 / 12%);
 }
 
 body.hackerba .hb-forum-mark {
@@ -286,7 +301,7 @@ body.hackerba .hb-aside-avatar .hb-forum-mark {
 body.hackerba .hb-card-info {
   flex: 1;
   min-width: 0;
-  padding-top: 2px;
+  padding-top: 14px;
 }
 
 body.hackerba .hb-card-title-row {
@@ -298,60 +313,55 @@ body.hackerba .hb-card-title-row {
 
 body.hackerba .hb-card-title {
   margin: 0;
-  color: #fff;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 35%);
-  font-size: 18px;
+  color: var(--hb-text);
+  font-size: 22px;
   font-weight: 700;
-  line-height: 1.2;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 body.hackerba .hb-card-level {
-  padding: 0 5px;
-  border-radius: 2px;
-  color: #8a4b00;
-  background: linear-gradient(180deg, #ffe9a8, #f0c45a);
-  box-shadow: 0 1px 1px rgb(0 0 0 / 18%);
+  padding: 0 7px;
+  border-radius: 6px;
+  color: #9a5b00;
+  background: #ffe8b8;
   font-size: 12px;
   font-weight: 700;
-  line-height: 18px;
+  line-height: 20px;
 }
 
 body.hackerba .hb-card-num {
   display: flex;
   gap: 18px;
-  margin-bottom: 2px;
-  color: #edf4ff;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 25%);
-  font-size: 12px;
-  line-height: 18px;
+  margin-bottom: 4px;
+  color: #646a73;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 body.hackerba .hb-card-num em {
-  margin-right: 2px;
-  color: inherit !important;
+  margin-right: 4px;
+  color: #8a9199 !important;
   font-style: normal;
-  opacity: 0.88;
 }
 
 body.hackerba .hb-card-num b {
-  color: inherit !important;
+  color: #1f2329 !important;
   font-weight: 700;
 }
 
 body.hackerba .hb-card-slogan {
   margin: 0;
-  color: #e8f0ff;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 28%);
-  font-size: 12px;
-  line-height: 18px;
-  opacity: 0.92;
+  color: var(--hb-subtle);
+  font-size: 13px;
+  line-height: 20px;
 }
 
 body.hackerba .hb-card-btns {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-bottom: 2px;
+  flex-direction: row;
+  gap: 8px;
+  padding: 14px 0 0;
 }
 
 body.hackerba .hb-btn-attention,
@@ -360,73 +370,75 @@ body.hackerba .hb-tab-post,
 body.hackerba .hb-btn-mini-post {
   display: inline-block;
   box-sizing: border-box;
-  min-width: 72px;
-  height: 28px;
-  padding: 0 12px;
+  min-width: 76px;
+  height: 34px;
+  padding: 0 14px;
   border: 0;
-  border-radius: 2px;
+  border-radius: var(--hb-radius-sm);
   text-align: center;
   text-decoration: none;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 28px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 34px;
   cursor: pointer;
 }
 
 body.hackerba .hb-btn-attention {
-  color: var(--hb-link);
-  background: var(--hb-surface);
+  color: var(--hb-orange);
+  background: #fff3eb;
 }
 
 body.hackerba .hb-btn-attention.hb-btn-followed {
-  color: #888;
-  background: rgb(255 255 255 / 88%);
+  color: var(--hb-subtle);
+  background: var(--hb-surface-2);
   cursor: default;
 }
 
 body.hackerba .hb-btn-checkin {
   color: #fff;
-  background: linear-gradient(180deg, #ff9a4d 0%, #ff7f24 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
+  background: var(--hb-orange);
 }
 
 body.hackerba .hb-btn-checkin.hb-btn-checked {
-  color: #888;
-  background: rgb(255 255 255 / 88%);
-  box-shadow: none;
+  color: var(--hb-subtle);
+  background: var(--hb-surface-2);
   cursor: default;
 }
 
 /* ===== 内容区 ===== */
 body.hackerba .hb-content {
   display: flex;
-  gap: 10px;
+  gap: 16px;
   width: var(--hb-width);
-  max-width: calc(100% - 24px);
-  margin: 8px auto 20px;
+  max-width: calc(100% - 32px);
+  margin: 16px auto 28px;
   align-items: flex-start;
 }
 
 body.hackerba .hb-main {
   flex: 1;
   min-width: 0;
-  border: 1px solid var(--hb-line);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--hb-radius);
   background: var(--hb-surface);
+  box-shadow: var(--hb-shadow);
 }
 
 body.hackerba .hb-tab-bar {
   display: flex;
   align-items: stretch;
-  height: 38px;
+  height: 48px;
   border-bottom: 1px solid var(--hb-line);
-  background: var(--hb-surface-soft);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-tab-nav {
   display: flex;
   flex: 1;
+  gap: 2px;
   margin: 0;
-  padding: 0 4px;
+  padding: 0 8px;
   list-style: none;
 }
 
@@ -436,12 +448,12 @@ body.hackerba .hb-tab-nav li {
 
 body.hackerba .hb-tab-nav a {
   display: inline-block;
-  padding: 10px 14px 8px;
+  padding: 14px 14px 12px;
   border-bottom: 2px solid transparent;
   color: var(--hb-subtle);
   text-decoration: none;
-  font-size: 14px;
-  line-height: 18px;
+  font-size: 15px;
+  line-height: 20px;
 }
 
 body.hackerba .hb-tab-nav a:hover {
@@ -449,21 +461,21 @@ body.hackerba .hb-tab-nav a:hover {
 }
 
 body.hackerba .hb-tab-nav .hb-tab-focus {
-  border-bottom-color: var(--hb-blue);
-  color: var(--hb-blue);
+  border-bottom-color: var(--hb-orange);
+  color: var(--hb-text);
   font-weight: 700;
-  background: var(--hb-surface);
+  background: transparent;
 }
 
 body.hackerba .hb-tab-post {
   align-self: center;
-  margin-right: 8px;
-  min-width: 56px;
-  height: 26px;
-  padding: 0 12px;
-  line-height: 26px;
+  margin-right: 12px;
+  min-width: 64px;
+  height: 32px;
+  padding: 0 14px;
+  line-height: 32px;
   color: #fff;
-  background: #ff7f24;
+  background: var(--hb-orange);
 }
 
 /* ===== 列表工具条 ===== */
@@ -471,15 +483,15 @@ body.hackerba .hb-thread-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 32px;
-  padding: 0 12px;
+  height: 40px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--hb-line);
-  background: var(--hb-surface-3);
-  font-size: 12px;
+  background: var(--hb-surface);
+  font-size: 13px;
 }
 
 body.hackerba .hb-thread-sort a {
-  margin-right: 14px;
+  margin-right: 16px;
   color: var(--hb-subtle);
   text-decoration: none;
 }
@@ -489,7 +501,7 @@ body.hackerba .hb-thread-sort a:hover {
 }
 
 body.hackerba .hb-thread-sort .hb-sort-focus {
-  color: var(--hb-blue);
+  color: var(--hb-text);
   font-weight: 700;
 }
 
@@ -499,26 +511,32 @@ body.hackerba .hb-thread-top-right {
 
 body.hackerba .hb-btn-mini-post {
   min-width: auto;
-  height: 22px;
-  padding: 0 8px;
-  line-height: 22px;
+  height: 26px;
+  padding: 0 10px;
+  line-height: 26px;
   color: #fff;
-  background: #ff7f24;
+  background: var(--hb-orange);
   font-size: 12px;
 }
 
-/* ===== 帖子列表（2018 贴吧 threadlist 双行） ===== */
+/* ===== 帖子列表 ===== */
 body.hackerba .hb-thread-list {
   margin: 0;
-  padding: 0;
+  padding: 4px 0;
   list-style: none;
 }
 
 body.hackerba .hb-thread-item {
   display: flex;
   align-items: flex-start;
-  padding: 10px 12px 9px 0;
+  gap: 4px;
+  padding: 14px 16px 14px 8px;
   border-bottom: 1px solid var(--hb-line);
+  transition: background 0.15s ease;
+}
+
+body.hackerba .hb-thread-item:last-child {
+  border-bottom: 0;
 }
 
 body.hackerba .hb-thread-item:hover {
@@ -527,68 +545,38 @@ body.hackerba .hb-thread-item:hover {
 
 body.hackerba .hb-thread-left {
   display: flex;
-  flex: 0 0 58px;
+  flex: 0 0 56px;
   justify-content: center;
   padding-top: 2px;
 }
 
 body.hackerba .hb-rep-num {
-  position: relative;
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
-  width: 37px;
-  height: 22px;
-  border: 1px solid #e5e5e5;
-  color: #ff7e23;
-  background: #f8f8f8;
-  font-family: Arial, "Helvetica Neue", sans-serif;
-  font-size: 12px;
+  min-width: 40px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--hb-orange);
+  background: #fff3eb;
+  font-family: "DIN Alternate", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
   font-weight: 700;
-  line-height: 20px;
+  line-height: 24px;
   text-align: center;
 }
 
-body.hackerba .hb-rep-num::before,
-body.hackerba .hb-rep-num::after {
-  position: absolute;
-  top: 50%;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  content: "";
-  pointer-events: none;
-}
-
-body.hackerba .hb-rep-num::before {
-  right: -6px;
-  margin-top: -5px;
-  border-width: 5px 0 5px 6px;
-  border-color: transparent transparent transparent #e5e5e5;
-}
-
-body.hackerba .hb-rep-num::after {
-  right: -5px;
-  margin-top: -4px;
-  border-width: 4px 0 4px 5px;
-  border-color: transparent transparent transparent #f8f8f8;
-}
-
 body.hackerba .hb-rep-zero {
-  color: #aaa;
+  color: var(--hb-muted);
+  background: var(--hb-surface-2);
 }
 
 body.hackerba .hb-rep-hot {
-  color: #ff7e23;
-  border-color: #ffd7ad;
-  background: #fff4e8;
-}
-
-body.hackerba .hb-rep-hot::before {
-  border-left-color: #ffd7ad;
-}
-
-body.hackerba .hb-rep-hot::after {
-  border-left-color: #fff4e8;
+  color: #fff;
+  background: var(--hb-orange);
 }
 
 body.hackerba .hb-thread-body {
@@ -620,14 +608,14 @@ body.hackerba .hb-thread-title {
 body.hackerba .hb-icon-hot,
 body.hackerba .hb-icon-good {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  border-radius: 1px;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  border-radius: 4px;
   color: #fff;
   font-size: 11px;
   font-weight: 700;
-  line-height: 16px;
+  line-height: 18px;
   text-align: center;
   vertical-align: -1px;
 }
@@ -641,14 +629,14 @@ body.hackerba .hb-icon-good {
 }
 
 body.hackerba .hb-th-tit {
-  color: var(--hb-link) !important;
-  font-size: 14px;
-  font-weight: 400;
+  color: var(--hb-text) !important;
+  font-size: 15px;
+  font-weight: 600;
   text-decoration: none !important;
 }
 
 body.hackerba .hb-th-tit:visited {
-  color: #777 !important;
+  color: var(--hb-subtle) !important;
 }
 
 body.hackerba .hb-th-tit:hover {
@@ -714,8 +702,8 @@ body.hackerba .hb-thread-abs {
   min-width: 0;
   overflow: hidden;
   color: var(--hb-muted);
-  font-size: 12px;
-  line-height: 18px;
+  font-size: 13px;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -759,7 +747,7 @@ body.hackerba .hb-modal-backdrop {
   margin: 0;
   padding: 0;
   border: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgb(15 23 42 / 42%);
   cursor: pointer;
 }
 
@@ -770,10 +758,10 @@ body.hackerba .hb-modal {
   width: min(560px, 100%);
   max-height: calc(100vh - 80px);
   overflow: auto;
-  border: 1px solid var(--hb-line);
-  border-radius: 2px;
+  border: 0;
+  border-radius: 16px;
   background: var(--hb-surface);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 16px 48px rgb(31 35 41 / 18%);
 }
 
 body.hackerba .hb-modal:has(.hb-doc-panel) {
@@ -787,15 +775,15 @@ body.hackerba .hb-modal .hb-auth-panel {
 
 body.hackerba .hb-modal-close {
   position: absolute;
-  top: 8px;
-  right: 10px;
+  top: 10px;
+  right: 12px;
   z-index: 2;
   width: 32px;
   height: 32px;
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 2px;
+  border-radius: 8px;
   color: var(--hb-muted);
   background: transparent;
   font-size: 22px;
@@ -812,6 +800,13 @@ body.hackerba.hb-popup-page .hb-main,
 body.hackerba.hb-popup-page .hb-aside {
   pointer-events: none;
   user-select: none;
+}
+
+body.hackerba .hb-modal-loading {
+  padding: 36px 24px;
+  color: var(--hb-muted);
+  font-size: 14px;
+  text-align: center;
 }
 
 body.hackerba .hb-auth-title {
@@ -837,7 +832,7 @@ body.hackerba .hb-auth-cards {
 body.hackerba .hb-auth-card {
   padding: 16px;
   border: 1px solid var(--hb-line);
-  border-radius: 2px;
+  border-radius: var(--hb-radius-sm);
   background: var(--hb-surface-3);
 }
 
@@ -873,23 +868,8 @@ body.hackerba .hb-auth-card input[type="password"] {
   height: 32px;
   padding: 0 8px;
   border: 1px solid var(--hb-input-border);
-  border-radius: 2px;
+  border-radius: var(--hb-radius-sm);
   background: var(--hb-surface);
-}
-
-body.hackerba .hb-auth-card .hb-auth-submit,
-body.hackerba .hb-auth-card input[type="submit"] {
-  margin-top: 10px;
-  min-width: 96px;
-  height: 32px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 2px;
-  color: #fff !important;
-  background: var(--hb-orange);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
 }
 
 body.hackerba .hb-auth-forgot {
@@ -955,6 +935,127 @@ body.hackerba .hb-doc-body p {
   margin: 0 0 12px;
 }
 
+body.hackerba .hb-user-panel .hb-doc-body table {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+body.hackerba .hb-user-panel .hb-doc-body td {
+  width: auto !important;
+  padding: 8px 10px 8px 0;
+  vertical-align: top;
+  color: var(--hb-subtle);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+body.hackerba .hb-user-panel .hb-doc-body td:first-child {
+  width: 88px !important;
+  min-width: 88px;
+  color: var(--hb-muted);
+  white-space: nowrap;
+}
+
+body.hackerba .hb-user-panel .hb-doc-body td:last-child {
+  width: auto !important;
+}
+
+body.hackerba .hb-user-panel .hb-doc-body textarea,
+body.hackerba .hb-user-panel .hb-doc-body input[type="text"] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--hb-input-border);
+  border-radius: var(--hb-radius-sm);
+  background: var(--hb-surface-2);
+}
+
+body.hackerba .hb-user-panel .hb-doc-body textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+body.hackerba .hb-user-panel .hb-form-actions {
+  margin-top: 16px;
+  padding-top: 4px;
+}
+
+body.hackerba .hb-profile-karma {
+  color: var(--hb-text);
+  font-weight: 700;
+}
+
+body.hackerba .hb-profile-level {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 6px;
+  color: #9a5b00;
+  background: #ffe8b8;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  vertical-align: middle;
+}
+
+body.hackerba .hb-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+body.hackerba .hb-form-actions-left {
+  margin-right: auto;
+}
+
+body.hackerba .hb-primary-btn,
+body.hackerba .hb-auth-card .hb-auth-submit,
+body.hackerba .hb-auth-card input[type="submit"],
+body.hackerba .hb-reply-box input[type="submit"],
+body.hackerba .hb-user-panel input[type="submit"],
+body.hackerba input[type="submit"] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  height: 34px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0 !important;
+  border-radius: var(--hb-radius-sm) !important;
+  color: #fff !important;
+  background: var(--hb-orange) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 34px;
+  cursor: pointer;
+}
+
+body.hackerba .hb-primary-btn:hover,
+body.hackerba .hb-auth-card input[type="submit"]:hover,
+body.hackerba .hb-reply-box input[type="submit"]:hover,
+body.hackerba .hb-user-panel input[type="submit"]:hover,
+body.hackerba input[type="submit"]:hover {
+  background: #f05f12 !important;
+}
+
+body.hackerba .hb-auth-card .hb-auth-submit,
+body.hackerba .hb-auth-card input[type="submit"] {
+  margin-top: 10px;
+  float: right;
+}
+
+body.hackerba .hb-auth-card form::after {
+  display: block;
+  clear: both;
+  content: "";
+}
+
 @media (max-width: 860px) {
   body.hackerba .hb-auth-cards {
     grid-template-columns: 1fr;
@@ -975,10 +1076,9 @@ body.hackerba .hb-pager {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 14px 12px 16px;
+  padding: 16px 12px 18px;
   border-top: 1px solid var(--hb-line);
-  background: var(--hb-surface-3);
-  font-family: "Microsoft YaHei", sans-serif;
+  background: var(--hb-surface);
   font-size: 13px;
 }
 
@@ -989,11 +1089,11 @@ body.hackerba .hb-pager-info {
 }
 
 body.hackerba .hb-pager-link {
-  padding: 4px 12px;
-  border: 1px solid #d7d7d7;
-  border-radius: 2px;
+  padding: 6px 14px;
+  border: 1px solid var(--hb-line);
+  border-radius: var(--hb-radius-sm);
   color: var(--hb-subtle);
-  background: var(--hb-surface);
+  background: var(--hb-surface-2);
   text-decoration: none;
 }
 
@@ -1003,75 +1103,78 @@ body.hackerba .hb-pager-link:hover {
 }
 
 body.hackerba .hb-pager-disabled {
-  padding: 4px 12px;
+  padding: 6px 14px;
   border: 1px solid var(--hb-line);
-  border-radius: 2px;
-  color: #ccc;
-  background: var(--hb-surface-soft);
+  border-radius: var(--hb-radius-sm);
+  color: #c5c9cf;
+  background: var(--hb-surface-2);
   cursor: default;
 }
 
 /* ===== 右侧栏 ===== */
 body.hackerba .hb-aside {
-  flex: 0 0 240px;
-  width: 240px;
+  flex: 0 0 260px;
+  width: 260px;
 }
 
 body.hackerba .hb-aside-box {
-  margin-bottom: 10px;
-  border: 1px solid var(--hb-line);
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--hb-radius);
   background: var(--hb-surface);
+  box-shadow: var(--hb-shadow);
 }
 
 body.hackerba .hb-aside-title {
   position: relative;
-  padding: 9px 12px 9px 14px;
+  padding: 14px 16px 12px 18px;
   border-bottom: 1px solid var(--hb-line);
-  background: var(--hb-surface-3);
+  background: var(--hb-surface);
   color: var(--hb-text);
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
 }
 
 body.hackerba .hb-aside-title::before {
   content: "";
   position: absolute;
-  top: 10px;
+  top: 16px;
   left: 0;
   width: 3px;
   height: 14px;
-  background: var(--hb-blue);
+  border-radius: 0 2px 2px 0;
+  background: var(--hb-orange);
 }
 
 body.hackerba .hb-aside-body {
-  padding: 12px;
+  padding: 14px 16px 16px;
   color: var(--hb-subtle);
-  font-size: 12px;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 body.hackerba .hb-aside-body p {
-  margin: 0 0 2px;
+  margin: 0 0 4px;
 }
 
 body.hackerba .hb-aside-forum {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed var(--hb-line);
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hb-line);
 }
 
 body.hackerba .hb-aside-avatar {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   overflow: hidden;
-  border-radius: 2px;
-  background: #f60;
+  border-radius: 10px;
+  background: #ff6600;
 }
 
 body.hackerba .hb-aside-name {
@@ -1081,12 +1184,13 @@ body.hackerba .hb-aside-name {
 
 body.hackerba .hb-aside-meta {
   color: var(--hb-muted);
+  font-size: 12px;
 }
 
 body.hackerba .hb-aside-body .hb-aside-link {
   display: inline-block;
   margin-right: 12px;
-  margin-top: 4px;
+  margin-top: 6px;
   color: var(--hb-blue);
   text-decoration: none;
 }
@@ -1097,9 +1201,9 @@ body.hackerba .hb-aside-body .hb-aside-link:hover {
 
 body.hackerba .hb-footer {
   width: var(--hb-width);
-  max-width: calc(100% - 24px);
-  margin: 0 auto 28px;
-  color: #aaa;
+  max-width: calc(100% - 32px);
+  margin: 0 auto 36px;
+  color: #a0a6ad;
   font-size: 12px;
   text-align: center;
 }
@@ -1119,12 +1223,11 @@ body.hackerba .hb-hn-source.hb-source-visible {
 body.hackerba.hb-item-page .hb-main {
   border: 0;
   background: transparent;
+  box-shadow: none;
 }
 
 body.hackerba.hb-item-page .hb-tab-bar {
-  margin-bottom: 6px;
-  border: 1px solid var(--hb-line);
-  background: var(--hb-surface-soft);
+  display: none !important;
 }
 
 body.hackerba.hb-item-page .hb-aside {
@@ -1141,11 +1244,14 @@ body.hackerba .hb-post-wrap {
   background: transparent;
 }
 
-/* 帖子标题栏 core_title */
+/* 帖子标题栏 */
 body.hackerba .hb-core-title {
-  margin: 0 0 6px;
-  border: 1px solid var(--hb-line);
+  margin: 0 0 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--hb-radius);
   background: var(--hb-surface);
+  box-shadow: var(--hb-shadow);
 }
 
 body.hackerba .hb-core-title-wrap {
@@ -1153,8 +1259,8 @@ body.hackerba .hb-core-title-wrap {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 42px;
-  padding: 10px 12px 8px;
+  min-height: 52px;
+  padding: 14px 18px;
 }
 
 body.hackerba .hb-core-title-txt {
@@ -1163,9 +1269,10 @@ body.hackerba .hb-core-title-txt {
   margin: 0;
   overflow: hidden;
   color: var(--hb-text);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 24px;
+  letter-spacing: -0.01em;
+  line-height: 26px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1180,58 +1287,60 @@ body.hackerba .hb-core-title-btns {
 
 body.hackerba .hb-core-meta {
   color: var(--hb-subtle);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 body.hackerba .hb-core-quick-reply {
   display: inline-block;
-  height: 24px;
-  padding: 0 14px;
-  border-radius: 2px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--hb-radius-sm);
   color: #fff !important;
-  background: #ff7f24;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 24px;
+  background: var(--hb-orange);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 32px;
   text-decoration: none !important;
 }
 
 body.hackerba .hb-core-quick-reply:hover {
-  background: #f07018;
+  background: #f05f12;
 }
 
 body.hackerba .hb-main-floor {
-  margin: 0 0 6px !important;
+  margin: 0 0 12px !important;
 }
 
 body.hackerba .hb-floor-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 12px;
   margin: 0;
   padding: 0;
   background: transparent;
 }
 
-/* 楼层 l_post / d_author + d_post_content_main */
 body.hackerba .hb-floor {
   display: flex;
   align-items: stretch;
-  margin: 0 0 6px;
-  border: 1px solid var(--hb-line);
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--hb-radius);
   background: var(--hb-surface);
+  box-shadow: var(--hb-shadow);
 }
 
 body.hackerba .hb-floor-author {
   position: relative;
   display: flex;
-  flex: 0 0 130px;
+  flex: 0 0 140px;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  width: 130px;
-  padding: 14px 6px 16px;
-  background: #f8f8f8;
+  gap: 8px;
+  width: 140px;
+  padding: 18px 10px 18px;
+  background: var(--hb-surface-2);
   border-right: 1px solid var(--hb-line);
   text-align: center;
 }
@@ -1239,65 +1348,67 @@ body.hackerba .hb-floor-author {
 body.hackerba .hb-louzhu,
 body.hackerba .hb-me {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 10px;
+  left: 10px;
   z-index: 1;
-  width: 36px;
-  height: 36px;
-  overflow: hidden;
+  width: auto;
+  height: auto;
+  overflow: visible;
   pointer-events: none;
 }
 
 body.hackerba .hb-louzhu span,
 body.hackerba .hb-me span {
-  position: absolute;
-  top: 6px;
-  left: -14px;
-  width: 52px;
+  position: static;
+  display: inline-block;
+  top: auto;
+  left: auto;
+  width: auto;
+  padding: 0 6px;
+  border-radius: 4px;
   color: #fff;
   font-size: 11px;
   font-weight: 700;
-  line-height: 16px;
+  line-height: 18px;
   text-align: center;
-  transform: rotate(-45deg);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+  transform: none;
+  box-shadow: none;
 }
 
 body.hackerba .hb-louzhu span {
-  background: #ff7f24;
+  background: var(--hb-orange);
 }
 
 body.hackerba .hb-me span {
-  background: #2db55d;
+  background: #18a058;
 }
 
 body.hackerba .hb-floor-face {
   display: block;
-  margin-top: 4px;
+  margin-top: 8px;
   text-decoration: none;
 }
 
 body.hackerba .hb-floor-avatar {
-  width: 60px;
-  height: 60px;
-  border: 1px solid #e0e0e0;
-  border-radius: 2px;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 14px;
   color: #fff;
   background: #7a7a7a;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%);
   font-family: Arial, sans-serif;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  line-height: 60px;
+  line-height: 56px;
   text-align: center;
 }
 
 body.hackerba .hb-floor-name {
   max-width: 110px;
   overflow: hidden;
-  color: var(--hb-link) !important;
-  font-size: 12px;
-  font-weight: 400;
+  color: var(--hb-text) !important;
+  font-size: 13px;
+  font-weight: 600;
   line-height: 18px;
   text-decoration: none !important;
   text-overflow: ellipsis;
@@ -1305,7 +1416,8 @@ body.hackerba .hb-floor-name {
 }
 
 body.hackerba .hb-floor-name:hover {
-  text-decoration: underline !important;
+  color: var(--hb-blue) !important;
+  text-decoration: none !important;
 }
 
 body.hackerba .hb-floor-level {
@@ -1319,7 +1431,7 @@ body.hackerba .hb-floor-level span {
 }
 
 body.hackerba .hb-floor-level em {
-  color: #fe7100;
+  color: var(--hb-orange);
   font-style: normal;
   font-weight: 700;
 }
@@ -1329,7 +1441,7 @@ body.hackerba .hb-floor-main {
   flex: 1;
   flex-direction: column;
   min-width: 0;
-  padding: 2px 14px 8px;
+  padding: 8px 18px 14px;
   background: var(--hb-surface);
 }
 
@@ -1338,8 +1450,8 @@ body.hackerba .hb-floor-top {
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  min-height: 26px;
-  margin-bottom: 2px;
+  min-height: 28px;
+  margin-bottom: 4px;
 }
 
 body.hackerba .hb-floor-no {
@@ -1348,14 +1460,15 @@ body.hackerba .hb-floor-no {
 }
 
 body.hackerba .hb-floor-lz .hb-floor-no {
-  color: #ff7f24;
+  color: var(--hb-orange);
   font-weight: 700;
 }
 
 body.hackerba .hb-share-link {
-  padding: 8px 10px;
-  border: 1px solid var(--hb-line);
-  background: var(--hb-surface-3);
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--hb-radius-sm);
+  background: var(--hb-surface-2);
 }
 
 body.hackerba .hb-share-label {
@@ -1391,21 +1504,23 @@ body.hackerba .hb-floor-quote {
 
 /* 楼中楼 j_lzl */
 body.hackerba .hb-lzl {
-  margin: 10px 0 4px;
-  border: 1px solid #e8e8e8;
-  background: #f7f7f7;
+  margin: 12px 0 4px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--hb-radius-sm);
+  background: var(--hb-surface-2);
 }
 
 body.hackerba .hb-lzl-hd {
-  padding: 6px 10px;
-  border-bottom: 1px solid #ebebeb;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hb-line);
   color: var(--hb-subtle);
   font-size: 12px;
 }
 
 body.hackerba .hb-lzl-hd em {
   margin: 0 2px;
-  color: #ff7f24;
+  color: var(--hb-orange);
   font-style: normal;
   font-weight: 700;
 }
@@ -1417,11 +1532,11 @@ body.hackerba .hb-lzl-list {
 }
 
 body.hackerba .hb-lzl-item {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--hb-line);
   color: var(--hb-text);
-  font-size: 12px;
-  line-height: 20px;
+  font-size: 13px;
+  line-height: 22px;
   word-break: break-word;
 }
 
@@ -1451,7 +1566,7 @@ body.hackerba .hb-lzl-me-tag {
 }
 
 body.hackerba .hb-lzl-lz-tag {
-  background: #ff7f24;
+  background: var(--hb-orange);
 }
 
 body.hackerba .hb-lzl-me-tag {
@@ -1501,9 +1616,9 @@ body.hackerba .hb-floor-content .commtext {
   flex: 1;
   min-height: 48px;
   color: var(--hb-text) !important;
-  font-family: "Microsoft YaHei", "PingFang SC", sans-serif !important;
-  font-size: 14px !important;
-  line-height: 24px !important;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
   word-break: break-word;
 }
 
@@ -1530,9 +1645,9 @@ body.hackerba .hb-floor-tail {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 10px;
-  padding-top: 6px;
-  border-top: 1px dashed #e5e5e5;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hb-line);
   color: var(--hb-muted);
   font-size: 12px;
 }
@@ -1582,8 +1697,11 @@ body.hackerba .hb-floor-collapsed .hb-lzl {
 
 body.hackerba .hb-reply-panel {
   margin: 0 0 16px;
-  border: 1px solid var(--hb-line);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--hb-radius);
   background: var(--hb-surface);
+  box-shadow: var(--hb-shadow);
 }
 
 body.hackerba .hb-reply-panel-title {
@@ -1604,19 +1722,20 @@ body.hackerba .hb-reply-box textarea {
   box-sizing: border-box;
   display: block;
   width: 100% !important;
-  min-height: 90px;
+  min-height: 100px;
   margin: 0 0 8px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid var(--hb-input-border);
-  background: var(--hb-surface);
-  font-family: "Microsoft YaHei", sans-serif !important;
-  font-size: 13px !important;
+  border-radius: var(--hb-radius-sm);
+  background: var(--hb-surface-2);
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif !important;
+  font-size: 14px !important;
   resize: vertical;
 }
 
 body.hackerba .hb-reply-box a[href*="formatdoc"] {
   display: inline-block;
-  margin: 0 10px 8px 0;
+  margin: 0;
   color: var(--hb-muted) !important;
   font-size: 12px;
   text-decoration: none !important;
@@ -1626,55 +1745,41 @@ body.hackerba .hb-reply-box a[href*="formatdoc"]:hover {
   color: var(--hb-blue) !important;
 }
 
-body.hackerba .hb-reply-box input[type="submit"] {
-  min-width: 88px;
-  height: 30px;
-  padding: 0 14px;
-  border: 0;
-  color: #fff !important;
-  background: #ff7f24;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 body.hackerba input,
 body.hackerba textarea {
   border: 1px solid var(--hb-input-border);
-  border-radius: 1px;
+  border-radius: var(--hb-radius-sm);
   font: inherit;
-}
-
-body.hackerba input[type="submit"] {
-  border: 0;
-  border-radius: 2px;
-  color: #fff !important;
-  background: var(--hb-orange);
-  cursor: pointer;
 }
 
 html[data-hb-theme="dark"] {
   color-scheme: dark;
-  --hb-blue: #8bb4e0;
-  --hb-blue-soft: #243044;
-  --hb-search: #4d8ef0;
-  --hb-orange: #ff943d;
-  --hb-rep: #ff943d;
-  --hb-good: #8bb4e0;
-  --hb-bg: #18191c;
-  --hb-surface: #24262b;
-  --hb-surface-2: #1e2025;
-  --hb-surface-3: #2a2c32;
-  --hb-surface-soft: #2e3138;
-  --hb-line: #3a3d45;
-  --hb-line-strong: #454851;
-  --hb-input-border: #4a4e58;
-  --hb-input-border-strong: #5c616c;
-  --hb-text: #e8e8ea;
-  --hb-muted: #9a9da5;
-  --hb-subtle: #b4b7bf;
-  --hb-link: #8bb4e0;
-  --hb-brand: #9aa3ff;
+  --hb-blue: #6b9fff;
+  --hb-blue-soft: #1d2740;
+  --hb-search: #4d82f3;
+  --hb-orange: #ff7a33;
+  --hb-rep: #ff7a33;
+  --hb-good: #6b9fff;
+  --hb-bg: #12141a;
+  --hb-surface: #1c1f27;
+  --hb-surface-2: #161922;
+  --hb-surface-3: #222632;
+  --hb-surface-soft: #222632;
+  --hb-line: #2c3140;
+  --hb-line-strong: #353b4d;
+  --hb-input-border: #3a4154;
+  --hb-input-border-strong: #4a5268;
+  --hb-text: #e8eaed;
+  --hb-muted: #8b93a7;
+  --hb-subtle: #a8b0c0;
+  --hb-link: #6b9fff;
+  --hb-brand: #6b9fff;
+  --hb-shadow: 0 1px 2px rgb(0 0 0 / 28%);
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-topbar {
+  border-bottom-color: rgb(255 255 255 / 6%);
+  background: rgb(28 31 39 / 92%);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-search input,
@@ -1686,52 +1791,50 @@ html[data-hb-theme="dark"] body.hackerba textarea {
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-card-banner {
-  border-color: #4a4036;
-  background: #2a1810;
+  background: transparent;
 }
 
-html[data-hb-theme="dark"][data-hb-banner-cover="0"] body.hackerba .hb-card-banner {
-  border-color: #3d5a80;
-  background: linear-gradient(180deg, #3f6fa8 0%, #2f5788 100%);
+html[data-hb-theme="dark"][data-hb-banner-cover="0"] body.hackerba .hb-card-head {
+  background: linear-gradient(135deg, #2a221c 0%, #1c1f27 45%, #1a2233 100%);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-card-banner-clip::after {
   background: linear-gradient(
     180deg,
-    rgb(0 0 0 / 22%) 0%,
-    rgb(0 0 0 / 12%) 34%,
-    rgb(0 0 0 / 62%) 100%
+    rgb(0 0 0 / 18%) 0%,
+    transparent 40%,
+    rgb(0 0 0 / 36%) 100%
   );
 }
 
-html[data-hb-theme="dark"] body.hackerba .hb-thread-item:hover {
+html[data-hb-theme="dark"] body.hackerba .hb-btn-attention {
+  color: var(--hb-orange);
+  background: rgb(255 107 26 / 14%);
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-btn-attention.hb-btn-followed,
+html[data-hb-theme="dark"] body.hackerba .hb-btn-checkin.hb-btn-checked {
+  color: var(--hb-subtle);
   background: var(--hb-surface-3);
 }
 
+html[data-hb-theme="dark"] body.hackerba .hb-thread-item:hover {
+  background: #1a1d26;
+}
+
 html[data-hb-theme="dark"] body.hackerba .hb-rep-num {
-  border-color: #4a4e58;
-  background: #2a2c32;
+  color: var(--hb-orange);
+  background: rgb(255 107 26 / 14%);
 }
 
-html[data-hb-theme="dark"] body.hackerba .hb-rep-num::before {
-  border-left-color: #4a4e58;
-}
-
-html[data-hb-theme="dark"] body.hackerba .hb-rep-num::after {
-  border-left-color: #2a2c32;
+html[data-hb-theme="dark"] body.hackerba .hb-rep-zero {
+  color: var(--hb-muted);
+  background: var(--hb-surface-3);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-rep-hot {
-  border-color: #7a4e28;
-  background: #3a2a1c;
-}
-
-html[data-hb-theme="dark"] body.hackerba .hb-rep-hot::before {
-  border-left-color: #7a4e28;
-}
-
-html[data-hb-theme="dark"] body.hackerba .hb-rep-hot::after {
-  border-left-color: #3a2a1c;
+  color: #fff;
+  background: var(--hb-orange);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-floor-author {
@@ -1739,12 +1842,7 @@ html[data-hb-theme="dark"] body.hackerba .hb-floor-author {
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-lzl {
-  border-color: var(--hb-line);
-  background: var(--hb-surface-soft);
-}
-
-html[data-hb-theme="dark"] body.hackerba .hb-lzl-hd {
-  border-bottom-color: var(--hb-line);
+  background: var(--hb-surface-2);
 }
 
 html[data-hb-theme="dark"] body.hackerba .hb-icon-author {
@@ -1762,9 +1860,35 @@ html[data-hb-theme="dark"] body.hackerba .hb-floor-tail {
   border-top-color: var(--hb-line);
 }
 
+html[data-hb-theme="dark"] body.hackerba .hb-card-num {
+  color: #a8b0c0;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-card-num em {
+  color: #8b93a7 !important;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-card-num b {
+  color: #e8eaed !important;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-profile-level {
+  color: #ffd089;
+  background: #4a3818;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-card-level {
+  color: #ffd089;
+  background: #4a3818;
+}
+
+html[data-hb-theme="dark"] body.hackerba .hb-doc-body {
+  color: var(--hb-subtle);
+}
+
 html[data-hb-density="compact"] body.hackerba .hb-thread-item {
-  padding-top: 7px;
-  padding-bottom: 7px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 @media (max-width: 860px) {

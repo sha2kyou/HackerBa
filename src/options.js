@@ -3,6 +3,7 @@ const language = document.querySelector("#language");
 const theme = document.querySelector("#theme");
 const density = document.querySelector("#density");
 const titleOpensDiscussion = document.querySelector("#titleOpensDiscussion");
+const discussionOpensNewTab = document.querySelector("#discussionOpensNewTab");
 const showBannerCover = document.querySelector("#showBannerCover");
 const status = document.querySelector("#status");
 
@@ -33,12 +34,14 @@ async function restorePreferences() {
     theme: "light",
     density: "comfortable",
     titleOpensDiscussion: true,
+    discussionOpensNewTab: true,
     showBannerCover: false,
   });
   language.value = preferences.language || "auto";
   theme.value = preferences.theme;
   density.value = preferences.density;
   titleOpensDiscussion.checked = preferences.titleOpensDiscussion !== false;
+  discussionOpensNewTab.checked = preferences.discussionOpensNewTab !== false;
   showBannerCover.checked = preferences.showBannerCover === true;
   applyOptionsI18n(resolveLocale(language.value, browserLang()));
 }
@@ -55,6 +58,7 @@ form.addEventListener("submit", async (event) => {
     theme: theme.value,
     density: density.value,
     titleOpensDiscussion: titleOpensDiscussion.checked,
+    discussionOpensNewTab: discussionOpensNewTab.checked,
     showBannerCover: showBannerCover.checked,
   });
   applyOptionsI18n(locale);

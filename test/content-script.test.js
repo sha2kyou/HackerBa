@@ -117,6 +117,8 @@ test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨�
   assert.equal(item.querySelector(".hb-rep-num")?.classList.contains("hb-rep-hot"), false);
   assert.equal(item.querySelector(".hb-th-tit").textContent, "A story");
   assert.equal(item.querySelector(".hb-th-tit").getAttribute("href"), "item?id=1");
+  assert.equal(item.querySelector(".hb-th-tit").getAttribute("target"), "_blank");
+  assert.equal(item.querySelector(".hb-th-tit").getAttribute("rel"), "noopener noreferrer");
   assert.match(item.querySelector(".hb-thread-abs").textContent, /example\.com/);
   assert.equal(item.querySelector(".hb-th-site").textContent, "example.com");
   assert.equal(item.querySelector(".hb-th-site").getAttribute("href"), "https://example.com");
@@ -127,8 +129,41 @@ test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨�
   assert.equal(item.querySelector(".hb-goto-item"), null);
   assert.equal(document.querySelector(".hb-hn-source")?.hidden, true);
   assert.equal(document.documentElement.dataset.hbTitleDiscussion, "1");
+  assert.equal(document.documentElement.dataset.hbDiscussionBlank, "1");
   assert.ok(document.querySelector(".hb-card-banner-clip"));
   assert.equal(document.querySelector('.hb-card-btns a.hb-btn-checkin[href="login"]')?.textContent, "Check in");
+});
+
+test("关闭详情新窗口时标题在当前页打开讨论", () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title">
+          <span class="titleline">
+            <a href="https://example.com">A story</a>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="subtext">
+          <span class="score" id="score_1">12 points</span>
+          by <a href="user?id=alice" class="hnuser">alice</a>
+          <a href="item?id=1">3&nbsp;comments</a>
+        </td>
+      </tr>
+    </table>
+  `);
+  loadScripts(document);
+  document.querySelector(".hb-wrap")?.remove();
+  document.body.classList.remove("hackerba");
+  document.documentElement.classList.remove("hackerba-page", "hb-boot");
+  document.documentElement.dataset.hbTitleDiscussion = "1";
+  document.documentElement.dataset.hbDiscussionBlank = "0";
+  document.defaultView.HackerBa.enhanceHackerNews(document);
+
+  const title = document.querySelector(".hb-th-tit");
+  assert.equal(title.getAttribute("href"), "item?id=1");
+  assert.equal(title.getAttribute("target"), null);
 });
 
 test("关闭标题打开讨论时标题指向原文，分数旁显示进入讨论", () => {
@@ -163,6 +198,7 @@ test("关闭标题打开讨论时标题指向原文，分数旁显示进入讨�
   const goto = document.querySelector(".hb-goto-item");
   assert.ok(goto);
   assert.equal(goto.getAttribute("href"), "item?id=1");
+  assert.equal(goto.getAttribute("target"), "_blank");
   assert.match(goto.textContent, /Discuss|进入讨论/);
   assert.match(document.querySelector(".hb-thread-abs").textContent, /12/);
 });
@@ -339,6 +375,7 @@ test("未登录发帖页套上贴吧壳并美化登录提示", () => {
   assert.equal(document.querySelectorAll(".hb-auth-card").length, 1);
   assert.equal(document.querySelector(".hb-auth-card input[type='submit']").value, "Log in");
   assert.equal(document.body.classList.contains("hb-popup-page"), true);
+  assert.equal(document.body.classList.contains("hb-popup-standalone"), true);
   assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
   assert.equal(document.querySelector(".hb-hn-source .hb-auth-panel"), null);
 });
@@ -375,6 +412,7 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   assert.equal(loginDoc.querySelector(".hb-auth-switch").getAttribute("href"), "login?mode=register");
   assert.ok(loginDoc.querySelector(".hb-modal .hb-auth-panel"));
   assert.equal(loginDoc.body.classList.contains("hb-popup-page"), true);
+  assert.equal(loginDoc.body.classList.contains("hb-popup-standalone"), true);
   assert.equal(loginDoc.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
 
   const registerDoc = createDocument(
@@ -405,6 +443,7 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   assert.equal(registerDoc.querySelector(".hb-auth-switch").getAttribute("href"), "login");
   assert.ok(registerDoc.querySelector(".hb-modal .hb-auth-panel"));
   assert.equal(registerDoc.body.classList.contains("hb-popup-page"), true);
+  assert.equal(registerDoc.body.classList.contains("hb-popup-standalone"), true);
 });
 
 test("吧规页以弹层展示，不挂在看帖主栏", () => {
@@ -432,7 +471,114 @@ test("吧规页以弹层展示，不挂在看帖主栏", () => {
   assert.match(document.querySelector(".hb-doc-body").textContent, /Be kind/);
   assert.equal(document.querySelector(".hb-bc-current").textContent, "Rules");
   assert.equal(document.body.classList.contains("hb-popup-page"), true);
+  assert.equal(document.body.classList.contains("hb-popup-standalone"), true);
   assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
+});
+
+test("列表页点击登录/吧规为页内弹框，关闭不跳转", async () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A story</a></span></td>
+      </tr>
+      <tr>
+        <td class="subtext">
+          <span class="score">10 points</span>
+          by <a href="user?id=alice" class="hnuser">alice</a>
+          <span class="age" title="2024-01-01T00:00:00">1 hour ago</span>
+          <a href="item?id=1">3&nbsp;comments</a>
+        </td>
+      </tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/news",
+  );
+
+  enhanceHackerNews(document);
+
+  const loginHtml = `
+    <b>Login</b>
+    <form action="login" method="post">
+      <table border="0">
+        <tr><td>username:</td><td><input type="text" name="acct"></td></tr>
+        <tr><td>password:</td><td><input type="password" name="pw"></td></tr>
+      </table>
+      <input type="submit" value="login">
+    </form>
+    <form action="login" method="post">
+      <input type="hidden" name="creating" value="t">
+      <table border="0">
+        <tr><td>username:</td><td><input type="text" name="acct"></td></tr>
+        <tr><td>password:</td><td><input type="password" name="pw"></td></tr>
+      </table>
+      <input type="submit" value="create account">
+    </form>
+  `;
+  const rulesHtml = `
+    <center><table width="500"><tr><td bgcolor="#fafaf0">
+      <b>Hacker News Guidelines</b>
+      <p>On-Topic: Anything that good hackers would find interesting.</p>
+    </td></tr></table></center>
+  `;
+
+  document.defaultView.fetch = async (url) => {
+    const href = String(url);
+    if (href.includes("login")) {
+      return {
+        ok: true,
+        text: async () => loginHtml,
+      };
+    }
+    if (href.includes("guidelines")) {
+      return {
+        ok: true,
+        text: async () => rulesHtml,
+      };
+    }
+    return { ok: false, status: 404, text: async () => "" };
+  };
+
+  const loginLink = document.querySelector('.hb-userbar a[href="login"]');
+  assert.ok(loginLink);
+  loginLink.dispatchEvent(
+    new document.defaultView.MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+    }),
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(document.defaultView.location.pathname, "/news");
+  assert.ok(document.querySelector(".hb-modal .hb-auth-panel"));
+  assert.equal(document.body.classList.contains("hb-popup-page"), true);
+  assert.equal(document.body.classList.contains("hb-popup-standalone"), false);
+  assert.ok(document.querySelector('.hb-tab-nav a[data-hb-tab="posts"].hb-tab-focus'));
+
+  document.querySelector(".hb-modal-close").click();
+  assert.equal(document.querySelector(".hb-modal-overlay"), null);
+  assert.equal(document.body.classList.contains("hb-popup-page"), false);
+  assert.equal(document.defaultView.location.pathname, "/news");
+  assert.ok(document.querySelector(".hb-thread-list"));
+
+  const rulesLink = document.querySelector('.hb-aside-link[href="newsguidelines.html"]');
+  assert.ok(rulesLink);
+  rulesLink.dispatchEvent(
+    new document.defaultView.MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+    }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(document.defaultView.location.pathname, "/news");
+  assert.ok(document.querySelector(".hb-modal .hb-doc-panel"));
+  assert.match(document.querySelector(".hb-doc-body").textContent, /On-Topic/);
 });
 
 test("用户信息页以弹层展示，不点亮看帖 Tab", () => {
@@ -440,13 +586,21 @@ test("用户信息页以弹层展示，不点亮看帖 Tab", () => {
     `
     <table id="hnmain">
       <tr>
+        <td bgcolor="#ff6600">
+          <table><tr><td><b>Hacker News</b></td><td>login</td></tr></table>
+        </td>
+      </tr>
+      <tr>
         <td>
-          <table>
-            <tr><td>user:</td><td>alice</td></tr>
-            <tr><td>created:</td><td>10 years ago</td></tr>
-            <tr><td>karma:</td><td>1234</td></tr>
-            <tr><td>about:</td><td>Hello from alice</td></tr>
-          </table>
+          <form method="post" action="x">
+            <table>
+              <tr><td>user:</td><td>alice</td></tr>
+              <tr><td>created:</td><td>10 years ago</td></tr>
+              <tr><td>karma:</td><td>1234</td></tr>
+              <tr><td>about:</td><td><textarea name="about">Hello from alice</textarea></td></tr>
+              <tr><td></td><td><input type="submit" value="update"></td></tr>
+            </table>
+          </form>
         </td>
       </tr>
     </table>
@@ -457,12 +611,133 @@ test("用户信息页以弹层展示，不点亮看帖 Tab", () => {
   enhanceHackerNews(document);
 
   assert.ok(document.querySelector(".hb-modal-overlay"));
-  assert.ok(document.querySelector(".hb-modal .hb-doc-panel"));
+  assert.ok(document.querySelector(".hb-modal .hb-user-panel"));
+  assert.equal(document.querySelector(".hb-doc-title").textContent, "alice");
   assert.match(document.querySelector(".hb-doc-body").textContent, /Hello from alice/);
+  assert.match(document.querySelector(".hb-doc-body").textContent, /Karma/);
+  assert.equal(document.querySelector(".hb-profile-karma")?.textContent, "1234");
+  assert.equal(document.querySelector(".hb-profile-level")?.textContent, "Lv.7");
+  assert.equal(document.querySelector(".hb-user-panel .hb-primary-btn")?.value, "Update profile");
+  assert.ok(document.querySelector(".hb-user-panel .hb-form-actions .hb-primary-btn"));
+  assert.equal(document.querySelector(".hb-user-panel .hb-form-actions-row"), null);
+  assert.doesNotMatch(document.querySelector(".hb-doc-body").textContent, /login/);
   assert.equal(document.querySelector(".hb-bc-current").textContent, "alice");
   assert.equal(document.body.classList.contains("hb-popup-page"), true);
+  assert.equal(document.body.classList.contains("hb-popup-standalone"), true);
   assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
   assert.equal(document.querySelector(".hb-hn-source").classList.contains("hb-source-hidden"), true);
+});
+
+test("中文语言下个人资料标签本地化", () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr>
+        <td>
+          <form method="post" action="x">
+            <table>
+              <tr><td>user:</td><td>alice</td></tr>
+              <tr><td>created:</td><td>10 years ago</td></tr>
+              <tr><td>karma:</td><td>1234</td></tr>
+              <tr><td>about:</td><td><textarea name="about">简介内容</textarea></td></tr>
+              <tr><td></td><td><a href="submitted?id=alice">submissions</a></td></tr>
+              <tr><td></td><td><a href="threads?id=alice">comments</a></td></tr>
+              <tr><td></td><td><a href="favorites?id=alice">favorites</a></td></tr>
+              <tr><td></td><td><input type="submit" value="update"></td></tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/user?id=alice",
+  );
+  loadScripts(document);
+  document.querySelector(".hb-wrap")?.remove();
+  document.body.classList.remove("hackerba", "hb-popup-page", "hb-popup-standalone");
+  document.documentElement.classList.remove("hackerba-page", "hb-boot");
+  document.documentElement.dataset.hbLang = "zh";
+  document.defaultView.HackerBa.enhanceHackerNews(document);
+
+  const bodyText = document.querySelector(".hb-doc-body")?.textContent || "";
+  assert.match(bodyText, /用户：/);
+  assert.match(bodyText, /注册：/);
+  assert.match(bodyText, /声望：/);
+  assert.match(bodyText, /简介：/);
+  assert.match(bodyText, /10 年前/);
+  assert.match(bodyText, /提交/);
+  assert.match(bodyText, /评论/);
+  assert.match(bodyText, /收藏/);
+  assert.equal(document.querySelector(".hb-user-panel .hb-primary-btn")?.value, "更新资料");
+});
+
+test("列表页点击用户链接能弹出用户详情", async () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr class="athing submission" id="1">
+        <td class="title"><span class="titleline"><a href="https://example.com">A story</a></span></td>
+      </tr>
+      <tr>
+        <td class="subtext">
+          <span class="score">10 points</span>
+          by <a href="user?id=alice" class="hnuser">alice</a>
+          <span class="age" title="2024-01-01T00:00:00">1 hour ago</span>
+          <a href="item?id=1">3&nbsp;comments</a>
+        </td>
+      </tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/news",
+  );
+
+  enhanceHackerNews(document);
+
+  const userHtml = `
+    <html><head><title>Profile: alice | Hacker News</title></head><body>
+    <table id="hnmain">
+      <tr>
+        <td bgcolor="#ff6600"><table><tr><td><b>Hacker News</b></td><td>login</td></tr></table></td>
+      </tr>
+      <tr>
+        <td>
+          <form method="post" action="x">
+            <table>
+              <tr><td>user:</td><td>alice</td></tr>
+              <tr><td>created:</td><td>10 years ago</td></tr>
+              <tr><td>karma:</td><td>1234</td></tr>
+              <tr><td>about:</td><td><textarea name="about">Hello from alice</textarea></td></tr>
+              <tr><td></td><td><input type="submit" value="update"></td></tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+    </body></html>
+  `;
+
+  document.defaultView.fetch = async () => ({
+    ok: true,
+    text: async () => userHtml,
+  });
+
+  const author = document.querySelector(".hb-author");
+  assert.ok(author);
+  author.dispatchEvent(
+    new document.defaultView.MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+    }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(document.defaultView.location.pathname, "/news");
+  assert.ok(document.querySelector(".hb-modal .hb-user-panel"));
+  assert.equal(document.querySelector(".hb-doc-title").textContent, "alice");
+  assert.match(document.querySelector(".hb-doc-body").textContent, /Hello from alice/);
+  assert.doesNotMatch(document.querySelector(".hb-doc-body").textContent, /^\s*Hacker News\s*login/s);
 });
 
 test("导航职责分离：分区在 Tab，排序仅看帖，侧栏不含重复入口", () => {
@@ -553,6 +828,9 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
   const button = card.querySelector(".hb-floor-toggle");
   assert.ok(document.querySelector(".hb-post-wrap"));
   assert.ok(document.querySelector(".hb-hn-source")?.hidden);
+  assert.equal(document.body.classList.contains("hb-item-page"), true);
+  assert.equal(document.querySelector(".hb-tab-bar")?.hidden, true);
+  assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
   assert.ok(main);
   assert.ok(document.querySelector(".hb-core-title"));
   assert.match(document.querySelector(".hb-core-title-txt").textContent, /Main post/);
@@ -567,6 +845,7 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
   assert.equal(main.querySelector(".hb-reply-box form"), null);
   assert.equal(document.querySelector(".hb-reply-panel-title")?.textContent, "Post a reply");
   assert.equal(document.querySelector('.hb-reply-box input[type="submit"]')?.value, "Submit");
+  assert.ok(document.querySelector(".hb-reply-box .hb-form-actions .hb-primary-btn"));
   assert.equal(card.querySelector(".hb-floor-no").textContent, "2F");
   assert.equal(card.querySelector(".hb-floor-name").textContent, "bob");
   assert.match(card.querySelector(".hb-floor-content").textContent, /Useful answer/);

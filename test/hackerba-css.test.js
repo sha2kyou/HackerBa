@@ -10,32 +10,33 @@ const hackerBaCss = await readFile(
 
 test("吧头封面固定 4:1 比例", () => {
   assert.match(hackerBaCss, /\.hb-card-cover\s*\{/);
-  assert.match(hackerBaCss, /\.hb-card-banner\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*1/s);
+  assert.match(hackerBaCss, /\.hb-card-banner-clip\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*1/s);
   assert.match(hackerBaCss, /\.hb-card-cover\s*\{[^}]*object-fit:\s*cover/s);
 });
 
-test("关闭首图时回退紧凑色条吧头", () => {
-  assert.match(
-    hackerBaCss,
-    /\[data-hb-banner-cover="0"\][\s\S]*?\.hb-card-banner\s*\{[^}]*aspect-ratio:\s*auto/s,
-  );
+test("关闭首图时回退白底信息卡吧头", () => {
   assert.match(
     hackerBaCss,
     /\[data-hb-banner-cover="0"\][\s\S]*?\.hb-card-cover[\s\S]*?display:\s*none/s,
   );
+  assert.match(
+    hackerBaCss,
+    /\[data-hb-banner-cover="0"\][\s\S]*?\.hb-card-head\s*\{[^}]*background:/s,
+  );
 });
 
-test("回复数框带贴吧式气泡三角", () => {
-  assert.match(hackerBaCss, /\.hb-rep-num::before/);
-  assert.match(hackerBaCss, /\.hb-rep-num::after/);
+test("回复数使用现代圆角徽章而非气泡三角", () => {
+  assert.doesNotMatch(hackerBaCss, /\.hb-rep-num::before/);
+  assert.doesNotMatch(hackerBaCss, /\.hb-rep-num::after/);
+  assert.match(hackerBaCss, /\.hb-rep-num\s*\{[^}]*border-radius:\s*6px/s);
   assert.match(hackerBaCss, /\.hb-rep-zero/);
   assert.match(hackerBaCss, /\.hb-rep-hot/);
 });
 
-test("开启首图时吧头像下沉叠入内容区", () => {
+test("开启首图时吧头像上叠封面", () => {
   assert.match(
     hackerBaCss,
-    /\[data-hb-banner-cover="1"\][\s\S]*?\.hb-card-avatar\s*\{[^}]*margin-bottom:\s*-36px/s,
+    /\[data-hb-banner-cover="1"\][\s\S]*?\.hb-card-avatar\s*\{[^}]*margin-top:\s*-36px/s,
   );
 });
 
@@ -57,7 +58,6 @@ test("吧头关注数和帖子数不受页面子元素颜色覆盖", () => {
   `);
 
   const { getComputedStyle } = dom.window;
-  const expectedColor = "rgb(237, 244, 255)";
-  assert.equal(getComputedStyle(dom.window.document.querySelector("em")).color, expectedColor);
-  assert.equal(getComputedStyle(dom.window.document.querySelector("b")).color, expectedColor);
+  assert.equal(getComputedStyle(dom.window.document.querySelector("em")).color, "rgb(138, 145, 153)");
+  assert.equal(getComputedStyle(dom.window.document.querySelector("b")).color, "rgb(31, 35, 41)");
 });

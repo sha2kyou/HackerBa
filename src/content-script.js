@@ -26,6 +26,7 @@ function enhanceHackerNews(document) {
   revealSourceIfNeeded(document);
   enhanceComments(document);
   bindSearchForm(document);
+  bindPopupLinks(document);
   void hydrateUserLevels(document);
 }
 
@@ -46,8 +47,19 @@ function localizeAuthLabel(text, document) {
   return text;
 }
 
-function detectOrphanPageKind(document, host) {
-  const path = document.defaultView?.location?.pathname || "";
+function resolvePageUrl(document, pageUrl) {
+  const base = document.defaultView?.location?.href || "https://news.ycombinator.com/";
+  if (pageUrl instanceof URL) {
+    return pageUrl;
+  }
+  if (typeof pageUrl === "string" && pageUrl) {
+    return new URL(pageUrl, base);
+  }
+  return new URL(base);
+}
+
+function detectOrphanPageKind(document, host, pageUrl) {
+  const path = resolvePageUrl(document, pageUrl).pathname || "";
   if (
     /\/(login|submit|forgot|changepw)/i.test(path) ||
     host.querySelector("form input[name='acct']")
@@ -64,23 +76,23 @@ function setBreadcrumbCurrent(document, text) {
   }
 }
 
-function getAuthMode(document) {
-  const params = new URLSearchParams(document.defaultView?.location?.search || "");
+function getAuthMode(document, pageUrl) {
+  const params = resolvePageUrl(document, pageUrl).searchParams;
   if (params.get("mode") === "register" || params.get("creating") === "t") {
     return "register";
   }
   return "login";
 }
 
-function enhanceAuthPanel(document, host) {
+function enhanceAuthPanel(document, host, pageUrl) {
   const panel = document.createElement("div");
   panel.className = "hb-auth-panel";
 
   const rawText = host.textContent || "";
-  const path = document.defaultView?.location?.pathname || "";
+  const path = resolvePageUrl(document, pageUrl).pathname || "";
   const needLogin = /logged in to submit|have to be logged in/i.test(rawText);
   const isForgot = /forgot/i.test(path);
-  const mode = isForgot ? "forgot" : getAuthMode(document);
+  const mode = isForgot ? "forgot" : getAuthMode(document, pageUrl);
 
   const title = document.createElement("h2");
   title.className = "hb-auth-title";
@@ -136,7 +148,7 @@ function enhanceAuthPanel(document, host) {
 
     form.querySelectorAll("input[type='submit']").forEach((button) => {
       button.value = localizeAuthLabel(button.value, document);
-      button.classList.add("hb-auth-submit");
+      button.classList.add("hb-auth-submit", "hb-primary-btn");
     });
 
     card.append(form);
@@ -171,7 +183,7 @@ function enhanceAuthPanel(document, host) {
   return panel;
 }
 
-function enhanceDocumentPanel(document, host) {
+function enhanceDocumentPanel(document, host, titleHint) {
   const panel = document.createElement("div");
   panel.className = "hb-doc-panel";
 
@@ -179,6 +191,7 @@ function enhanceDocumentPanel(document, host) {
   title.className = "hb-doc-title";
   const heading =
     host.querySelector("b, h1, h2, title")?.textContent?.trim() ||
+    titleHint?.trim() ||
     document.title?.trim() ||
     "Hacker News";
   title.textContent = heading;
@@ -187,8 +200,7 @@ function enhanceDocumentPanel(document, host) {
   const body = document.createElement("div");
   body.className = "hb-doc-body";
 
-  const sourceRoot =
-    host.querySelector("td[bgcolor], td, .body, article") || host;
+  const sourceRoot = pickDocumentSourceRoot(host);
   const clone = sourceRoot.cloneNode(true);
   clone.querySelectorAll("img, script, style").forEach((node) => node.remove());
   const firstBold = clone.querySelector("b, h1, h2");
@@ -200,50 +212,314 @@ function enhanceDocumentPanel(document, host) {
   return panel;
 }
 
-function wrapOrphanContent(document, orphanNodes) {
-  const host = document.createElement("div");
-  orphanNodes.forEach((node) => host.append(node));
-  const kind = detectOrphanPageKind(document, host);
-  if (kind === "auth") {
-    const needLogin = /logged in to submit|have to be logged in/i.test(host.textContent || "");
-    const mode = getAuthMode(document);
-    setBreadcrumbCurrent(
-      document,
-      needLogin
-        ? t("crumbPostLogin", null, document)
-        : mode === "register"
-          ? t("registerTitle", null, document)
-          : t("login", null, document),
-    );
-    return enhanceAuthPanel(document, host);
+function isHnHeaderCell(td) {
+  const bg = (td?.getAttribute?.("bgcolor") || "").toLowerCase();
+  return bg === "#ff6600" || bg === "ff6600";
+}
+
+function pickDocumentSourceRoot(host) {
+  const soft = host.querySelector(
+    'td[bgcolor="#fafaf0"], td[bgcolor="#FAFAF0"], td[bgcolor="#f6f6ef"], td[bgcolor="#F6F6EF"]',
+  );
+  if (soft) {
+    return soft;
+  }
+  for (const td of host.querySelectorAll("td[bgcolor]")) {
+    if (!isHnHeaderCell(td)) {
+      return td;
+    }
+  }
+  return host.querySelector(".body, article") || host;
+}
+
+function extractUserProfileRoot(host) {
+  if (!host) {
+    return null;
+  }
+  const form = host.querySelector("form");
+  if (form?.querySelector("table")) {
+    return form;
+  }
+  const tables = [...host.querySelectorAll("table")];
+  const profile = tables.find((table) => {
+    const text = table.textContent || "";
+    return /\buser\s*:/i.test(text) && /\bkarma\s*:/i.test(text);
+  });
+  if (profile) {
+    return profile;
+  }
+  for (const td of host.querySelectorAll("td")) {
+    if (isHnHeaderCell(td)) {
+      continue;
+    }
+    if (/\buser\s*:/i.test(td.textContent || "")) {
+      return td;
+    }
+  }
+  return pickDocumentSourceRoot(host);
+}
+
+function localizeProfileLabel(text, document) {
+  const raw = String(text || "").trim();
+  if (!raw) {
+    return "";
+  }
+  const key = raw.replace(/:$/, "").trim().toLowerCase();
+  const map = {
+    user: "profileUser",
+    created: "profileCreated",
+    karma: "profileKarma",
+    about: "profileAbout",
+    email: "profileEmail",
+    showdead: "profileShowdead",
+    noprocrast: "profileNoprocrast",
+    maxvisit: "profileMaxvisit",
+    minaway: "profileMinaway",
+    delay: "profileDelay",
+  };
+  const msgKey = map[key];
+  if (!msgKey) {
+    return "";
+  }
+  const locale = localeOf(document);
+  const colon = locale === "zh" ? "：" : ":";
+  return `${t(msgKey, null, document)}${colon}`;
+}
+
+function localizeProfileAge(text, document) {
+  const raw = String(text || "").trim();
+  const match = raw.match(/^(\d+)\s+(second|minute|hour|day|month|year)s?\s+ago$/i);
+  if (!match) {
+    return "";
+  }
+  const n = Number(match[1]);
+  const unit = match[2].toLowerCase();
+  const keyMap = {
+    second: "secondsAgo",
+    minute: "minutesAgo",
+    hour: "hoursAgo",
+    day: "daysAgo",
+    month: "monthsAgo",
+    year: "yearsAgo",
+  };
+  const key = keyMap[unit];
+  return key ? t(key, { n }, document) : "";
+}
+
+function localizeUserProfile(document, root) {
+  if (!root) {
+    return;
   }
 
-  const path = document.defaultView?.location?.pathname || "";
-  if (/guidelines/i.test(path)) {
-    setBreadcrumbCurrent(document, t("crumbRules", null, document));
-  } else if (/security|showhn|newsfaq/i.test(path)) {
-    setBreadcrumbCurrent(document, t("crumbHelp", null, document));
-  } else if (/forgot/i.test(path)) {
-    setBreadcrumbCurrent(document, t("crumbForgot", null, document));
-  } else {
-    setBreadcrumbCurrent(document, t("crumbPage", null, document));
+  root.querySelectorAll("tr").forEach((row) => {
+    const cells = [...row.querySelectorAll(":scope > td")];
+    if (cells.length === 0) {
+      return;
+    }
+    const labelCell = cells[0];
+    if (!labelCell.querySelector("input, textarea, select, a, button")) {
+      const localized = localizeProfileLabel(labelCell.textContent, document);
+      if (localized) {
+        labelCell.textContent = localized;
+      }
+    }
+    const valueCell = cells[1];
+    if (valueCell && !valueCell.querySelector("input, textarea, select, a, button")) {
+      const localizedAge = localizeProfileAge(valueCell.textContent, document);
+      if (localizedAge) {
+        valueCell.textContent = localizedAge;
+      }
+    }
+  });
+
+  root.querySelectorAll("a").forEach((link) => {
+    const value = String(link.textContent || "").trim().toLowerCase();
+    if (value === "submissions") {
+      link.textContent = t("profileSubmissions", null, document);
+    } else if (value === "comments") {
+      link.textContent = t("profileComments", null, document);
+    } else if (value === "favorites") {
+      link.textContent = t("profileFavorites", null, document);
+    }
+  });
+}
+
+function isProfileKarmaLabel(text) {
+  const key = String(text || "")
+    .trim()
+    .replace(/[:：]\s*$/, "")
+    .toLowerCase();
+  return key === "karma" || key === "声望";
+}
+
+function attachProfileKarmaLevel(document, root) {
+  if (!root) {
+    return;
+  }
+
+  for (const row of root.querySelectorAll("tr")) {
+    const cells = [...row.querySelectorAll(":scope > td")];
+    if (cells.length < 2 || !isProfileKarmaLabel(cells[0].textContent)) {
+      continue;
+    }
+
+    const valueCell = cells[1];
+    if (valueCell.querySelector("input, textarea, select")) {
+      continue;
+    }
+
+    const raw = String(valueCell.textContent || "").trim();
+    const karma = Number(raw.replace(/,/g, ""));
+    if (!Number.isFinite(karma)) {
+      continue;
+    }
+
+    const level = userLevelFromKarma(karma);
+    const karmaEl = document.createElement("span");
+    karmaEl.className = "hb-profile-karma";
+    karmaEl.textContent = raw;
+
+    const levelEl = document.createElement("span");
+    levelEl.className = "hb-profile-level";
+    levelEl.textContent = `Lv.${level}`;
+    levelEl.title = `${t("level", null, document)} · karma ${karma}`;
+
+    valueCell.replaceChildren(karmaEl, document.createTextNode(" "), levelEl);
+    break;
+  }
+}
+
+function enhanceUserPanel(document, host, { userId, titleHint } = {}) {
+  const panel = document.createElement("div");
+  panel.className = "hb-doc-panel hb-user-panel";
+
+  const title = document.createElement("h2");
+  title.className = "hb-doc-title";
+  const fallbackTitle =
+    titleHint?.replace(/\s*[|\u2013\u2014-].*$/, "").trim() ||
+    t("crumbUser", null, document);
+  title.textContent = userId || fallbackTitle;
+  panel.append(title);
+
+  const body = document.createElement("div");
+  body.className = "hb-doc-body";
+
+  const profileRoot = extractUserProfileRoot(host) || host;
+  const clone = profileRoot.cloneNode(true);
+  clone.querySelectorAll("img, script, style").forEach((node) => node.remove());
+  clone.querySelectorAll("td[bgcolor]").forEach((td) => {
+    if (isHnHeaderCell(td)) {
+      td.closest("tr")?.remove();
+    }
+  });
+
+  const actions = document.createElement("div");
+  actions.className = "hb-form-actions";
+  clone.querySelectorAll('input[type="submit"]').forEach((button) => {
+    button.classList.add("hb-primary-btn");
+    if (/^update$/i.test(String(button.value || "").trim())) {
+      button.value = t("updateProfile", null, document);
+    }
+    const row = button.closest("tr");
+    actions.append(button);
+    row?.remove();
+  });
+
+  localizeUserProfile(document, clone);
+  attachProfileKarmaLevel(document, clone);
+
+  body.append(clone);
+  if (actions.childNodes.length > 0) {
+    const form = body.querySelector("form");
+    if (form) {
+      form.append(actions);
+    } else {
+      body.append(actions);
+    }
+  }
+  panel.append(body);
+  return panel;
+}
+
+function wrapOrphanContent(document, orphanNodes, pageUrl, options = {}) {
+  const updateBreadcrumb = options.updateBreadcrumb !== false;
+  const host = document.createElement("div");
+  orphanNodes.forEach((node) => host.append(node));
+  const url = resolvePageUrl(document, pageUrl);
+  const kind = detectOrphanPageKind(document, host, url);
+  if (kind === "auth") {
+    const needLogin = /logged in to submit|have to be logged in/i.test(host.textContent || "");
+    const mode = getAuthMode(document, url);
+    if (updateBreadcrumb) {
+      setBreadcrumbCurrent(
+        document,
+        needLogin
+          ? t("crumbPostLogin", null, document)
+          : mode === "register"
+            ? t("registerTitle", null, document)
+            : t("login", null, document),
+      );
+    }
+    return enhanceAuthPanel(document, host, url);
+  }
+
+  const path = url.pathname || "";
+  if (updateBreadcrumb) {
+    if (/guidelines/i.test(path)) {
+      setBreadcrumbCurrent(document, t("crumbRules", null, document));
+    } else if (/security|showhn|newsfaq|formatdoc/i.test(path)) {
+      setBreadcrumbCurrent(document, t("crumbHelp", null, document));
+    } else if (/forgot/i.test(path)) {
+      setBreadcrumbCurrent(document, t("crumbForgot", null, document));
+    } else {
+      setBreadcrumbCurrent(document, t("crumbPage", null, document));
+    }
   }
   return enhanceDocumentPanel(document, host);
 }
 
+function isPopupHref(href, document) {
+  if (!href || href.startsWith("#") || /^(mailto|javascript):/i.test(href)) {
+    return false;
+  }
+  try {
+    const url = resolvePageUrl(document, href);
+    const origin = document.defaultView?.location?.origin;
+    if (origin && url.origin !== origin) {
+      return false;
+    }
+    const key = url.pathname.replace(/^\//, "").split("/")[0] || "";
+    if (key === "login" || key === "forgot" || key === "changepw" || key === "user") {
+      return true;
+    }
+    return /guidelines|security|showhn|newsfaq|formatdoc/i.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function shouldSuppressTabFocus(document) {
-  if (document.body.classList.contains("hb-popup-page")) {
+  if (document.body.classList.contains("hb-popup-standalone")) {
+    return true;
+  }
+  if (document.body.classList.contains("hb-item-page")) {
     return true;
   }
   const key = getCurrentPathKey(document);
-  if (key === "user" || key === "login" || key === "forgot" || key === "changepw") {
+  if (
+    key === "item" ||
+    key === "user" ||
+    key === "login" ||
+    key === "forgot" ||
+    key === "changepw"
+  ) {
     return true;
   }
   const path = document.defaultView?.location?.pathname || "";
-  return /guidelines|security|showhn|newsfaq/i.test(path);
+  return /guidelines|security|showhn|newsfaq|formatdoc/i.test(path);
 }
 
-function dismissPopup(document) {
+function dismissPopupNavigate(document) {
   const win = document.defaultView;
   if (!win) {
     return;
@@ -255,12 +531,34 @@ function dismissPopup(document) {
   win.location.href = "news";
 }
 
-function presentPopupModal(document, wrap, panel) {
-  if (!wrap || !panel || wrap.querySelector(".hb-modal-overlay")) {
+function closePopupModal(document) {
+  document.querySelector(".hb-modal-overlay")?.remove();
+  document.body.classList.remove("hb-popup-page");
+  if (!document.body.classList.contains("hb-popup-standalone")) {
+    return;
+  }
+  document.body.classList.remove("hb-popup-standalone");
+}
+
+function createPopupLoadingPanel(document) {
+  const panel = document.createElement("div");
+  panel.className = "hb-doc-panel hb-modal-loading";
+  const title = document.createElement("p");
+  title.textContent = t("popupLoading", null, document);
+  panel.append(title);
+  return panel;
+}
+
+function presentPopupModal(document, wrap, panel, options = {}) {
+  if (!wrap || !panel) {
     return;
   }
 
+  const standalone = Boolean(options.standalone);
+  wrap.querySelector(".hb-modal-overlay")?.remove();
+
   document.body.classList.add("hb-popup-page");
+  document.body.classList.toggle("hb-popup-standalone", standalone);
 
   const overlay = document.createElement("div");
   overlay.className = "hb-modal-overlay";
@@ -283,7 +581,11 @@ function presentPopupModal(document, wrap, panel) {
 
   const onDismiss = (event) => {
     event.preventDefault();
-    dismissPopup(document);
+    if (standalone) {
+      dismissPopupNavigate(document);
+      return;
+    }
+    closePopupModal(document);
   };
   backdrop.addEventListener("click", onDismiss);
   close.addEventListener("click", onDismiss);
@@ -293,6 +595,114 @@ function presentPopupModal(document, wrap, panel) {
   wrap.append(overlay);
 }
 
+function buildPopupPanelFromHtml(document, html, pageUrl, options = {}) {
+  const updateBreadcrumb = Boolean(options.updateBreadcrumb);
+  const url = resolvePageUrl(document, pageUrl);
+  const parsed = new DOMParser().parseFromString(html, "text/html");
+  const main = parsed.querySelector("#hnmain");
+
+  if (/\/user/i.test(url.pathname) && main) {
+    const userId = url.searchParams.get("id")?.trim();
+    if (updateBreadcrumb) {
+      setBreadcrumbCurrent(document, userId || t("crumbUser", null, document));
+    }
+    const imported = document.importNode(main, true);
+    return enhanceUserPanel(document, imported, {
+      userId,
+      titleHint: parsed.title,
+    });
+  }
+
+  const host = document.createElement("div");
+  if (main) {
+    host.append(document.importNode(main, true));
+  } else {
+    for (const child of [...parsed.body.childNodes]) {
+      if (child.nodeType === 1 && child.tagName === "SCRIPT") {
+        continue;
+      }
+      host.append(document.importNode(child, true));
+    }
+  }
+  return wrapOrphanContent(document, [...host.childNodes], url, { updateBreadcrumb });
+}
+
+async function openInPagePopup(document, href) {
+  const wrap = document.querySelector(".hb-wrap");
+  const win = document.defaultView;
+  if (!wrap || !win) {
+    return;
+  }
+
+  const pageUrl = resolvePageUrl(document, href);
+  const standalone = document.body.classList.contains("hb-popup-standalone");
+  presentPopupModal(document, wrap, createPopupLoadingPanel(document), { standalone });
+
+  try {
+    const response = await win.fetch(pageUrl.href, {
+      credentials: "same-origin",
+      headers: { Accept: "text/html" },
+    });
+    if (!response.ok) {
+      throw new Error(`popup fetch failed: ${response.status}`);
+    }
+    const html = await response.text();
+    const panel = buildPopupPanelFromHtml(document, html, pageUrl, {
+      updateBreadcrumb: standalone,
+    });
+    presentPopupModal(document, wrap, panel, { standalone });
+  } catch {
+    win.location.href = pageUrl.href;
+  }
+}
+
+function bindPopupLinks(document) {
+  if (document.documentElement.dataset.hbPopupBound === "1") {
+    return;
+  }
+  document.documentElement.dataset.hbPopupBound = "1";
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.defaultPrevented || event.button !== 0) {
+        return;
+      }
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      const anchor = event.target?.closest?.("a[href]");
+      if (!anchor || anchor.target === "_blank") {
+        return;
+      }
+      const href = anchor.getAttribute("href");
+      if (!isPopupHref(href, document)) {
+        return;
+      }
+      // 独立弹层页内的切换（登录⇄注册）仍走页内替换
+      event.preventDefault();
+      event.stopPropagation();
+      void openInPagePopup(document, href);
+    },
+    true,
+  );
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+    if (!document.querySelector(".hb-modal-overlay")) {
+      return;
+    }
+    event.preventDefault();
+    if (document.body.classList.contains("hb-popup-standalone")) {
+      dismissPopupNavigate(document);
+      return;
+    }
+    closePopupModal(document);
+  });
+}
+
 function mountUserPopup(document, wrap, source, main) {
   if (getCurrentPathKey(document) !== "user" || !main) {
     return;
@@ -300,8 +710,11 @@ function mountUserPopup(document, wrap, source, main) {
   const params = new URLSearchParams(document.defaultView?.location?.search || "");
   const userId = params.get("id")?.trim();
   setBreadcrumbCurrent(document, userId || t("crumbUser", null, document));
-  const panel = enhanceDocumentPanel(document, main);
-  presentPopupModal(document, wrap, panel);
+  const panel = enhanceUserPanel(document, main, {
+    userId,
+    titleHint: document.title,
+  });
+  presentPopupModal(document, wrap, panel, { standalone: true });
   source.hidden = true;
   source.classList.add("hb-source-hidden");
   source.classList.remove("hb-source-visible");
@@ -419,7 +832,7 @@ function buildCommunityShell(document) {
     </div>
     <div class="hb-breadcrumb">
       <a href="news">${escapeHtml(t("brandName", null, document))}</a>
-      <span class="hb-bc-sep">&gt;</span>
+      <span class="hb-bc-sep">/</span>
       <span class="hb-bc-current">${escapeHtml(t("forumName", null, document))}</span>
     </div>
     <div class="hb-card-banner">
@@ -522,7 +935,7 @@ function buildCommunityShell(document) {
   } else {
     wrap.querySelector(".hb-thread-panel").append(source);
     const panel = wrapOrphanContent(document, orphanNodes);
-    presentPopupModal(document, wrap, panel);
+    presentPopupModal(document, wrap, panel, { standalone: true });
   }
 }
 
@@ -611,7 +1024,7 @@ function revealSourceIfNeeded(document) {
   const hideSource = Boolean(
     document.querySelector(".hb-thread-list") ||
       document.querySelector(".hb-post-wrap") ||
-      document.body.classList.contains("hb-popup-page"),
+      document.body.classList.contains("hb-popup-standalone"),
   );
   source.hidden = hideSource;
   source.classList.toggle("hb-source-hidden", hideSource);
@@ -672,6 +1085,14 @@ function titleHrefForThread(document, thread) {
   return thread.itemHref || thread.externalHref || "#";
 }
 
+function shouldOpenDiscussionBlank(document) {
+  return document.documentElement.dataset.hbDiscussionBlank !== "0";
+}
+
+function blankTargetAttrs(enabled) {
+  return enabled ? ` target="_blank" rel="noopener noreferrer"` : "";
+}
+
 function createThreadItem(document, thread) {
   const badges = [];
   if (Number(thread.replyNum) >= 50) {
@@ -686,6 +1107,7 @@ function createThreadItem(document, thread) {
   }
 
   const openDiscussion = document.documentElement.dataset.hbTitleDiscussion !== "0";
+  const discussionBlank = shouldOpenDiscussionBlank(document);
   const absParts = [];
   if (thread.site) {
     absParts.push(thread.site);
@@ -706,14 +1128,14 @@ function createThreadItem(document, thread) {
     : "";
 
   if (!openDiscussion && thread.itemHref) {
-    const gotoLink = `<a class="hb-goto-item" href="${escapeAttr(thread.itemHref)}">${escapeHtml(t("gotoDiscussion", null, document))}</a>`;
+    const gotoLink = `<a class="hb-goto-item" href="${escapeAttr(thread.itemHref)}"${blankTargetAttrs(discussionBlank)}>${escapeHtml(t("gotoDiscussion", null, document))}</a>`;
     absHtml = absHtml ? `${absHtml} ${gotoLink}` : gotoLink;
   }
 
   const titleHref = titleHrefForThread(document, thread);
-  const titleAttrs = /^https?:/i.test(titleHref) && titleHref !== thread.itemHref
-    ? ` href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer"`
-    : ` href="${escapeAttr(titleHref)}"`;
+  const titleIsExternal = /^https?:/i.test(titleHref) && titleHref !== thread.itemHref;
+  const titleOpensBlank = titleIsExternal || (!titleIsExternal && discussionBlank && titleHref === thread.itemHref);
+  const titleAttrs = ` href="${escapeAttr(titleHref)}"${blankTargetAttrs(titleOpensBlank)}`;
 
   const replyCount = Number(thread.replyNum) || 0;
   const repClass = [
@@ -1241,15 +1663,27 @@ function createReplyPanel(document, form) {
   title.textContent = t("postReply", null, document);
   panel.append(title);
 
-  form.querySelectorAll('input[type="submit"]').forEach((button) => {
-    if (/add comment/i.test(button.value || "")) {
-      button.value = t("submit", null, document);
-    }
-  });
   const help = form.querySelector('a[href*="formatdoc"]');
   if (help) {
     help.textContent = t("editHelp", null, document);
   }
+
+  const actions = document.createElement("div");
+  actions.className = "hb-form-actions";
+  if (help) {
+    const left = document.createElement("div");
+    left.className = "hb-form-actions-left";
+    left.append(help);
+    actions.append(left);
+  }
+  form.querySelectorAll('input[type="submit"]').forEach((button) => {
+    button.classList.add("hb-primary-btn");
+    if (/add comment/i.test(button.value || "")) {
+      button.value = t("submit", null, document);
+    }
+    actions.append(button);
+  });
+  form.append(actions);
 
   const box = document.createElement("div");
   box.className = "hb-reply-box";
@@ -1537,6 +1971,10 @@ function enhanceComments(document) {
   }
 
   document.body.classList.add("hb-item-page");
+  const tabBar = document.querySelector(".hb-tab-bar");
+  if (tabBar) {
+    tabBar.hidden = true;
+  }
 
   const meUser = resolveSessionUser(document)?.name || "";
   const wrap = document.createElement("div");
@@ -1620,6 +2058,7 @@ async function applyPreferences(document) {
     theme: "light",
     density: "comfortable",
     titleOpensDiscussion: true,
+    discussionOpensNewTab: true,
     showBannerCover: false,
     language: "auto",
   };
@@ -1645,6 +2084,8 @@ async function applyPreferences(document) {
   document.documentElement.dataset.hbDensity = preferences.density || defaults.density;
   document.documentElement.dataset.hbTitleDiscussion =
     preferences.titleOpensDiscussion === false ? "0" : "1";
+  document.documentElement.dataset.hbDiscussionBlank =
+    preferences.discussionOpensNewTab === false ? "0" : "1";
   document.documentElement.dataset.hbBannerCover =
     preferences.showBannerCover === true ? "1" : "0";
   document.documentElement.dataset.hbLang = locale;
@@ -1692,6 +2133,10 @@ globalThis.HackerBa = {
   applyPreferences,
   userLevelFromKarma,
   applyBannerCover,
+  isPopupHref,
+  openInPagePopup,
+  closePopupModal,
+  buildPopupPanelFromHtml,
   BANNER_COVER_PATH,
   KARMA_LEVEL_REF,
   KARMA_LEVEL_AT_REF,
