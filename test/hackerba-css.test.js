@@ -25,6 +25,20 @@ test("关闭首图时回退紧凑色条吧头", () => {
   );
 });
 
+test("回复数框带贴吧式气泡三角", () => {
+  assert.match(hackerBaCss, /\.hb-rep-num::before/);
+  assert.match(hackerBaCss, /\.hb-rep-num::after/);
+  assert.match(hackerBaCss, /\.hb-rep-zero/);
+  assert.match(hackerBaCss, /\.hb-rep-hot/);
+});
+
+test("开启首图时吧头像下沉叠入内容区", () => {
+  assert.match(
+    hackerBaCss,
+    /\[data-hb-banner-cover="1"\][\s\S]*?\.hb-card-avatar\s*\{[^}]*margin-bottom:\s*-36px/s,
+  );
+});
+
 test("吧头关注数和帖子数不受页面子元素颜色覆盖", () => {
   const dom = new JSDOM(`
     <!doctype html>

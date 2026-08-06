@@ -113,17 +113,22 @@ test("将 HN 列表重建为贴吧式帖子行：左侧回复数 + 标题进讨�
   const item = document.querySelector(".hb-thread-item");
   assert.ok(item);
   assert.equal(item.querySelector(".hb-rep-num").textContent, "48");
+  assert.equal(item.querySelector(".hb-rep-num")?.classList.contains("hb-rep-zero"), false);
+  assert.equal(item.querySelector(".hb-rep-num")?.classList.contains("hb-rep-hot"), false);
   assert.equal(item.querySelector(".hb-th-tit").textContent, "A story");
   assert.equal(item.querySelector(".hb-th-tit").getAttribute("href"), "item?id=1");
   assert.match(item.querySelector(".hb-thread-abs").textContent, /example\.com/);
   assert.equal(item.querySelector(".hb-th-site").textContent, "example.com");
   assert.equal(item.querySelector(".hb-th-site").getAttribute("href"), "https://example.com");
+  assert.ok(item.querySelector(".hb-icon-author"));
   assert.equal(item.querySelector(".hb-author").textContent, "alice");
   assert.match(item.querySelector(".hb-create-time").textContent, /2 hours ago/);
   assert.equal(item.querySelector(".hb-last-time"), null);
   assert.equal(item.querySelector(".hb-goto-item"), null);
   assert.equal(document.querySelector(".hb-hn-source")?.hidden, true);
   assert.equal(document.documentElement.dataset.hbTitleDiscussion, "1");
+  assert.ok(document.querySelector(".hb-card-banner-clip"));
+  assert.equal(document.querySelector('.hb-card-btns a.hb-btn-checkin[href="login"]')?.textContent, "Check in");
 });
 
 test("关闭标题打开讨论时标题指向原文，分数旁显示进入讨论", () => {
@@ -328,10 +333,14 @@ test("未登录发帖页套上贴吧壳并美化登录提示", () => {
 
   assert.ok(document.querySelector(".hb-wrap"));
   assert.ok(document.querySelector(".hb-auth-panel"));
+  assert.ok(document.querySelector(".hb-modal-overlay"));
+  assert.ok(document.querySelector(".hb-modal .hb-auth-panel"));
   assert.match(document.querySelector(".hb-auth-title").textContent, /Log in/);
   assert.equal(document.querySelectorAll(".hb-auth-card").length, 1);
   assert.equal(document.querySelector(".hb-auth-card input[type='submit']").value, "Log in");
-  assert.equal(document.querySelector(".hb-hn-source").classList.contains("hb-source-visible"), true);
+  assert.equal(document.body.classList.contains("hb-popup-page"), true);
+  assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
+  assert.equal(document.querySelector(".hb-hn-source .hb-auth-panel"), null);
 });
 
 test("登录页只显示登录卡，注册入口只显示注册卡", () => {
@@ -364,6 +373,9 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   assert.equal(loginDoc.querySelectorAll(".hb-auth-card").length, 1);
   assert.equal(loginDoc.querySelector(".hb-auth-card h3").textContent, "Log in");
   assert.equal(loginDoc.querySelector(".hb-auth-switch").getAttribute("href"), "login?mode=register");
+  assert.ok(loginDoc.querySelector(".hb-modal .hb-auth-panel"));
+  assert.equal(loginDoc.body.classList.contains("hb-popup-page"), true);
+  assert.equal(loginDoc.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
 
   const registerDoc = createDocument(
     `
@@ -391,9 +403,11 @@ test("登录页只显示登录卡，注册入口只显示注册卡", () => {
   assert.equal(registerDoc.querySelectorAll(".hb-auth-card").length, 1);
   assert.equal(registerDoc.querySelector(".hb-auth-card h3").textContent, "Create account");
   assert.equal(registerDoc.querySelector(".hb-auth-switch").getAttribute("href"), "login");
+  assert.ok(registerDoc.querySelector(".hb-modal .hb-auth-panel"));
+  assert.equal(registerDoc.body.classList.contains("hb-popup-page"), true);
 });
 
-test("吧规页保留正文并以文档样式展示", () => {
+test("吧规页以弹层展示，不挂在看帖主栏", () => {
   const document = createDocument(`
     <center>
       <table width="500">
@@ -410,12 +424,45 @@ test("吧规页保留正文并以文档样式展示", () => {
   enhanceHackerNews(document);
 
   assert.ok(document.querySelector(".hb-doc-panel"));
+  assert.ok(document.querySelector(".hb-modal .hb-doc-panel"));
   assert.equal(document.querySelector(".hb-auth-panel"), null);
+  assert.equal(document.querySelector(".hb-hn-source .hb-doc-panel"), null);
   assert.match(document.querySelector(".hb-doc-title").textContent, /Guidelines|吧规|规范/);
   assert.match(document.querySelector(".hb-doc-body").textContent, /On-Topic/);
   assert.match(document.querySelector(".hb-doc-body").textContent, /Be kind/);
   assert.equal(document.querySelector(".hb-bc-current").textContent, "Rules");
-  assert.equal(document.querySelector(".hb-hn-source").classList.contains("hb-source-visible"), true);
+  assert.equal(document.body.classList.contains("hb-popup-page"), true);
+  assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
+});
+
+test("用户信息页以弹层展示，不点亮看帖 Tab", () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr>
+        <td>
+          <table>
+            <tr><td>user:</td><td>alice</td></tr>
+            <tr><td>created:</td><td>10 years ago</td></tr>
+            <tr><td>karma:</td><td>1234</td></tr>
+            <tr><td>about:</td><td>Hello from alice</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/user?id=alice",
+  );
+
+  enhanceHackerNews(document);
+
+  assert.ok(document.querySelector(".hb-modal-overlay"));
+  assert.ok(document.querySelector(".hb-modal .hb-doc-panel"));
+  assert.match(document.querySelector(".hb-doc-body").textContent, /Hello from alice/);
+  assert.equal(document.querySelector(".hb-bc-current").textContent, "alice");
+  assert.equal(document.body.classList.contains("hb-popup-page"), true);
+  assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
+  assert.equal(document.querySelector(".hb-hn-source").classList.contains("hb-source-hidden"), true);
 });
 
 test("导航职责分离：分区在 Tab，排序仅看帖，侧栏不含重复入口", () => {
@@ -669,6 +716,7 @@ test("已登录时顶栏显示用户名与退出", () => {
   assert.equal(document.querySelector(".hb-card-level")?.dataset.hbUser, "alice");
   assert.equal(document.querySelector(".hb-card-level")?.textContent, "Lv.1");
   assert.equal(document.querySelector(".hb-btn-attention.hb-btn-followed")?.textContent, "Following");
+  assert.equal(document.querySelector(".hb-btn-checkin.hb-btn-checked")?.textContent, "Checked in");
   assert.equal(document.querySelector('.hb-card-btns a.hb-btn-attention[href="login"]'), null);
 });
 
@@ -688,6 +736,7 @@ test("未登录时吧等级为占位", () => {
   assert.equal(document.querySelector(".hb-card-level")?.dataset.hbUser, undefined);
   assert.equal(document.querySelector(".hb-btn-attention.hb-btn-followed"), null);
   assert.equal(document.querySelector('.hb-card-btns a.hb-btn-attention[href="login"]')?.textContent, "Follow");
+  assert.equal(document.querySelector('.hb-card-btns a.hb-btn-checkin[href="login"]')?.textContent, "Check in");
 });
 
 test("当前用户回复显示我标识，楼主优先", () => {

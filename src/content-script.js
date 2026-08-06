@@ -231,6 +231,82 @@ function wrapOrphanContent(document, orphanNodes) {
   return enhanceDocumentPanel(document, host);
 }
 
+function shouldSuppressTabFocus(document) {
+  if (document.body.classList.contains("hb-popup-page")) {
+    return true;
+  }
+  const key = getCurrentPathKey(document);
+  if (key === "user" || key === "login" || key === "forgot" || key === "changepw") {
+    return true;
+  }
+  const path = document.defaultView?.location?.pathname || "";
+  return /guidelines|security|showhn|newsfaq/i.test(path);
+}
+
+function dismissPopup(document) {
+  const win = document.defaultView;
+  if (!win) {
+    return;
+  }
+  if (win.history?.length > 1) {
+    win.history.back();
+    return;
+  }
+  win.location.href = "news";
+}
+
+function presentPopupModal(document, wrap, panel) {
+  if (!wrap || !panel || wrap.querySelector(".hb-modal-overlay")) {
+    return;
+  }
+
+  document.body.classList.add("hb-popup-page");
+
+  const overlay = document.createElement("div");
+  overlay.className = "hb-modal-overlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+
+  const backdrop = document.createElement("button");
+  backdrop.type = "button";
+  backdrop.className = "hb-modal-backdrop";
+  backdrop.setAttribute("aria-label", t("close", null, document));
+
+  const modal = document.createElement("div");
+  modal.className = "hb-modal";
+
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "hb-modal-close";
+  close.setAttribute("aria-label", t("close", null, document));
+  close.textContent = "×";
+
+  const onDismiss = (event) => {
+    event.preventDefault();
+    dismissPopup(document);
+  };
+  backdrop.addEventListener("click", onDismiss);
+  close.addEventListener("click", onDismiss);
+
+  modal.append(close, panel);
+  overlay.append(backdrop, modal);
+  wrap.append(overlay);
+}
+
+function mountUserPopup(document, wrap, source, main) {
+  if (getCurrentPathKey(document) !== "user" || !main) {
+    return;
+  }
+  const params = new URLSearchParams(document.defaultView?.location?.search || "");
+  const userId = params.get("id")?.trim();
+  setBreadcrumbCurrent(document, userId || t("crumbUser", null, document));
+  const panel = enhanceDocumentPanel(document, main);
+  presentPopupModal(document, wrap, panel);
+  source.hidden = true;
+  source.classList.add("hb-source-hidden");
+  source.classList.remove("hb-source-visible");
+}
+
 function readKarmaBesideUserLink(userLink) {
   const sibling = userLink?.nextSibling;
   if (sibling?.nodeType === 3) {
@@ -347,7 +423,9 @@ function buildCommunityShell(document) {
       <span class="hb-bc-current">${escapeHtml(t("forumName", null, document))}</span>
     </div>
     <div class="hb-card-banner">
-      <img class="hb-card-cover" alt="" decoding="async">
+      <div class="hb-card-banner-clip">
+        <img class="hb-card-cover" alt="" decoding="async">
+      </div>
       <div class="hb-card-head">
         <div class="hb-card-avatar" aria-hidden="true">
           <span class="hb-forum-mark">Y</span>
@@ -370,8 +448,10 @@ function buildCommunityShell(document) {
         <div class="hb-card-btns">
           ${
             session
-              ? `<button type="button" class="hb-btn-attention hb-btn-followed" aria-pressed="true">${escapeHtml(t("followed", null, document))}</button>`
-              : `<a class="hb-btn-attention" href="login">${escapeHtml(t("follow", null, document))}</a>`
+              ? `<button type="button" class="hb-btn-attention hb-btn-followed" aria-pressed="true">${escapeHtml(t("followed", null, document))}</button>
+          <button type="button" class="hb-btn-checkin hb-btn-checked" aria-pressed="true">${escapeHtml(t("checkedIn", null, document))}</button>`
+              : `<a class="hb-btn-attention" href="login">${escapeHtml(t("follow", null, document))}</a>
+          <a class="hb-btn-checkin" href="login">${escapeHtml(t("checkin", null, document))}</a>`
           }
         </div>
       </div>
@@ -437,15 +517,13 @@ function buildCommunityShell(document) {
   if (existingMain) {
     source.append(existingMain);
     existingMain.querySelector(".pagetop")?.closest("tr")?.classList.add("hb-original-header");
+    wrap.querySelector(".hb-thread-panel").append(source);
+    mountUserPopup(document, wrap, source, existingMain);
   } else {
+    wrap.querySelector(".hb-thread-panel").append(source);
     const panel = wrapOrphanContent(document, orphanNodes);
-    source.append(panel);
-    source.hidden = false;
-    source.classList.remove("hb-source-hidden");
-    source.classList.add("hb-source-visible");
+    presentPopupModal(document, wrap, panel);
   }
-
-  wrap.querySelector(".hb-thread-panel").append(source);
 }
 
 function getCurrentPathKey(document) {
@@ -459,6 +537,13 @@ function getCurrentPathKey(document) {
 function highlightActiveTab(document) {
   const tabs = document.querySelectorAll(".hb-tab-nav a");
   if (tabs.length === 0) {
+    return;
+  }
+
+  if (shouldSuppressTabFocus(document)) {
+    tabs.forEach((tab) => {
+      tab.classList.remove("hb-tab-focus");
+    });
     return;
   }
 
@@ -524,7 +609,9 @@ function revealSourceIfNeeded(document) {
   }
 
   const hideSource = Boolean(
-    document.querySelector(".hb-thread-list") || document.querySelector(".hb-post-wrap"),
+    document.querySelector(".hb-thread-list") ||
+      document.querySelector(".hb-post-wrap") ||
+      document.body.classList.contains("hb-popup-page"),
   );
   source.hidden = hideSource;
   source.classList.toggle("hb-source-hidden", hideSource);
@@ -628,11 +715,20 @@ function createThreadItem(document, thread) {
     ? ` href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer"`
     : ` href="${escapeAttr(titleHref)}"`;
 
+  const replyCount = Number(thread.replyNum) || 0;
+  const repClass = [
+    "hb-rep-num",
+    replyCount === 0 ? "hb-rep-zero" : "",
+    replyCount >= 100 ? "hb-rep-hot" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   const item = document.createElement("li");
   item.className = "hb-thread-item";
   item.innerHTML = `
     <div class="hb-thread-left">
-      <span class="hb-rep-num" title="${escapeAttr(t("repliesTitle", null, document))}">${escapeHtml(thread.replyNum)}</span>
+      <span class="${repClass}" title="${escapeAttr(t("repliesTitle", null, document))}">${escapeHtml(thread.replyNum)}</span>
     </div>
     <div class="hb-thread-body">
       <div class="hb-thread-lz">
@@ -641,6 +737,7 @@ function createThreadItem(document, thread) {
           <a class="hb-th-tit"${titleAttrs}>${escapeHtml(thread.title)}</a>
         </div>
         <div class="hb-thread-author-meta">
+          <span class="hb-icon-author" aria-hidden="true"></span>
           <a class="hb-author" href="${escapeAttr(thread.authorHref)}" title="${escapeAttr(t("authorTitle", null, document))}">${escapeHtml(thread.author)}</a>
           <span class="hb-create-time" title="${escapeAttr(t("createdTitle", null, document))}">${escapeHtml(thread.age || "")}</span>
         </div>
