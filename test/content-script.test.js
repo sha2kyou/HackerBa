@@ -1406,7 +1406,14 @@ test("语言偏好 zh 时界面为中文", () => {
       <tr class="athing submission" id="1">
         <td class="title"><span class="titleline"><a href="https://example.com">A story</a></span></td>
       </tr>
-      <tr><td class="subtext"><a href="item?id=1">3&nbsp;comments</a></td></tr>
+      <tr>
+        <td class="subtext">
+          <span class="score">10 points</span>
+          by <a class="hnuser" href="user?id=alice">alice</a>
+          <span class="age"><a href="item?id=1">0 minutes ago</a></span>
+          | <a href="item?id=1">3&nbsp;comments</a>
+        </td>
+      </tr>
     </table>
   `);
   loadScripts(document);
@@ -1425,6 +1432,40 @@ test("语言偏好 zh 时界面为中文", () => {
     [...document.querySelectorAll(".hb-tab-nav a")].map((a) => a.textContent).join(","),
     "看帖,问答,作品,招聘,精品",
   );
+  assert.equal(document.querySelector(".hb-create-time")?.textContent, "刚刚");
+});
+
+test("中文下列表相对时间本地化", () => {
+  const document = createDocument(`
+    <table id="hnmain">
+      <tr class="athing" id="1">
+        <td class="title"><span class="titleline"><a href="item?id=1">A</a></span></td>
+      </tr>
+      <tr>
+        <td class="subtext">
+          <a class="hnuser" href="user?id=a">a</a>
+          <span class="age">2 hours ago</span>
+          | <a href="item?id=1">1&nbsp;comment</a>
+        </td>
+      </tr>
+      <tr class="athing" id="2">
+        <td class="title"><span class="titleline"><a href="item?id=2">B</a></span></td>
+      </tr>
+      <tr>
+        <td class="subtext">
+          <a class="hnuser" href="user?id=b">b</a>
+          <span class="age">1 minute ago</span>
+          | <a href="item?id=2">discuss</a>
+        </td>
+      </tr>
+    </table>
+  `);
+  loadScripts(document);
+  document.documentElement.dataset.hbLang = "zh";
+  document.defaultView.HackerBa.enhanceHackerNews(document);
+
+  const ages = [...document.querySelectorAll(".hb-create-time")].map((el) => el.textContent);
+  assert.deepEqual(ages, ["2 小时前", "1 分钟前"]);
 });
 
 test("karma 对数曲线无上限，参考点约 Lv.12", () => {

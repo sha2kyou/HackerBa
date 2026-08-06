@@ -694,11 +694,11 @@ body.hackerba .hb-th-site:hover {
 
 body.hackerba .hb-thread-author-meta {
   display: flex;
-  flex: 0 0 148px;
+  flex: 0 0 128px;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  width: 148px;
+  gap: 4px;
+  width: 128px;
   overflow: hidden;
   white-space: nowrap;
   font-size: 12px;
@@ -710,7 +710,6 @@ body.hackerba .hb-icon-author {
   flex: 0 0 12px;
   width: 12px;
   height: 12px;
-  margin-right: -2px;
   background: #9aa3ad;
   vertical-align: -1px;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='3.2' r='2.2'/%3E%3Cpath d='M1.5 10.5c0-2.4 2-4 4.5-4s4.5 1.6 4.5 4'/%3E%3C/svg%3E")
@@ -720,11 +719,12 @@ body.hackerba .hb-icon-author {
 }
 
 body.hackerba .hb-author {
-  max-width: 78px;
+  min-width: 0;
   overflow: hidden;
   color: var(--hb-link) !important;
   text-decoration: none !important;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 body.hackerba .hb-author:hover {
@@ -732,7 +732,13 @@ body.hackerba .hb-author:hover {
 }
 
 body.hackerba .hb-create-time {
+  flex: 0 0 128px;
+  width: 128px;
   color: var(--hb-muted);
+  font-size: 12px;
+  line-height: 20px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 body.hackerba .hb-thread-abs {

@@ -370,11 +370,20 @@ function localizeProfileLabel(text, document) {
 
 function localizeProfileAge(text, document) {
   const raw = String(text || "").trim();
+  if (!raw) {
+    return "";
+  }
+  if (/^just\s+now$/i.test(raw)) {
+    return t("justNow", null, document);
+  }
   const match = raw.match(/^(\d+)\s+(second|minute|hour|day|month|year)s?\s+ago$/i);
   if (!match) {
     return "";
   }
   const n = Number(match[1]);
+  if (n === 0) {
+    return t("justNow", null, document);
+  }
   const unit = match[2].toLowerCase();
   const keyMap = {
     second: "secondsAgo",
@@ -386,6 +395,14 @@ function localizeProfileAge(text, document) {
   };
   const key = keyMap[unit];
   return key ? t(key, { n }, document) : "";
+}
+
+function localizeAgeText(text, document) {
+  const raw = String(text || "").trim();
+  if (!raw) {
+    return "";
+  }
+  return localizeProfileAge(raw, document) || raw;
 }
 
 function localizeUserProfile(document, root) {
@@ -1752,12 +1769,12 @@ function createThreadItem(document, thread) {
         </div>
         <div class="hb-thread-author-meta">
           <span class="hb-icon-author" aria-hidden="true"></span>
-          <a class="hb-author" href="${escapeAttr(thread.authorHref)}" title="${escapeAttr(t("authorTitle", null, document))}">${escapeHtml(thread.author)}</a>
-          <span class="hb-create-time" title="${escapeAttr(t("createdTitle", null, document))}">${escapeHtml(thread.age || "")}</span>
+          <a class="hb-author" href="${escapeAttr(thread.authorHref)}" title="${escapeAttr(thread.author)}">${escapeHtml(thread.author)}</a>
         </div>
       </div>
       <div class="hb-thread-detail-row">
         <div class="hb-thread-abs">${absHtml}</div>
+        <span class="hb-create-time" title="${escapeAttr(t("createdTitle", null, document))}">${escapeHtml(thread.age || "")}</span>
       </div>
     </div>
   `;
@@ -1920,7 +1937,7 @@ function storiesToThreads(document) {
 
     const author = metaRow.querySelector(".hnuser")?.textContent?.trim() || t("anonymous", null, document);
     const authorHref = metaRow.querySelector(".hnuser")?.getAttribute("href") || "login";
-    const age = metaRow.querySelector(".age")?.textContent?.trim() || "";
+    const age = localizeAgeText(metaRow.querySelector(".age")?.textContent, document);
     const scoreText = metaRow.querySelector(".score")?.textContent?.trim() || "";
     const score = Number((scoreText.match(/(\d+)/) || [])[1] || 0);
     const commentsLink = [...metaRow.querySelectorAll("a")].find((link) =>
@@ -2291,7 +2308,7 @@ function buildMainFloor(document, fatitem, replyCount, meUser = "") {
   const site = fatitem.querySelector(".sitestr")?.textContent?.trim() || "";
   const user = fatitem.querySelector(".hnuser")?.textContent?.trim() || t("anonymous", null, document);
   const userHref = fatitem.querySelector(".hnuser")?.getAttribute("href") || "login";
-  const age = fatitem.querySelector(".age")?.textContent?.trim() || "";
+  const age = localizeAgeText(fatitem.querySelector(".age")?.textContent, document);
   const score = fatitem.querySelector(".score")?.textContent?.trim() || "";
   const form = fatitem.querySelector("form");
   const toptext = fatitem.querySelector(".toptext");
@@ -2365,9 +2382,11 @@ function buildMainFloor(document, fatitem, replyCount, meUser = "") {
 function createFloorCard(document, comment, floor, firstUser, meUser = "") {
   const user = comment.querySelector(".hnuser")?.textContent?.trim() || "?";
   const userHref = comment.querySelector(".hnuser")?.getAttribute("href") || "login";
-  const age =
-    comment.querySelector(".age")?.textContent?.trim() ||
-    (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " ").trim();
+  const age = localizeAgeText(
+    comment.querySelector(".age")?.textContent ||
+      (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " "),
+    document,
+  );
   const isLz = Boolean(firstUser && user === firstUser);
   const isMe = Boolean(meUser && user === meUser);
   const commentNode = comment.querySelector(".comment");
@@ -2474,9 +2493,11 @@ function syncLzlCount(lzl) {
 function createLzlItem(document, comment, { firstUser, meUser = "", replyTo = "" }) {
   const user = comment.querySelector(".hnuser")?.textContent?.trim() || "?";
   const userHref = comment.querySelector(".hnuser")?.getAttribute("href") || "login";
-  const age =
-    comment.querySelector(".age")?.textContent?.trim() ||
-    (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " ").trim();
+  const age = localizeAgeText(
+    comment.querySelector(".age")?.textContent ||
+      (comment.querySelector(".comhead")?.textContent || "").replace(user, "").replace(/\s+/g, " "),
+    document,
+  );
   const isLz = Boolean(firstUser && user === firstUser);
   const isMe = Boolean(meUser && user === meUser);
   const commentNode = comment.querySelector(".comment");
