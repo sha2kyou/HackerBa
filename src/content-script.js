@@ -80,13 +80,6 @@ function detectOrphanPageKind(document, host, pageUrl) {
   return "document";
 }
 
-function setBreadcrumbCurrent(document, text) {
-  const current = document.querySelector(".hb-bc-current");
-  if (current) {
-    current.textContent = text;
-  }
-}
-
 function getAuthMode(document, pageUrl) {
   const params = resolvePageUrl(document, pageUrl).searchParams;
   if (params.get("mode") === "register" || params.get("creating") === "t") {
@@ -552,7 +545,7 @@ function enhanceUserPanel(document, host, { userId, titleHint } = {}) {
   title.className = "hb-doc-title";
   const fallbackTitle =
     titleHint?.replace(/\s*[|\u2013\u2014-].*$/, "").trim() ||
-    t("crumbUser", null, document);
+    t("profileUser", null, document);
   title.textContent = userId || fallbackTitle;
   panel.append(title);
 
@@ -737,46 +730,16 @@ function enhanceSubmitPanel(document, host) {
   return panel;
 }
 
-function wrapOrphanContent(document, orphanNodes, pageUrl, options = {}) {
-  const updateBreadcrumb = options.updateBreadcrumb !== false;
+function wrapOrphanContent(document, orphanNodes, pageUrl) {
   const host = document.createElement("div");
   orphanNodes.forEach((node) => host.append(node));
   const url = resolvePageUrl(document, pageUrl);
   const kind = detectOrphanPageKind(document, host, url);
   if (kind === "auth") {
-    const needLogin = /logged in to submit|have to be logged in/i.test(host.textContent || "");
-    const mode = getAuthMode(document, url);
-    if (updateBreadcrumb) {
-      setBreadcrumbCurrent(
-        document,
-        needLogin
-          ? t("crumbPostLogin", null, document)
-          : mode === "register"
-            ? t("registerTitle", null, document)
-            : t("login", null, document),
-      );
-    }
     return enhanceAuthPanel(document, host, url);
   }
-
   if (kind === "submit") {
-    if (updateBreadcrumb) {
-      setBreadcrumbCurrent(document, t("crumbPost", null, document));
-    }
     return enhanceSubmitPanel(document, host);
-  }
-
-  const path = url.pathname || "";
-  if (updateBreadcrumb) {
-    if (/guidelines/i.test(path)) {
-      setBreadcrumbCurrent(document, t("crumbRules", null, document));
-    } else if (/security|showhn|newsfaq|formatdoc/i.test(path)) {
-      setBreadcrumbCurrent(document, t("crumbHelp", null, document));
-    } else if (/forgot/i.test(path)) {
-      setBreadcrumbCurrent(document, t("crumbForgot", null, document));
-    } else {
-      setBreadcrumbCurrent(document, t("crumbPage", null, document));
-    }
   }
   return enhanceDocumentPanel(document, host);
 }
@@ -899,17 +862,13 @@ function presentPopupModal(document, wrap, panel, options = {}) {
   wrap.append(overlay);
 }
 
-function buildPopupPanelFromHtml(document, html, pageUrl, options = {}) {
-  const updateBreadcrumb = Boolean(options.updateBreadcrumb);
+function buildPopupPanelFromHtml(document, html, pageUrl) {
   const url = resolvePageUrl(document, pageUrl);
   const parsed = new DOMParser().parseFromString(html, "text/html");
   const main = parsed.querySelector("#hnmain");
 
   if (/\/user/i.test(url.pathname) && main) {
     const userId = url.searchParams.get("id")?.trim();
-    if (updateBreadcrumb) {
-      setBreadcrumbCurrent(document, userId || t("crumbUser", null, document));
-    }
     const imported = document.importNode(main, true);
     return enhanceUserPanel(document, imported, {
       userId,
@@ -928,7 +887,7 @@ function buildPopupPanelFromHtml(document, html, pageUrl, options = {}) {
       host.append(document.importNode(child, true));
     }
   }
-  return wrapOrphanContent(document, [...host.childNodes], url, { updateBreadcrumb });
+  return wrapOrphanContent(document, [...host.childNodes], url);
 }
 
 async function openInPagePopup(document, href) {
@@ -951,9 +910,7 @@ async function openInPagePopup(document, href) {
       throw new Error(`popup fetch failed: ${response.status}`);
     }
     const html = await response.text();
-    const panel = buildPopupPanelFromHtml(document, html, pageUrl, {
-      updateBreadcrumb: standalone,
-    });
+    const panel = buildPopupPanelFromHtml(document, html, pageUrl);
     presentPopupModal(document, wrap, panel, { standalone });
   } catch {
     win.location.href = pageUrl.href;
@@ -1013,7 +970,6 @@ function mountUserPopup(document, wrap, source, main) {
   }
   const params = new URLSearchParams(document.defaultView?.location?.search || "");
   const userId = params.get("id")?.trim();
-  setBreadcrumbCurrent(document, userId || t("crumbUser", null, document));
   const panel = enhanceUserPanel(document, main, {
     userId,
     titleHint: document.title,
@@ -1465,9 +1421,6 @@ function buildCommunityShell(document) {
         </form>
         <div class="hb-userbar"></div>
       </div>
-    </div>
-    <div class="hb-breadcrumb">
-      <span class="hb-bc-current">${escapeHtml(t("forumName", null, document))}</span>
     </div>
     <div class="hb-card-banner">
       <div class="hb-card-banner-clip">
@@ -2022,16 +1975,6 @@ async function searchHackerNews(query, document) {
   };
 }
 
-function updateSearchBreadcrumb(document, query) {
-  const current = document.querySelector(".hb-bc-current");
-  if (!current) {
-    return;
-  }
-  current.textContent = query
-    ? t("searchCrumb", { q: query }, document)
-    : t("forumName", null, document);
-}
-
 let hbSearchSeq = 0;
 
 async function runLocalSearch(document, query) {
@@ -2041,7 +1984,6 @@ async function runLocalSearch(document, query) {
   }
 
   const seq = ++hbSearchSeq;
-  updateSearchBreadcrumb(document, query);
   renderThreadPanel(document, {
     threads: [],
     countLabel: t("searching", null, document),
@@ -2332,10 +2274,6 @@ function buildMainFloor(document, fatitem, replyCount, meUser = "") {
   const form = fatitem.querySelector("form");
   const toptext = fatitem.querySelector(".toptext");
   const isMe = Boolean(meUser && user === meUser);
-
-  if (title) {
-    setBreadcrumbCurrent(document, title.length > 28 ? `${title.slice(0, 28)}…` : title);
-  }
 
   const coreTitle = createCoreTitle(document, { title, replyCount });
 

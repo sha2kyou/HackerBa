@@ -197,21 +197,12 @@ body.hackerba .hb-user-sep {
   color: var(--hb-line-strong);
 }
 
-/* ===== 面包屑 ===== */
-body.hackerba .hb-breadcrumb {
-  width: var(--hb-width);
-  max-width: calc(100% - 32px);
-  margin: 14px auto 10px;
-  color: var(--hb-subtle);
-  font-size: 13px;
-}
-
 /* ===== 吧头 ===== */
 body.hackerba .hb-card-banner {
   position: relative;
   width: var(--hb-width);
   max-width: calc(100% - 32px);
-  margin: 0 auto;
+  margin: 14px auto 0;
   overflow: visible;
   border: 0;
   border-radius: var(--hb-radius);
@@ -2014,7 +2005,6 @@ html[data-hb-density="compact"] body.hackerba .hb-thread-item {
   }
 
   body.hackerba .hb-topbar-inner,
-  body.hackerba .hb-breadcrumb,
   body.hackerba .hb-card-banner,
   body.hackerba .hb-content,
   body.hackerba .hb-footer {

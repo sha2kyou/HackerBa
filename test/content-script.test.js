@@ -283,10 +283,9 @@ test("搜索结果用贴吧列表样式渲染到主栏", async () => {
   assert.equal(document.querySelector(".hb-th-tit").textContent, "Typed results");
   assert.equal(document.querySelector(".hb-th-tit").getAttribute("href"), "item?id=99");
   assert.equal(document.querySelector(".hb-rep-num").textContent, "7");
-  assert.match(document.querySelector(".hb-breadcrumb").textContent, /Search/);
 });
 
-test("帖子行包含右侧最后回复区，并带列表工具条与面包屑", () => {
+test("帖子行包含右侧最后回复区，并带列表工具条", () => {
   const document = createDocument(`
     <table id="hnmain">
       <tr class="athing submission" id="1">
@@ -306,7 +305,6 @@ test("帖子行包含右侧最后回复区，并带列表工具条与面包屑",
   enhanceHackerNews(document);
 
   const item = document.querySelector(".hb-thread-item");
-  assert.ok(document.querySelector(".hb-breadcrumb"));
   assert.ok(document.querySelector(".hb-thread-top"));
   assert.equal(document.querySelector(".hb-thread-top .hb-sort-focus").textContent, "Default");
   assert.ok(item.querySelector(".hb-thread-author-meta"));
@@ -415,7 +413,6 @@ test("已登录发帖页渲染为独立发帖表单", () => {
   assert.equal(document.querySelector(".hb-compose-panel .hb-form-actions .hb-primary-btn")?.value, "Submit");
   assert.equal(document.querySelector(".hb-compose-help")?.textContent, "Formatting help");
   assert.equal(document.querySelector('input[name="fnid"]')?.value, "abc");
-  assert.equal(document.querySelector(".hb-bc-current")?.textContent, "New post");
   assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
 });
 
@@ -522,7 +519,6 @@ test("吧规页以弹层展示，不挂在看帖主栏", () => {
   assert.equal(document.querySelector(".hb-doc-body .foot"), null);
   assert.equal(document.querySelector('.hb-doc-body table[bgcolor="#ff6600"]'), null);
   assert.doesNotMatch(document.querySelector(".hb-doc-body").innerHTML, /^(?:\s*<br\s*\/?>)+/i);
-  assert.equal(document.querySelector(".hb-bc-current").textContent, "Rules");
   assert.equal(document.body.classList.contains("hb-popup-page"), true);
   assert.equal(document.body.classList.contains("hb-popup-standalone"), true);
   assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
@@ -715,7 +711,6 @@ test("用户信息页以弹层展示，不点亮看帖 Tab", () => {
   assert.ok(document.querySelector(".hb-user-panel .hb-form-actions .hb-primary-btn"));
   assert.equal(document.querySelector(".hb-user-panel .hb-form-actions-row"), null);
   assert.doesNotMatch(document.querySelector(".hb-doc-body").textContent, /login/);
-  assert.equal(document.querySelector(".hb-bc-current").textContent, "alice");
   assert.equal(document.body.classList.contains("hb-popup-page"), true);
   assert.equal(document.body.classList.contains("hb-popup-standalone"), true);
   assert.equal(document.querySelector(".hb-tab-nav a.hb-tab-focus"), null);
@@ -1562,7 +1557,6 @@ test("语言偏好 zh 时界面为中文", () => {
 
   assert.match(document.querySelector(".hb-brand").textContent, /贴吧/);
   assert.equal(document.querySelector(".hb-brand").getAttribute("title"), "Hacker贴吧");
-  assert.equal(document.querySelector(".hb-breadcrumb .hb-bc-current")?.textContent, "Hacker News 吧");
   assert.equal(document.querySelector(".hb-search-btn").textContent, "搜索");
   assert.match(document.querySelector(".hb-footer")?.textContent || "", /Hacker贴吧/);
   assert.equal(
