@@ -2397,23 +2397,6 @@ function createFloorCard(document, comment, floor, firstUser, meUser = "") {
   floorNo.className = "hb-floor-no";
   floorNo.textContent = t("floor", { n: floor }, document);
   top.append(floorNo);
-
-  const toggle = document.createElement("button");
-  toggle.className = "hb-floor-toggle";
-  toggle.type = "button";
-  toggle.textContent = t("collapse", null, document);
-  toggle.setAttribute("aria-expanded", "true");
-  toggle.setAttribute("aria-label", t("collapseFloor", null, document));
-  toggle.addEventListener("click", () => {
-    const collapsed = card.classList.toggle("hb-floor-collapsed");
-    toggle.textContent = collapsed ? t("expand", null, document) : t("collapse", null, document);
-    toggle.setAttribute("aria-expanded", String(!collapsed));
-    toggle.setAttribute(
-      "aria-label",
-      collapsed ? t("expandFloor", null, document) : t("collapseFloor", null, document),
-    );
-  });
-  top.append(toggle);
   main.append(top);
 
   const content = document.createElement("div");

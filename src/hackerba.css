@@ -1786,25 +1786,6 @@ body.hackerba .hb-floor-reply:hover {
   color: var(--hb-blue) !important;
 }
 
-body.hackerba .hb-floor-toggle {
-  padding: 0;
-  border: 0;
-  color: var(--hb-muted);
-  background: transparent;
-  font-size: 12px;
-  line-height: 18px;
-  cursor: pointer;
-}
-
-body.hackerba .hb-floor-toggle:hover {
-  color: var(--hb-blue);
-}
-
-body.hackerba .hb-floor-collapsed .hb-floor-content,
-body.hackerba .hb-floor-collapsed .hb-lzl {
-  display: none;
-}
-
 body.hackerba .hb-reply-panel {
   margin: 0 0 16px;
   overflow: hidden;

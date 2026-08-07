@@ -912,7 +912,7 @@ test("非看帖分区不显示排序条", () => {
   assert.equal(document.querySelector(".hb-thread-sort .hb-sort-focus").textContent, "Ask");
 });
 
-test("为评论重建贴吧楼层卡片与折叠控件", () => {
+test("为评论重建贴吧楼层卡片", () => {
   const document = createDocument(`
     <table id="hnmain">
       <tr><td>
@@ -948,7 +948,6 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
 
   const main = document.querySelector(".hb-main-floor");
   const card = document.querySelector(".hb-floor-list .hb-floor");
-  const button = card.querySelector(".hb-floor-toggle");
   assert.ok(document.querySelector(".hb-post-wrap"));
   assert.ok(document.querySelector(".hb-hn-source")?.hidden);
   assert.equal(document.body.classList.contains("hb-item-page"), true);
@@ -973,12 +972,8 @@ test("为评论重建贴吧楼层卡片与折叠控件", () => {
   assert.equal(card.querySelector(".hb-floor-name").textContent, "bob");
   assert.match(card.querySelector(".hb-floor-content").textContent, /Useful answer/);
   assert.equal(card.querySelector(".hb-floor-reply").textContent, "Reply");
-  assert.equal(button.getAttribute("aria-expanded"), "true");
+  assert.equal(card.querySelector(".hb-floor-toggle"), null);
   assert.ok(card.querySelector(".hb-floor-avatar"));
-
-  button.click();
-  assert.equal(card.classList.contains("hb-floor-collapsed"), true);
-  assert.equal(button.getAttribute("aria-expanded"), "false");
 });
 
 test("嵌套评论收进楼中楼", () => {
@@ -1175,7 +1170,7 @@ test("楼中楼预览设为不限制时全部展示", async () => {
   assert.equal(lzl.querySelector(".hb-lzl-more"), null);
 });
 
-test("重复运行不会重复插入评论折叠控件与帖子列表", () => {
+test("重复运行不会重复插入帖子列表", () => {
   const document = createDocument(`
     <table id="hnmain">
       <tr class="athing submission" id="1">
