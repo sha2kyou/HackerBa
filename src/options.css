@@ -174,14 +174,6 @@ body {
   display: none;
 }
 
-.hb-opt-section-title {
-  margin: 0;
-  color: var(--hb-subtle);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
 .hb-opt-grid {
   display: grid;
   gap: 12px;

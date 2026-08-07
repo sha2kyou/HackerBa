@@ -1137,13 +1137,9 @@ function createSettingsSwitch(document, { id, titleKey, hintKey }) {
   return { label, input };
 }
 
-function createSettingsSection(document, titleKey, nodes) {
+function createSettingsSection(document, nodes) {
   const section = document.createElement("section");
   section.className = "hb-settings-section";
-  const heading = document.createElement("h3");
-  heading.className = "hb-settings-section-title";
-  heading.textContent = t(titleKey, null, document);
-  section.append(heading);
   for (const node of nodes) {
     section.append(node);
   }
@@ -1275,9 +1271,9 @@ function buildSettingsPanel(document) {
 
   const columns = document.createElement("div");
   columns.className = "hb-settings-columns";
-  const appearanceSection = createSettingsSection(document, "optSectionAppearance", [appearanceGrid]);
+  const appearanceSection = createSettingsSection(document, [appearanceGrid]);
   appearanceSection.id = "hb-settings-appearance";
-  const readingSection = createSettingsSection(document, "optSectionReading", [readingGrid, readingList]);
+  const readingSection = createSettingsSection(document, [readingGrid, readingList]);
   readingSection.id = "hb-settings-reading";
   columns.append(appearanceSection, readingSection);
 

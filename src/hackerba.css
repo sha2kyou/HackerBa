@@ -2282,14 +2282,6 @@ body.hackerba .hb-settings-section[hidden] {
   display: none;
 }
 
-body.hackerba .hb-settings-section-title {
-  margin: 0;
-  color: var(--hb-subtle);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
 body.hackerba .hb-settings-grid {
   display: grid;
   gap: 12px;
