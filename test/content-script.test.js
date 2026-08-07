@@ -1017,6 +1017,138 @@ test("嵌套评论收进楼中楼", () => {
   assert.match(items[1].textContent, /Deeper/);
 });
 
+test("楼中楼超过 3 条时默认折叠其余回复", () => {
+  const replies = Array.from({ length: 7 }, (_, i) => {
+    const n = i + 1;
+    return `
+      <tr class="athing comtr">
+        <td class="ind" indent="1"></td>
+        <td class="default">
+          <span class="comhead"><a class="hnuser" href="user?id=u${n}">u${n}</a></span>
+          <div class="comment"><span class="commtext">Reply ${n}</span></div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr><td>
+        <table class="fatitem">
+          <tr class="athing">
+            <td class="title"><span class="titleline"><a href="https://example.com">T</a></span></td>
+          </tr>
+          <tr>
+            <td class="subtext">
+              by <a class="hnuser" href="user?id=alice">alice</a>
+              <span class="age">1 hour ago</span>
+              | <a href="item?id=1">8&nbsp;comments</a>
+            </td>
+          </tr>
+        </table>
+        <table class="comment-tree">
+          <tr class="athing comtr">
+            <td class="ind" indent="0"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=bob">bob</a></span>
+              <div class="comment"><span class="commtext">Top</span></div>
+            </td>
+          </tr>
+          ${replies}
+        </table>
+      </td></tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/item?id=1",
+  );
+
+  enhanceHackerNews(document);
+
+  const lzl = document.querySelector(".hb-lzl");
+  assert.ok(lzl);
+  assert.equal(lzl.querySelector(".hb-lzl-num").textContent, "7");
+  const items = [...lzl.querySelectorAll(".hb-lzl-item")];
+  assert.equal(items.length, 7);
+  assert.equal(items.filter((item) => item.classList.contains("hb-lzl-item-folded")).length, 4);
+  assert.ok(items[2].classList.contains("hb-lzl-preview-last"));
+
+  const more = lzl.querySelector(".hb-lzl-more");
+  assert.ok(more);
+  assert.match(more.textContent, /Show 4 more replies/);
+
+  more.click();
+  assert.equal(lzl.querySelector(".hb-lzl-more"), null);
+  assert.equal(lzl.querySelectorAll(".hb-lzl-item-folded").length, 0);
+  assert.equal(lzl.querySelector(".hb-lzl-preview-last"), null);
+});
+
+test("楼中楼预览设为不限制时全部展示", async () => {
+  const replies = Array.from({ length: 6 }, (_, i) => {
+    const n = i + 1;
+    return `
+      <tr class="athing comtr">
+        <td class="ind" indent="1"></td>
+        <td class="default">
+          <span class="comhead"><a class="hnuser" href="user?id=u${n}">u${n}</a></span>
+          <div class="comment"><span class="commtext">Reply ${n}</span></div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr><td>
+        <table class="fatitem">
+          <tr class="athing">
+            <td class="title"><span class="titleline"><a href="https://example.com">T</a></span></td>
+          </tr>
+          <tr>
+            <td class="subtext">
+              by <a class="hnuser" href="user?id=alice">alice</a>
+              <span class="age">1 hour ago</span>
+              | <a href="item?id=1">7&nbsp;comments</a>
+            </td>
+          </tr>
+        </table>
+        <table class="comment-tree">
+          <tr class="athing comtr">
+            <td class="ind" indent="0"></td>
+            <td class="default">
+              <span class="comhead"><a class="hnuser" href="user?id=bob">bob</a></span>
+              <div class="comment"><span class="commtext">Top</span></div>
+            </td>
+          </tr>
+          ${replies}
+        </table>
+      </td></tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/item?id=1",
+  );
+  document.defaultView.chrome = {
+    storage: {
+      sync: {
+        async get(defaults) {
+          return { ...defaults, lzlPreviewLimit: "unlimited" };
+        },
+      },
+    },
+  };
+
+  loadScripts(document);
+  await document.defaultView.HackerBa.applyPreferences(document);
+  document.defaultView.HackerBa.enhanceHackerNews(document);
+
+  const lzl = document.querySelector(".hb-lzl");
+  assert.ok(lzl);
+  assert.equal(document.documentElement.dataset.hbLzlPreview, "unlimited");
+  assert.equal(lzl.querySelectorAll(".hb-lzl-item-folded").length, 0);
+  assert.equal(lzl.querySelector(".hb-lzl-more"), null);
+});
+
 test("重复运行不会重复插入评论折叠控件与帖子列表", () => {
   const document = createDocument(`
     <table id="hnmain">
@@ -1149,9 +1281,11 @@ test("顶栏提供插件设置入口", async () => {
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(panel.querySelector("#theme")?.value, "light");
   assert.equal(panel.querySelector("#accentColor")?.value, "blue");
+  assert.equal(panel.querySelector("#lzlPreviewLimit")?.value, "3");
 
   panel.querySelector("#theme").value = "dark";
   panel.querySelector("#accentColor").value = "orange";
+  panel.querySelector("#lzlPreviewLimit").value = "10";
   panel.querySelector("#showBannerCover").checked = true;
   panel.querySelector("#hb-preferences").dispatchEvent(
     new document.defaultView.Event("submit", { bubbles: true, cancelable: true }),
@@ -1160,6 +1294,7 @@ test("顶栏提供插件设置入口", async () => {
 
   assert.equal(stored.theme, "dark");
   assert.equal(stored.accentColor, "orange");
+  assert.equal(stored.lzlPreviewLimit, "10");
   assert.equal(stored.showBannerCover, true);
   assert.equal(reloaded, true);
 });

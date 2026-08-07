@@ -1063,6 +1063,7 @@ const DEFAULT_PREFERENCES = {
   discussionOpensNewTab: true,
   showBannerCover: false,
   language: "auto",
+  lzlPreviewLimit: "3",
 };
 
 function resolveExtensionUrl(path) {
@@ -1232,10 +1233,24 @@ function buildSettingsPanel(document) {
     titleKey: "optBannerCover",
     hintKey: "optBannerCoverHint",
   });
+  const lzlPreview = createSettingsSelect(document, {
+    id: "lzlPreviewLimit",
+    labelKey: "optLzlPreview",
+    options: [
+      { value: "3", labelKey: "optLzlPreview3" },
+      { value: "5", labelKey: "optLzlPreview5" },
+      { value: "10", labelKey: "optLzlPreview10" },
+      { value: "unlimited", labelKey: "optLzlPreviewUnlimited" },
+    ],
+  });
 
   const appearanceGrid = document.createElement("div");
   appearanceGrid.className = "hb-settings-grid";
   appearanceGrid.append(language.label, theme.label, density.label, accentColor.label);
+
+  const readingGrid = document.createElement("div");
+  readingGrid.className = "hb-settings-grid";
+  readingGrid.append(lzlPreview.label);
 
   const readingList = document.createElement("div");
   readingList.className = "hb-settings-list";
@@ -1243,7 +1258,7 @@ function buildSettingsPanel(document) {
 
   form.append(
     createSettingsSection(document, "optSectionAppearance", [appearanceGrid]),
-    createSettingsSection(document, "optSectionReading", [readingList]),
+    createSettingsSection(document, "optSectionReading", [readingGrid, readingList]),
   );
 
   const footer = document.createElement("div");
@@ -1291,6 +1306,7 @@ function buildSettingsPanel(document) {
     theme: theme.select,
     density: density.select,
     accentColor: accentColor.select,
+    lzlPreviewLimit: lzlPreview.select,
     titleOpensDiscussion: titleClick.input,
     discussionOpensNewTab: discussionTab.input,
     showBannerCover: bannerCover.input,
@@ -1303,6 +1319,7 @@ function buildSettingsPanel(document) {
       theme: theme.select,
       density: density.select,
       accentColor: accentColor.select,
+      lzlPreviewLimit: lzlPreview.select,
       titleOpensDiscussion: titleClick.input,
       discussionOpensNewTab: discussionTab.input,
       showBannerCover: bannerCover.input,
@@ -1326,6 +1343,7 @@ async function hydrateSettingsForm(document, fields) {
   fields.theme.value = preferences.theme || DEFAULT_PREFERENCES.theme;
   fields.density.value = preferences.density || DEFAULT_PREFERENCES.density;
   fields.accentColor.value = preferences.accentColor || DEFAULT_PREFERENCES.accentColor;
+  fields.lzlPreviewLimit.value = resolveLzlPreviewLimitPref(preferences.lzlPreviewLimit);
   fields.titleOpensDiscussion.checked = preferences.titleOpensDiscussion !== false;
   fields.discussionOpensNewTab.checked = preferences.discussionOpensNewTab !== false;
   fields.showBannerCover.checked = preferences.showBannerCover === true;
@@ -1337,6 +1355,7 @@ async function saveSettingsForm(document, fields) {
     theme: fields.theme.value,
     density: fields.density.value,
     accentColor: fields.accentColor.value,
+    lzlPreviewLimit: resolveLzlPreviewLimitPref(fields.lzlPreviewLimit.value),
     titleOpensDiscussion: fields.titleOpensDiscussion.checked,
     discussionOpensNewTab: fields.discussionOpensNewTab.checked,
     showBannerCover: fields.showBannerCover.checked,
@@ -2490,6 +2509,53 @@ function syncLzlCount(lzl) {
   }
 }
 
+const LZL_PREVIEW_LIMITS = new Set(["3", "5", "10", "unlimited"]);
+
+function resolveLzlPreviewLimitPref(value) {
+  const raw = String(value ?? "");
+  return LZL_PREVIEW_LIMITS.has(raw) ? raw : DEFAULT_PREFERENCES.lzlPreviewLimit;
+}
+
+/** @returns {number | null} null = 不限制 */
+function resolveLzlPreviewLimit(document) {
+  const pref = resolveLzlPreviewLimitPref(document.documentElement.dataset.hbLzlPreview);
+  if (pref === "unlimited") {
+    return null;
+  }
+  return Number(pref);
+}
+
+function applyLzlFold(lzl, document) {
+  lzl.querySelector(".hb-lzl-more")?.remove();
+
+  const items = [...lzl.querySelectorAll(".hb-lzl-list > .hb-lzl-item")];
+  items.forEach((item) => {
+    item.classList.remove("hb-lzl-item-folded", "hb-lzl-preview-last");
+  });
+
+  const limit = resolveLzlPreviewLimit(document);
+  if (limit == null || items.length <= limit) {
+    return;
+  }
+
+  const hidden = items.slice(limit);
+  hidden.forEach((item) => item.classList.add("hb-lzl-item-folded"));
+  items[limit - 1]?.classList.add("hb-lzl-preview-last");
+
+  const more = document.createElement("button");
+  more.type = "button";
+  more.className = "hb-lzl-more";
+  const hiddenCount = hidden.length;
+  more.textContent = t("lzlExpandMore", { n: hiddenCount }, document);
+  more.setAttribute("aria-label", more.textContent);
+  more.addEventListener("click", () => {
+    hidden.forEach((item) => item.classList.remove("hb-lzl-item-folded"));
+    items[limit - 1]?.classList.remove("hb-lzl-preview-last");
+    more.remove();
+  });
+  lzl.append(more);
+}
+
 function createLzlItem(document, comment, { firstUser, meUser = "", replyTo = "" }) {
   const user = comment.querySelector(".hnuser")?.textContent?.trim() || "?";
   const userHref = comment.querySelector(".hnuser")?.getAttribute("href") || "login";
@@ -2643,6 +2709,7 @@ function enhanceComments(document) {
       stack.push({ indent, user: built.user, card: floorCard });
     });
 
+    list.querySelectorAll(".hb-lzl").forEach((lzl) => applyLzlFold(lzl, document));
     wrap.append(list);
   }
 
@@ -2695,6 +2762,9 @@ async function applyPreferences(document) {
     preferences.discussionOpensNewTab === false ? "0" : "1";
   document.documentElement.dataset.hbBannerCover =
     preferences.showBannerCover === true ? "1" : "0";
+  document.documentElement.dataset.hbLzlPreview = resolveLzlPreviewLimitPref(
+    preferences.lzlPreviewLimit,
+  );
   document.documentElement.dataset.hbLang = locale;
   document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
   bindSystemThemeSync(document);

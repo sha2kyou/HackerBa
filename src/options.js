@@ -3,12 +3,19 @@ const language = document.querySelector("#language");
 const theme = document.querySelector("#theme");
 const accentColor = document.querySelector("#accentColor");
 const density = document.querySelector("#density");
+const lzlPreviewLimit = document.querySelector("#lzlPreviewLimit");
 const titleOpensDiscussion = document.querySelector("#titleOpensDiscussion");
 const discussionOpensNewTab = document.querySelector("#discussionOpensNewTab");
 const showBannerCover = document.querySelector("#showBannerCover");
 const status = document.querySelector("#status");
 
 const { resolveLocale, t } = globalThis.HackerBaI18n;
+const LZL_PREVIEW_LIMITS = new Set(["3", "5", "10", "unlimited"]);
+
+function resolveLzlPreviewLimitPref(value) {
+  const raw = String(value ?? "");
+  return LZL_PREVIEW_LIMITS.has(raw) ? raw : "3";
+}
 
 function browserLang() {
   return globalThis.navigator?.language || "";
@@ -49,6 +56,7 @@ async function restorePreferences() {
     theme: "light",
     accentColor: "blue",
     density: "comfortable",
+    lzlPreviewLimit: "3",
     titleOpensDiscussion: true,
     discussionOpensNewTab: true,
     showBannerCover: false,
@@ -57,6 +65,7 @@ async function restorePreferences() {
   theme.value = preferences.theme;
   accentColor.value = preferences.accentColor === "orange" ? "orange" : "blue";
   density.value = preferences.density;
+  lzlPreviewLimit.value = resolveLzlPreviewLimitPref(preferences.lzlPreviewLimit);
   titleOpensDiscussion.checked = preferences.titleOpensDiscussion !== false;
   discussionOpensNewTab.checked = preferences.discussionOpensNewTab !== false;
   showBannerCover.checked = preferences.showBannerCover === true;
@@ -85,6 +94,7 @@ form.addEventListener("submit", async (event) => {
     theme: theme.value,
     accentColor: accentColor.value,
     density: density.value,
+    lzlPreviewLimit: resolveLzlPreviewLimitPref(lzlPreviewLimit.value),
     titleOpensDiscussion: titleOpensDiscussion.checked,
     discussionOpensNewTab: discussionOpensNewTab.checked,
     showBannerCover: showBannerCover.checked,
