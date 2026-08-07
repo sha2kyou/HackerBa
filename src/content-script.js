@@ -398,6 +398,34 @@ function localizeAgeText(text, document) {
   return localizeProfileAge(raw, document) || raw;
 }
 
+function unlinkProfileSelfName(root) {
+  if (!root) {
+    return;
+  }
+
+  for (const row of root.querySelectorAll("tr")) {
+    const cells = [...row.querySelectorAll(":scope > td")];
+    if (cells.length < 2) {
+      continue;
+    }
+    const label = String(cells[0].textContent || "")
+      .trim()
+      .replace(/[:：]\s*$/, "")
+      .toLowerCase();
+    if (label !== "user" && label !== "用户") {
+      continue;
+    }
+    cells[1].querySelectorAll("a").forEach((link) => {
+      const href = link.getAttribute("href") || "";
+      if (!/\/?user\?/i.test(href)) {
+        return;
+      }
+      link.replaceWith(root.ownerDocument.createTextNode(link.textContent || ""));
+    });
+    break;
+  }
+}
+
 function localizeUserProfile(document, root) {
   if (!root) {
     return;
@@ -574,6 +602,7 @@ function enhanceUserPanel(document, host, { userId, titleHint } = {}) {
   });
 
   localizeUserProfile(document, clone);
+  unlinkProfileSelfName(clone);
   attachProfileKarmaLevel(document, clone);
   regroupProfileLinks(document, clone);
 

@@ -717,6 +717,37 @@ test("用户信息页以弹层展示，不点亮看帖 Tab", () => {
   assert.equal(document.querySelector(".hb-hn-source").classList.contains("hb-source-hidden"), true);
 });
 
+test("个人详情页用户名不可点击", () => {
+  const document = createDocument(
+    `
+    <table id="hnmain">
+      <tr>
+        <td>
+          <table>
+            <tr><td>user:</td><td><a href="user?id=alice" class="hnuser">alice</a></td></tr>
+            <tr><td>created:</td><td>10 years ago</td></tr>
+            <tr><td>karma:</td><td>1234</td></tr>
+            <tr><td>about:</td><td>Hello</td></tr>
+            <tr><td></td><td><a href="submitted?id=alice">submissions</a></td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `,
+    "https://news.ycombinator.com/user?id=alice",
+  );
+
+  enhanceHackerNews(document);
+
+  const userRow = [...document.querySelectorAll(".hb-user-panel tr")].find((row) =>
+    /User|用户/.test(row.querySelector("td")?.textContent || ""),
+  );
+  assert.ok(userRow);
+  assert.match(userRow.textContent, /alice/);
+  assert.equal(userRow.querySelector("a"), null);
+  assert.ok(document.querySelector('.hb-profile-link[href="submitted?id=alice"]'));
+});
+
 test("中文语言下个人资料标签本地化", () => {
   const document = createDocument(
     `
