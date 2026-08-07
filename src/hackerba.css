@@ -2226,15 +2226,49 @@ body.hackerba .hb-settings-form {
   overflow: hidden;
 }
 
-body.hackerba .hb-settings-columns {
+body.hackerba .hb-settings-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px 24px;
+  grid-template-columns: 132px minmax(0, 1fr);
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 16px 18px 12px;
+}
+
+body.hackerba .hb-settings-nav {
+  display: grid;
   align-content: start;
+  gap: 4px;
+  padding: 16px 12px;
+  border-right: 1px solid var(--hb-line);
+}
+
+body.hackerba .hb-settings-nav-item {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--hb-radius-sm);
+  color: var(--hb-subtle);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+body.hackerba .hb-settings-nav-item:hover {
+  color: var(--hb-text);
+  background: var(--hb-surface-2);
+}
+
+body.hackerba .hb-settings-nav-item.is-active {
+  color: var(--hb-blue);
+  background: var(--hb-accent-soft);
+}
+
+body.hackerba .hb-settings-columns {
+  min-width: 0;
+  padding: 16px 18px 12px;
 }
 
 body.hackerba .hb-settings-section {
@@ -2242,6 +2276,10 @@ body.hackerba .hb-settings-section {
   gap: 12px;
   min-width: 0;
   align-content: start;
+}
+
+body.hackerba .hb-settings-section[hidden] {
+  display: none;
 }
 
 body.hackerba .hb-settings-section-title {
@@ -2441,4 +2479,22 @@ html[data-hb-theme="dark"] body.hackerba .hb-settings-switch {
 
 html[data-hb-theme="dark"] body.hackerba .hb-settings-toggle-track {
   background: #3a3f4a;
+}
+
+@media (max-width: 640px) {
+  body.hackerba .hb-settings-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  body.hackerba .hb-settings-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 10px 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--hb-line);
+  }
+
+  body.hackerba .hb-settings-nav-item {
+    text-align: center;
+  }
 }

@@ -1150,6 +1150,38 @@ function createSettingsSection(document, titleKey, nodes) {
   return section;
 }
 
+function createSettingsNavigation(document, sections) {
+  const navigation = document.createElement("nav");
+  navigation.className = "hb-settings-nav";
+  navigation.setAttribute("aria-label", t("pluginSettings", null, document));
+
+  const buttons = sections.map(({ id, titleKey }) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "hb-settings-nav-item";
+    button.textContent = t(titleKey, null, document);
+    button.setAttribute("aria-controls", id);
+    button.setAttribute("aria-selected", "false");
+    navigation.append(button);
+    return button;
+  });
+
+  function select(index) {
+    sections.forEach(({ section }, sectionIndex) => {
+      const active = sectionIndex === index;
+      section.hidden = !active;
+      buttons[sectionIndex].classList.toggle("is-active", active);
+      buttons[sectionIndex].setAttribute("aria-selected", String(active));
+    });
+  }
+
+  buttons.forEach((button, index) => {
+    button.addEventListener("click", () => select(index));
+  });
+  select(0);
+  return navigation;
+}
+
 function buildSettingsPanel(document) {
   const panel = document.createElement("div");
   panel.className = "hb-settings-panel";
@@ -1243,9 +1275,20 @@ function buildSettingsPanel(document) {
 
   const columns = document.createElement("div");
   columns.className = "hb-settings-columns";
-  columns.append(
-    createSettingsSection(document, "optSectionAppearance", [appearanceGrid]),
-    createSettingsSection(document, "optSectionReading", [readingGrid, readingList]),
+  const appearanceSection = createSettingsSection(document, "optSectionAppearance", [appearanceGrid]);
+  appearanceSection.id = "hb-settings-appearance";
+  const readingSection = createSettingsSection(document, "optSectionReading", [readingGrid, readingList]);
+  readingSection.id = "hb-settings-reading";
+  columns.append(appearanceSection, readingSection);
+
+  const layout = document.createElement("div");
+  layout.className = "hb-settings-layout";
+  layout.append(
+    createSettingsNavigation(document, [
+      { id: appearanceSection.id, titleKey: "optSectionAppearance", section: appearanceSection },
+      { id: readingSection.id, titleKey: "optSectionReading", section: readingSection },
+    ]),
+    columns,
   );
 
   const footer = document.createElement("div");
@@ -1263,6 +1306,7 @@ function buildSettingsPanel(document) {
   developerLink.target = "_blank";
   developerLink.rel = "noopener noreferrer";
   developerLink.textContent = "sha2kyou";
+
   const repositoryLink = document.createElement("a");
   repositoryLink.href = "https://github.com/sha2kyou/HackerBa";
   repositoryLink.target = "_blank";
@@ -1285,7 +1329,7 @@ function buildSettingsPanel(document) {
   actions.append(status, submit);
 
   footer.append(about, actions);
-  form.append(columns, footer);
+  form.append(layout, footer);
   panel.append(form);
 
   void hydrateSettingsForm(document, {

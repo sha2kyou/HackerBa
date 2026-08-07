@@ -12,9 +12,15 @@
         <h1 data-i18n="brandName">HackerBa</h1>
         <p data-i18n="optSubtitle">Tieba-style Hacker News reading</p>
       </header>
+      <button class="hb-opt-close" type="button" aria-label="Close" data-i18n-aria="close">×</button>
       <form id="preferences" class="hb-opt-form">
-        <div class="hb-opt-columns">
-          <section class="hb-opt-section">
+        <div class="hb-opt-layout">
+          <nav class="hb-opt-nav" aria-label="Settings">
+            <button type="button" class="hb-opt-nav-item is-active" data-settings-panel="appearance" aria-controls="opt-appearance" aria-selected="true" data-i18n="optSectionAppearance">Appearance</button>
+            <button type="button" class="hb-opt-nav-item" data-settings-panel="reading" aria-controls="opt-reading" aria-selected="false" data-i18n="optSectionReading">Reading</button>
+          </nav>
+          <div class="hb-opt-columns">
+          <section id="opt-appearance" class="hb-opt-section">
             <h2 class="hb-opt-section-title" data-i18n="optSectionAppearance">Appearance</h2>
             <div class="hb-opt-grid">
               <label>
@@ -49,7 +55,7 @@
               </label>
             </div>
           </section>
-          <section class="hb-opt-section">
+          <section id="opt-reading" class="hb-opt-section" hidden>
             <h2 class="hb-opt-section-title" data-i18n="optSectionReading">Reading</h2>
             <div class="hb-opt-grid">
               <label>
@@ -68,47 +74,40 @@
                   <strong data-i18n="optTitleClick">Open discussion on title click</strong>
                   <small data-i18n-html="optTitleClickHint">On: open the discussion page<br>Off: open the original link; a Discuss button appears next to the score</small>
                 </span>
-                <input id="titleOpensDiscussion" name="titleOpensDiscussion" type="checkbox" checked>
+                <span class="hb-opt-toggle">
+                  <input id="titleOpensDiscussion" name="titleOpensDiscussion" type="checkbox" checked>
+                  <span class="hb-opt-toggle-track" aria-hidden="true"></span>
+                </span>
               </label>
               <label class="hb-opt-switch">
                 <span>
                   <strong data-i18n="optDiscussionNewTab">Open discussion in new tab</strong>
                   <small data-i18n-html="optDiscussionNewTabHint">On: open discussion pages in a new tab<br>Off: open discussion in the current tab</small>
                 </span>
-                <input id="discussionOpensNewTab" name="discussionOpensNewTab" type="checkbox" checked>
+                <span class="hb-opt-toggle">
+                  <input id="discussionOpensNewTab" name="discussionOpensNewTab" type="checkbox" checked>
+                  <span class="hb-opt-toggle-track" aria-hidden="true"></span>
+                </span>
               </label>
               <label class="hb-opt-switch">
                 <span>
                   <strong data-i18n="optBannerCover">Show forum cover image</strong>
                   <small data-i18n-html="optBannerCoverHint">On: show the 4:1 cover on the forum header<br>Off: hide the cover and keep a compact info card</small>
                 </span>
-                <input id="showBannerCover" name="showBannerCover" type="checkbox">
+                <span class="hb-opt-toggle">
+                  <input id="showBannerCover" name="showBannerCover" type="checkbox">
+                  <span class="hb-opt-toggle-track" aria-hidden="true"></span>
+                </span>
               </label>
             </div>
           </section>
+          </div>
         </div>
         <div class="hb-opt-footer">
           <section class="hb-opt-about" aria-label="About">
-            <p>
-              <span data-i18n="optVersion">Version</span>
-              <span id="opt-version"></span>
-            </p>
-            <p>
-              <span data-i18n="optDeveloper">Developer</span>
-              <a
-                href="https://github.com/sha2kyou"
-                target="_blank"
-                rel="noopener noreferrer"
-              >sha2kyou</a>
-            </p>
-            <p>
-              <span data-i18n="optRepository">Repository</span>
-              <a
-                href="https://github.com/sha2kyou/HackerBa"
-                target="_blank"
-                rel="noopener noreferrer"
-              >github.com/sha2kyou/HackerBa</a>
-            </p>
+            <span data-i18n="optVersion">Version</span> <span id="opt-version"></span> ·
+            <a href="https://github.com/sha2kyou" target="_blank" rel="noopener noreferrer">sha2kyou</a> ·
+            <a href="https://github.com/sha2kyou/HackerBa" target="_blank" rel="noopener noreferrer">GitHub</a>
           </section>
           <div class="hb-opt-actions">
             <output id="status" aria-live="polite"></output>

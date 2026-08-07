@@ -1299,6 +1299,7 @@ test("顶栏提供插件设置入口", async () => {
   assert.ok(panel.querySelector(".hb-settings-columns"));
   assert.equal(panel.querySelectorAll(".hb-settings-section").length, 2);
   assert.ok(panel.querySelector(".hb-settings-section-title"));
+  assert.ok(panel.querySelector(".hb-settings-nav"));
   assert.ok(panel.querySelector(".hb-settings-toggle"));
 
   await new Promise((resolve) => setTimeout(resolve, 0));

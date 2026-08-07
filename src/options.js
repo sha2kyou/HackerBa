@@ -8,6 +8,9 @@ const titleOpensDiscussion = document.querySelector("#titleOpensDiscussion");
 const discussionOpensNewTab = document.querySelector("#discussionOpensNewTab");
 const showBannerCover = document.querySelector("#showBannerCover");
 const status = document.querySelector("#status");
+const closeButton = document.querySelector(".hb-opt-close");
+const settingsNavItems = [...document.querySelectorAll(".hb-opt-nav-item")];
+const settingsPanels = [...document.querySelectorAll(".hb-opt-section")];
 
 const { resolveLocale, t } = globalThis.HackerBaI18n;
 const LZL_PREVIEW_LIMITS = new Set(["3", "5", "10", "unlimited"]);
@@ -44,11 +47,31 @@ function applyOptionsI18n(locale) {
   document.querySelectorAll("[data-i18n-html]").forEach((node) => {
     node.innerHTML = t(locale, node.getAttribute("data-i18n-html"));
   });
+  document.querySelectorAll("[data-i18n-aria]").forEach((node) => {
+    node.setAttribute("aria-label", t(locale, node.getAttribute("data-i18n-aria")));
+  });
   const versionEl = document.querySelector("#opt-version");
   if (versionEl) {
     versionEl.textContent = chrome.runtime.getManifest().version;
   }
 }
+
+function selectSettingsPanel(name) {
+  settingsNavItems.forEach((item) => {
+    const active = item.dataset.settingsPanel === name;
+    item.classList.toggle("is-active", active);
+    item.setAttribute("aria-selected", String(active));
+  });
+  settingsPanels.forEach((panel) => {
+    panel.hidden = panel.id !== `opt-${name}`;
+  });
+}
+
+settingsNavItems.forEach((item) => {
+  item.addEventListener("click", () => selectSettingsPanel(item.dataset.settingsPanel));
+});
+
+closeButton.addEventListener("click", () => window.close());
 
 async function restorePreferences() {
   const preferences = await chrome.storage.sync.get({
