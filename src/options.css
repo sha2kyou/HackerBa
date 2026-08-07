@@ -227,9 +227,11 @@ select:focus {
 
 .hb-opt-footer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 12px;
   flex: 0 0 auto;
-  padding: 12px 18px 16px;
+  padding: 10px 18px;
   border-top: 1px solid var(--hb-line);
   background: var(--hb-surface);
 }
@@ -237,7 +239,7 @@ select:focus {
 .hb-opt-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
 }
 
@@ -265,7 +267,7 @@ select:focus {
 }
 
 output {
-  min-height: 18px;
+  min-height: 0;
   color: var(--hb-accent);
   font-size: 12px;
   line-height: 1.4;
@@ -393,6 +395,15 @@ output {
 
   .hb-opt-nav-item {
     text-align: center;
+  }
+
+  .hb-opt-footer {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .hb-opt-actions {
+    justify-content: space-between;
   }
 }
 
