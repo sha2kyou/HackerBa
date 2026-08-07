@@ -7,95 +7,115 @@
     <link rel="stylesheet" href="options.css">
   </head>
   <body>
-    <main>
-      <h1 data-i18n="brandName">HackerBa</h1>
-      <p data-i18n="optSubtitle">Tieba-style Hacker News reading</p>
-      <form id="preferences">
-        <label>
-          <span data-i18n="optLanguage">Language</span>
-          <select id="language" name="language">
-            <option value="auto" data-i18n="optLangAuto">Follow browser</option>
-            <option value="en" data-i18n="optLangEn">English</option>
-            <option value="zh" data-i18n="optLangZh">中文</option>
-          </select>
-        </label>
-        <label>
-          <span data-i18n="optTheme">Theme</span>
-          <select id="theme" name="theme">
-            <option value="light" data-i18n="optThemeLight">Light</option>
-            <option value="dark" data-i18n="optThemeDark">Dark</option>
-            <option value="system" data-i18n="optThemeSystem">System</option>
-          </select>
-        </label>
-        <label>
-          <span data-i18n="optAccentColor">Theme color</span>
-          <select id="accentColor" name="accentColor">
-            <option value="blue" data-i18n="optAccentBlue">Tieba blue</option>
-            <option value="orange" data-i18n="optAccentOrange">HN orange</option>
-          </select>
-        </label>
-        <label>
-          <span data-i18n="optDensity">Density</span>
-          <select id="density" name="density">
-            <option value="comfortable" data-i18n="optDensityComfortable">Comfortable</option>
-            <option value="compact" data-i18n="optDensityCompact">Compact</option>
-          </select>
-        </label>
-        <label>
-          <span data-i18n="optLzlPreview">Nested replies preview</span>
-          <select id="lzlPreviewLimit" name="lzlPreviewLimit">
-            <option value="3" data-i18n="optLzlPreview3">3</option>
-            <option value="5" data-i18n="optLzlPreview5">5</option>
-            <option value="10" data-i18n="optLzlPreview10">10</option>
-            <option value="unlimited" data-i18n="optLzlPreviewUnlimited">Unlimited</option>
-          </select>
-        </label>
-        <label class="hb-opt-switch">
-          <span>
-            <strong data-i18n="optTitleClick">Open discussion on title click</strong>
-            <small data-i18n-html="optTitleClickHint">On: open the discussion page<br>Off: open the original link; a Discuss button appears next to the score</small>
-          </span>
-          <input id="titleOpensDiscussion" name="titleOpensDiscussion" type="checkbox" checked>
-        </label>
-        <label class="hb-opt-switch">
-          <span>
-            <strong data-i18n="optDiscussionNewTab">Open discussion in new tab</strong>
-            <small data-i18n-html="optDiscussionNewTabHint">On: open discussion pages in a new tab<br>Off: open discussion in the current tab</small>
-          </span>
-          <input id="discussionOpensNewTab" name="discussionOpensNewTab" type="checkbox" checked>
-        </label>
-        <label class="hb-opt-switch">
-          <span>
-            <strong data-i18n="optBannerCover">Show forum cover image</strong>
-            <small data-i18n-html="optBannerCoverHint">On: show the 4:1 cover on the forum header<br>Off: hide the cover and keep a compact info card</small>
-          </span>
-          <input id="showBannerCover" name="showBannerCover" type="checkbox">
-        </label>
-        <button type="submit" data-i18n="optSave">Save settings</button>
-        <output id="status" aria-live="polite"></output>
+    <main class="hb-opt-panel">
+      <header class="hb-opt-head">
+        <h1 data-i18n="brandName">HackerBa</h1>
+        <p data-i18n="optSubtitle">Tieba-style Hacker News reading</p>
+      </header>
+      <form id="preferences" class="hb-opt-form">
+        <div class="hb-opt-columns">
+          <section class="hb-opt-section">
+            <h2 class="hb-opt-section-title" data-i18n="optSectionAppearance">Appearance</h2>
+            <div class="hb-opt-grid">
+              <label>
+                <span data-i18n="optLanguage">Language</span>
+                <select id="language" name="language">
+                  <option value="auto" data-i18n="optLangAuto">Follow browser</option>
+                  <option value="en" data-i18n="optLangEn">English</option>
+                  <option value="zh" data-i18n="optLangZh">中文</option>
+                </select>
+              </label>
+              <label>
+                <span data-i18n="optTheme">Theme</span>
+                <select id="theme" name="theme">
+                  <option value="light" data-i18n="optThemeLight">Light</option>
+                  <option value="dark" data-i18n="optThemeDark">Dark</option>
+                  <option value="system" data-i18n="optThemeSystem">System</option>
+                </select>
+              </label>
+              <label>
+                <span data-i18n="optAccentColor">Theme color</span>
+                <select id="accentColor" name="accentColor">
+                  <option value="blue" data-i18n="optAccentBlue">Tieba blue</option>
+                  <option value="orange" data-i18n="optAccentOrange">HN orange</option>
+                </select>
+              </label>
+              <label>
+                <span data-i18n="optDensity">Density</span>
+                <select id="density" name="density">
+                  <option value="comfortable" data-i18n="optDensityComfortable">Comfortable</option>
+                  <option value="compact" data-i18n="optDensityCompact">Compact</option>
+                </select>
+              </label>
+            </div>
+          </section>
+          <section class="hb-opt-section">
+            <h2 class="hb-opt-section-title" data-i18n="optSectionReading">Reading</h2>
+            <div class="hb-opt-grid">
+              <label>
+                <span data-i18n="optLzlPreview">Nested replies preview</span>
+                <select id="lzlPreviewLimit" name="lzlPreviewLimit">
+                  <option value="3" data-i18n="optLzlPreview3">3</option>
+                  <option value="5" data-i18n="optLzlPreview5">5</option>
+                  <option value="10" data-i18n="optLzlPreview10">10</option>
+                  <option value="unlimited" data-i18n="optLzlPreviewUnlimited">Unlimited</option>
+                </select>
+              </label>
+            </div>
+            <div class="hb-opt-list">
+              <label class="hb-opt-switch">
+                <span>
+                  <strong data-i18n="optTitleClick">Open discussion on title click</strong>
+                  <small data-i18n-html="optTitleClickHint">On: open the discussion page<br>Off: open the original link; a Discuss button appears next to the score</small>
+                </span>
+                <input id="titleOpensDiscussion" name="titleOpensDiscussion" type="checkbox" checked>
+              </label>
+              <label class="hb-opt-switch">
+                <span>
+                  <strong data-i18n="optDiscussionNewTab">Open discussion in new tab</strong>
+                  <small data-i18n-html="optDiscussionNewTabHint">On: open discussion pages in a new tab<br>Off: open discussion in the current tab</small>
+                </span>
+                <input id="discussionOpensNewTab" name="discussionOpensNewTab" type="checkbox" checked>
+              </label>
+              <label class="hb-opt-switch">
+                <span>
+                  <strong data-i18n="optBannerCover">Show forum cover image</strong>
+                  <small data-i18n-html="optBannerCoverHint">On: show the 4:1 cover on the forum header<br>Off: hide the cover and keep a compact info card</small>
+                </span>
+                <input id="showBannerCover" name="showBannerCover" type="checkbox">
+              </label>
+            </div>
+          </section>
+        </div>
+        <div class="hb-opt-footer">
+          <section class="hb-opt-about" aria-label="About">
+            <p>
+              <span data-i18n="optVersion">Version</span>
+              <span id="opt-version"></span>
+            </p>
+            <p>
+              <span data-i18n="optDeveloper">Developer</span>
+              <a
+                href="https://github.com/sha2kyou"
+                target="_blank"
+                rel="noopener noreferrer"
+              >sha2kyou</a>
+            </p>
+            <p>
+              <span data-i18n="optRepository">Repository</span>
+              <a
+                href="https://github.com/sha2kyou/HackerBa"
+                target="_blank"
+                rel="noopener noreferrer"
+              >github.com/sha2kyou/HackerBa</a>
+            </p>
+          </section>
+          <div class="hb-opt-actions">
+            <output id="status" aria-live="polite"></output>
+            <button type="submit" data-i18n="optSave">Save settings</button>
+          </div>
+        </div>
       </form>
-      <section class="hb-opt-about" aria-label="About">
-        <p>
-          <span data-i18n="optVersion">Version</span>
-          <span id="opt-version"></span>
-        </p>
-        <p>
-          <span data-i18n="optDeveloper">Developer</span>
-          <a
-            href="https://github.com/sha2kyou"
-            target="_blank"
-            rel="noopener noreferrer"
-          >sha2kyou</a>
-        </p>
-        <p>
-          <span data-i18n="optRepository">Repository</span>
-          <a
-            href="https://github.com/sha2kyou/HackerBa"
-            target="_blank"
-            rel="noopener noreferrer"
-          >github.com/sha2kyou/HackerBa</a>
-        </p>
-      </section>
     </main>
     <script src="i18n.js"></script>
     <script type="module" src="options.js"></script>

@@ -1158,6 +1158,14 @@ body.hackerba input[type="submit"]:hover {
     width: 100%;
     max-height: calc(100vh - 16px);
   }
+
+  body.hackerba .hb-modal:has(.hb-settings-panel) {
+    height: min(600px, calc(100vh - 16px));
+  }
+
+  body.hackerba .hb-settings-columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 body.hackerba .hb-pager {
@@ -2210,16 +2218,26 @@ html[data-hb-theme="dark"] body.hackerba .hb-compose-panel textarea {
 
 /* ===== 插件设置弹层 ===== */
 body.hackerba .hb-modal:has(.hb-settings-panel) {
-  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  width: min(680px, 100%);
+  height: min(560px, calc(100vh - 48px));
+  overflow: hidden;
 }
 
 body.hackerba .hb-settings-panel {
-  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
 }
 
 body.hackerba .hb-settings-head {
-  margin: 0 0 18px;
-  padding: 0 28px 14px 0;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 16px 48px 12px 18px;
   border-bottom: 1px solid var(--hb-line);
 }
 
@@ -2233,19 +2251,36 @@ body.hackerba .hb-settings-title {
 
 body.hackerba .hb-settings-subtitle {
   margin: 6px 0 0;
-  color: var(--hb-muted);
-  font-size: 12px;
-  line-height: 1.4;
+  color: var(--hb-subtle);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 body.hackerba .hb-settings-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+body.hackerba .hb-settings-columns {
   display: grid;
-  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 18px 12px;
+  align-content: start;
 }
 
 body.hackerba .hb-settings-section {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
+  align-content: start;
 }
 
 body.hackerba .hb-settings-section-title {
@@ -2400,8 +2435,10 @@ body.hackerba .hb-settings-toggle input:focus-visible + .hb-settings-toggle-trac
 body.hackerba .hb-settings-footer {
   display: grid;
   gap: 12px;
-  padding-top: 4px;
+  flex: 0 0 auto;
+  padding: 12px 18px 16px;
   border-top: 1px solid var(--hb-line);
+  background: var(--hb-surface);
 }
 
 body.hackerba .hb-settings-about {

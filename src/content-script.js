@@ -1256,7 +1256,9 @@ function buildSettingsPanel(document) {
   readingList.className = "hb-settings-list";
   readingList.append(titleClick.label, discussionTab.label, bannerCover.label);
 
-  form.append(
+  const columns = document.createElement("div");
+  columns.className = "hb-settings-columns";
+  columns.append(
     createSettingsSection(document, "optSectionAppearance", [appearanceGrid]),
     createSettingsSection(document, "optSectionReading", [readingGrid, readingList]),
   );
@@ -1298,7 +1300,7 @@ function buildSettingsPanel(document) {
   actions.append(status, submit);
 
   footer.append(about, actions);
-  form.append(footer);
+  form.append(columns, footer);
   panel.append(form);
 
   void hydrateSettingsForm(document, {
