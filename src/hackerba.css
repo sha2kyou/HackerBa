@@ -206,16 +206,6 @@ body.hackerba .hb-breadcrumb {
   font-size: 13px;
 }
 
-body.hackerba .hb-breadcrumb a {
-  color: var(--hb-blue);
-  text-decoration: none;
-}
-
-body.hackerba .hb-bc-sep {
-  margin: 0 6px;
-  color: var(--hb-line-strong);
-}
-
 /* ===== 吧头 ===== */
 body.hackerba .hb-card-banner {
   position: relative;

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "HackerBa",
-  "version": "0.2.5",
-  "description": "\u5c06 Hacker News \u6539\u9020\u6210\u8d34\u5427\u5f0f\u9605\u8bfb\u4f53\u9a8c\u3002",
+  "version": "0.2.6",
+  "description": "将 Hacker News 改造成贴吧式阅读体验。",
   "icons": {
     "16": "src/icons/icon16.png",
     "32": "src/icons/icon32.png",

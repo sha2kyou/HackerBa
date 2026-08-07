@@ -1467,8 +1467,6 @@ function buildCommunityShell(document) {
       </div>
     </div>
     <div class="hb-breadcrumb">
-      <a href="news">${escapeHtml(t("brandName", null, document))}</a>
-      <span class="hb-bc-sep">/</span>
       <span class="hb-bc-current">${escapeHtml(t("forumName", null, document))}</span>
     </div>
     <div class="hb-card-banner">
